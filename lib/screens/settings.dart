@@ -1,0 +1,316 @@
+import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:settings_ui/settings_ui.dart';
+import 'package:sunrise/models/account.dart';
+import 'package:sunrise/screens/profile.dart';
+import 'package:sunrise/screens/sign_in.dart';
+import 'package:sunrise/widgets/custom_image.dart';
+
+import '../theme/color.dart';
+import '../widgets/settings_section.dart';
+
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key, required this.userProfile});
+
+  final UserProfile userProfile;
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColor.appBgColor,
+        title: Text(
+          "Settings",
+          style: GoogleFonts.lato(
+            textStyle: Theme.of(context).textTheme.displayLarge,
+            fontSize: 30,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+      body: _buildSettings(),
+    );
+  }
+
+  _buildUser() {
+    return Container(
+      height: 220,
+      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
+      decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(30)),
+          color: Colors.red),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 40),
+                child: CustomImage(widget.userProfile.profilePicture),
+              ),
+              const SizedBox(width: 20),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, right: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        width: 213,
+                        child: Text(
+                          widget.userProfile.name,
+                          softWrap: true, maxLines: 2,
+                          style: const TextStyle(
+                              fontSize: 25,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              overflow: TextOverflow.ellipsis),
+                        )),
+                    const SizedBox(height: 20),
+                    Text(
+                      widget.userProfile.email,
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(50)),
+                color: Colors.white),
+            child: SettingsItem(
+              icons: Icons.edit,
+              iconStyle: IconStyle(
+                withBackground: true,
+                borderRadius: 50,
+                backgroundColor: Colors.yellow[600],
+              ),
+              title: "Modify",
+              subtitle: "Tap to change your data",
+              onTap: () {
+                Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) =>
+                          ProfilePage(userProfile: widget.userProfile),
+                    ));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _buildSettings() {
+    return SettingsList(
+      applicationType: ApplicationType.both,
+      sections: [
+        CustomSettingsSection(
+          child: Column(
+            children: [
+              _buildUser(),
+            ],
+          ),
+        ),
+        CustomSettingsSection(
+          child: RaisedSettingsSection(
+            children: [
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.blue_300,
+                      borderRadius: BorderRadius.circular(50)),
+                  child:
+                      const Icon(Icons.notifications, color: AppColor.blue_700),
+                ),
+                title: const Text("Notification"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              ),
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.red_500,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: const Icon(Icons.privacy_tip_sharp,
+                      color: AppColor.red_700),
+                ),
+                title: const Text("Privacy Policy"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              ),
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.purple_500,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: const Icon(Icons.info_rounded,
+                      color: AppColor.purple_700),
+                ),
+                title: const Text("About"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              ),
+            ],
+          ),
+        ),
+        CustomSettingsSection(
+          child: RaisedSettingsSection(
+            children: [
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.orange_500,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: const Icon(CupertinoIcons.chat_bubble_fill,
+                      color: AppColor.orange_700),
+                ),
+                title: const Text("Send Feedback"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              ),
+            ],
+          ),
+        ),
+        CustomSettingsSection(
+          child: RaisedSettingsSection(
+            children: [
+              SettingsTile.navigation(
+                leading: const Icon(Icons.exit_to_app_rounded),
+                title: const Text("Sign Out"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  _signOutAccountConfirmationDialog();
+                },
+              ),
+              SettingsTile.navigation(
+                leading: const Icon(CupertinoIcons.delete_solid),
+                title: const Text(
+                  "Delete account",
+                  style: TextStyle(color: AppColor.red_700),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  _deleteAccountConfirmationDialog();
+                },
+              ),
+            ],
+          ),
+        ),
+        const CustomSettingsSection(
+          child: SizedBox(height: 100),
+        ),
+      ],
+    );
+  }
+
+  _deleteAccountConfirmationDialog() {
+    return Alert(
+      context: context,
+      type: AlertType.error,
+      title: "Delete",
+      desc:
+          "Are you sure you want to delete your account?\nThis action can't be undone.",
+      buttons: [
+        DialogButton(
+          onPressed: () => Navigator.pop(context),
+          color: AppColor.red_700,
+          child: const Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () {
+            _deleteAccount();
+            _deleteSuccessDialog();
+          },
+          color: AppColor.green_700,
+          child: const Text(
+            "Yes",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
+
+  _signOutAccountConfirmationDialog() {
+    return Alert(
+      context: context,
+      type: AlertType.info,
+      title: "Sign Out",
+      desc: "You are signing out of your profile.",
+      buttons: [
+        DialogButton(
+          onPressed: () => Navigator.pop(context),
+          color: AppColor.red_700,
+          child: const Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () {
+            _signOut();
+            _buildSignInPage();
+          },
+          color: AppColor.green_700,
+          child: const Text(
+            "Proceed",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
+
+  _deleteSuccessDialog() {
+    return Alert(
+      context: context,
+      type: AlertType.success,
+      title: "Success",
+      desc: "Your account has successfully been deleted.",
+      buttons: [
+        DialogButton(
+          onPressed: () {
+            _buildSignInPage();
+          },
+          color: AppColor.green_700,
+          child: const Text(
+            "Ok",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> _deleteAccount() async {
+    await FirebaseAuth.instance.currentUser?.delete();
+  }
+
+  _buildSignInPage() {
+    Navigator.pop(context);
+    Navigator.push(
+        context,
+        CupertinoPageRoute(
+            builder: (BuildContext context) => const SignInPage()));
+  }
+}

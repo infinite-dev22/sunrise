@@ -1,0 +1,126 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:sunrise/models/account.dart';
+import 'package:sunrise/screens/forgot_password.dart';
+import 'package:sunrise/screens/root.dart';
+import 'package:sunrise/screens/verify_email.dart';
+
+import '../services/auth_services.dart';
+import '../services/database_services.dart';
+
+class SignInPage extends StatelessWidget {
+  const SignInPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final mfaAction = AuthStateChangeAction<MFARequired>(
+      (context, state) async {
+        final nav = Navigator.of(context);
+
+        await startMFAVerification(
+          resolver: state.resolver,
+          context: context,
+        );
+
+        UserProfile userProfile = await DatabaseServices.getUserProfile(
+            FirebaseAuth.instance.currentUser!.uid);
+
+        nav.push(CupertinoPageRoute(
+            builder: (BuildContext context) => RootApp(userProfile: userProfile,)));
+      },
+    );
+
+    final nav = Navigator.of(context);
+
+    return SignInScreen(
+      actions: [
+        ForgotPasswordAction((context, email) {
+          _navigateToForgotPassword(context, email);
+        }),
+        AuthStateChangeAction<SignedIn>((context, state) async {
+          AuthServices.createUserProfile();
+          if (!state.user!.emailVerified) {
+            _navigateToVerifyEmail(context);
+          } else {
+            UserProfile userProfile = await DatabaseServices.getUserProfile(
+                FirebaseAuth.instance.currentUser!.uid);
+            _navigateToRootApp(nav, userProfile);
+          }
+        }),
+        AuthStateChangeAction<UserCreated>((context, state) async {
+          AuthServices.createUserProfile();
+          if (!state.credential.user!.emailVerified) {
+            _navigateToVerifyEmail(context);
+          } else {
+            UserProfile userProfile = await DatabaseServices.getUserProfile(
+                FirebaseAuth.instance.currentUser!.uid);
+            _navigateToRootApp(nav, userProfile);
+          }
+        }),
+        AuthStateChangeAction<CredentialLinked>((context, state) async {
+          AuthServices.createUserProfile();
+          if (!state.user.emailVerified) {
+            _navigateToVerifyEmail(context);
+          } else {
+            UserProfile userProfile = await DatabaseServices.getUserProfile(
+                FirebaseAuth.instance.currentUser!.uid);
+            _navigateToRootApp(nav, userProfile);
+          }
+        }),
+        mfaAction,
+      ],
+      styles: const {
+        EmailFormStyle(signInButtonVariant: ButtonVariant.filled),
+      },
+      subtitleBuilder: (context, action) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            action == AuthAction.signIn
+                ? 'Welcome to HomePal Broker! Please sign in to continue.'
+                : 'Welcome to HomePal Broker! Please create an account to continue',
+          ),
+        );
+      },
+      footerBuilder: (context, action) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              action == AuthAction.signIn
+                  ? 'By signing in, you agree to our terms and conditions.'
+                  : 'By registering, you agree to our terms and conditions.',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  _navigateToRootApp(NavigatorState nav, UserProfile userProfile) {
+    nav.pop();
+    nav.push(MaterialPageRoute(
+        builder: (BuildContext context) => RootApp(
+              userProfile: userProfile,
+            )));
+  }
+
+  _navigateToVerifyEmail(BuildContext context) {
+    Navigator.push(
+        context,
+        CupertinoPageRoute(
+            builder: (BuildContext context) => const VerifyEmailPage()));
+  }
+
+  _navigateToForgotPassword(BuildContext context, String? email) {
+    Navigator.push(
+        context,
+        CupertinoPageRoute(
+            builder: (BuildContext context) => ForgotPasswordPage(
+                  email: email,
+                )));
+  }
+}
