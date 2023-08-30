@@ -422,8 +422,9 @@ class DatabaseServices {
   }
 
   static Future<List> getFavorite(String listingId) async {
-    QuerySnapshot listingsSnap = await db
-        .collectionGroup('Favorites')
+    QuerySnapshot listingsSnap = await favoritesRef
+        .doc(user!.uid)
+        .collection('Favorites')
         .where("listingId", isEqualTo: listingId)
         .orderBy('timestamp', descending: true)
         .get();

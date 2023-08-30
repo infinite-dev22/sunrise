@@ -153,11 +153,11 @@ class _HomePageState extends State<HomePage> {
 
   _buildNavigateToViewPage(Listing listing) async {
     var nav = Navigator.of(context);
+
+    // These variables below affect performance significantly, try putting them
+    // into their respective screen(ViewPage).
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
-
-    DatabaseServices.addRecent(user!.uid, listing);
-
     List favorite = await DatabaseServices.getFavorite(listing.id);
 
     return nav.push(CupertinoPageRoute(
@@ -231,14 +231,14 @@ class _HomePageState extends State<HomePage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
+          return Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('Something went wrong'),
                 IconButton(
                   onPressed: () {
-                    _showFeatured();
+                    build(context);
                   },
                   icon: const Icon(Icons.refresh),
                 ),
@@ -247,7 +247,11 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            return Container();
+          }
+        } catch (e) {
           return Container();
         }
 
@@ -311,11 +315,21 @@ class _HomePageState extends State<HomePage> {
             .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Text("Inner error");
+          try {
+            if (snapshot.data!.docs.isEmpty) {
+              if (snapshot.hasError) {
+                return const Text("Inner error");
+              }
+            }
+          } catch (e) {
+            return Container();
           }
 
-          if (snapshot.data!.docs.isEmpty) {
+          try {
+            if (snapshot.data!.docs.isEmpty) {
+              return Container();
+            }
+          } catch (e) {
             return Container();
           }
 
@@ -378,19 +392,20 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
+          .orderBy('likes', descending: true)
+          .where("likes", isGreaterThan: 0)
           .limit(10)
-          .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
+          return Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('Something went wrong'),
                 IconButton(
                   onPressed: () {
-                    _showPopulars();
+                    build(context);
                   },
                   icon: const Icon(Icons.refresh),
                 ),
@@ -399,7 +414,11 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            return Container();
+          }
+        } catch (e) {
           return Container();
         }
 
@@ -470,14 +489,14 @@ class _HomePageState extends State<HomePage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
+          return Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('Something went wrong'),
                 IconButton(
                   onPressed: () {
-                    _showFeatured();
+                    build(context);
                   },
                   icon: const Icon(Icons.refresh),
                 ),
@@ -486,7 +505,11 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            return Container();
+          }
+        } catch (e) {
           return Container();
         }
 
@@ -552,21 +575,16 @@ class _HomePageState extends State<HomePage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
-            child: Row(
+          return Center(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text('Something went wrong'),
-                    IconButton(
-                      onPressed: () {
-                        _showListings();
-                      },
-                      icon: const Icon(Icons.refresh),
-                    ),
-                  ],
+                const Text('Something went wrong'),
+                IconButton(
+                  onPressed: () {
+                    build(context);
+                  },
+                  icon: const Icon(Icons.refresh),
                 ),
               ],
             ),
@@ -581,15 +599,19 @@ class _HomePageState extends State<HomePage> {
           return _loadingWidget();
         }
 
-        if (snapshot.data!.docs.isEmpty) {
-          _noData = true;
-          return Container(
-            alignment: Alignment.center,
-            margin: const EdgeInsets.only(
-              bottom: 200,
-            ),
-            child: const Text('No properties yet.'),
-          );
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            _noData = true;
+            return Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(
+                bottom: 200,
+              ),
+              child: const Text('No properties yet.'),
+            );
+          }
+        } catch (e) {
+          return Container();
         }
 
         _noData = false;
@@ -636,17 +658,19 @@ class _HomePageState extends State<HomePage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text('Something went wrong'),
-              IconButton(
-                onPressed: () {
-                  _showFilteredListings(filter);
-                },
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
+          return Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Something went wrong'),
+                IconButton(
+                  onPressed: () {
+                    build(context);
+                  },
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
           );
         }
 
@@ -658,32 +682,36 @@ class _HomePageState extends State<HomePage> {
           return _loadingWidget();
         }
 
-        if (snapshot.data!.docs.isEmpty) {
-          return Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Matched Properties",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                  ],
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            return Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Matched Properties",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                margin: const EdgeInsets.only(
-                  bottom: 200,
-                  top: 50,
+                Container(
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(
+                    bottom: 200,
+                    top: 50,
+                  ),
+                  child: const Text('No matched properties.'),
                 ),
-                child: const Text('No matched properties.'),
-              ),
-            ],
-          );
+              ],
+            );
+          }
+        } catch (e) {
+          return Container();
         }
 
         return Column(

@@ -17,7 +17,7 @@ class AuthServices {
           'bio': '',
           'accountType': 'broker',
           'phoneNumber': signedInUser.phoneNumber ?? '',
-          'profilePicture': signedInUser.photoURL ?? '',
+          'profilePicture': signedInUser.photoURL ?? 'https://firebasestorage.googleapis.com/v0/b/homepal-ug.appspot.com/o/images%2Fusers%2Fuser-placeholder.png?alt=media&token=36801737-2fe3-49cc-8d9e-c784ede1e630',
         });
         return true;
       }

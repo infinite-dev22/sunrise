@@ -194,7 +194,8 @@ class _RoomsPageState extends State<RoomsPage> {
                                       const Spacer(),
                                       Text(
                                         room.lastMessages?.last.createdAt
-                                            .toString() ?? '',
+                                                .toString() ??
+                                            '',
                                         style: const TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w500,

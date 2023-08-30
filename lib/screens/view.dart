@@ -40,6 +40,7 @@ class _ViewPageState extends State<ViewPage> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var imageHeight = screenHeight * 0.5;
+    DatabaseServices.addRecent(user!.uid, widget.listing);
 
     return Scaffold(
       backgroundColor: AppColor.appBgColor,
@@ -253,12 +254,19 @@ class _ViewPageState extends State<ViewPage> {
             children: [
               Row(
                 children: [
-                  Text(
-                    widget.listing.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: AppColor.darker,
-                      fontWeight: FontWeight.w700,
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .75,
+                    child: Expanded(
+                      child: Text(
+                        widget.listing.name,
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: AppColor.darker,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -304,6 +312,26 @@ class _ViewPageState extends State<ViewPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.sparkles,
+                    color: Colors.grey,
+                    size: 16,
+                  ),
+                  Text(
+                    widget.listing.status,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ],

@@ -143,22 +143,19 @@ class _FavouritePageState extends State<FavouritePage> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text('Something went wrong'),
-                    IconButton(
-                      onPressed: () {
-                        _showFavorites();
-                      },
-                      icon: const Icon(Icons.refresh),
-                    ),
-                  ],
-                ),
-              ],
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text('Something went wrong'),
+                  IconButton(
+                    onPressed: () {
+                      build(context);
+                    },
+                    icon: const Icon(Icons.refresh),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -171,14 +168,18 @@ class _FavouritePageState extends State<FavouritePage> {
           return _loadingWidget();
         }
 
-        if (snapshot.data!.docs.isEmpty) {
-          return Container(
-            alignment: Alignment.center,
-            margin: const EdgeInsets.only(
-              bottom: 200,
-            ),
-            child: const Text('Your favorites appear here'),
-          );
+        try {
+          if (snapshot.data!.docs.isEmpty) {
+            return Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(
+                bottom: 200,
+              ),
+              child: const Text('Your favorites appear here'),
+            );
+          }
+        } catch (e) {
+          return Container();
         }
 
         return Column(
@@ -208,7 +209,11 @@ class _FavouritePageState extends State<FavouritePage> {
             return const Text("Inner error");
           }
 
-          if (snapshot.data!.docs.isEmpty) {
+          try {
+            if (snapshot.data!.docs.isEmpty) {
+              return Container();
+            }
+          } catch (e) {
             return Container();
           }
 

@@ -139,14 +139,15 @@ class _FavouriteItemState extends State<FavouriteItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        SizedBox(width: MediaQuery.of(context).size.width * .52,
+          child: Text(
           widget.data.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
+        ),),
         const SizedBox(
-          height: 5,
+          height: 2.5,
         ),
         Row(
           children: [
@@ -165,7 +166,7 @@ class _FavouriteItemState extends State<FavouriteItem> {
           ],
         ),
         const SizedBox(
-          height: 5,
+          height: 2.5,
         ),
         Text(
           "${widget.data.currency}${widget.data.price}",

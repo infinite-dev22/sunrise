@@ -32,7 +32,7 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
     } else if(phone.length == 11) {
       formattedPhoneNumber = "${phone.substring(0, 1)} (${phone.substring(1, 4)}) ${phone.substring(4, phone.length)}";
     } else  if(phone.length == 10) {
-      formattedPhoneNumber = "${phone.substring(0, 3)} ${phone.substring(3, phone.length)}";
+      formattedPhoneNumber = "+${phone.substring(0, 3)} ${phone.substring(3, phone.length)}";
     }
     widget.userProfile.phoneNumber = formattedPhoneNumber;
     DatabaseServices.updateUserData(widget.userProfile);

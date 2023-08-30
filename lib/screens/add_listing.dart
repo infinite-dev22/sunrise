@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:platform_local_notifications/platform_local_notifications.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/root.dart';
@@ -48,6 +49,8 @@ class _AddListingPageState extends State<AddListingPage> {
   bool _petsValue = false;
   bool _poolValue = false;
 
+  bool _featured = false;
+
   final _formKey = GlobalKey<FormState>();
 
   final _name = TextEditingController();
@@ -65,7 +68,8 @@ class _AddListingPageState extends State<AddListingPage> {
   // late String _location =
   //     (widget.listing != null) ? widget.listing!.location : "";
   // late String _price = (widget.listing != null) ? widget.listing!.price : "";
-  late String _currency = (widget.listing != null) ? widget.listing!.currency : "";
+  late String _currency =
+      (widget.listing != null) ? widget.listing!.currency : "";
 
   late String _status = (widget.listing != null) ? widget.listing!.status : "";
   late String _propertyType =
@@ -497,7 +501,6 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _formButtons() {
-    var nav = Navigator.of(context);
     return Row(
       children: [
         ElevatedButton(
@@ -517,167 +520,8 @@ class _AddListingPageState extends State<AddListingPage> {
         const Spacer(),
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
-          onPressed: () async {
-            _loading
-                ? {
-                    showDialog(
-                        barrierDismissible: false,
-                        builder: (ctx) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        },
-                        context: context),
-                    _showUploadListingNotification(
-                        "Upload In Progress", "Uploading property listing...")
-                  }
-                : const SizedBox.shrink();
-
-            if (_formKey.currentState!.validate() &&
-                _propertyType.isNotEmpty &&
-                _status.isNotEmpty &&
-                CustomPhotoGallery.images.isNotEmpty) {
-              setState(() {
-                _loading = true;
-              });
-
-              _images = (await StorageServices.uploadListingImages(
-                  CustomPhotoGallery.images));
-
-              Listing listing = Listing(
-                id: '',
-                userId: _brokerId,
-                name: _name.text.trim(),
-                location: _location.text.trim(),
-                price: (_status == "Rent") ? "${_numberFormat(_price.text.trim())}/month" : "${_numberFormat(_price.text.trim())}",
-                currency: _currency,
-                status: _status,
-                propertyType: _propertyType,
-                yearConstructed: _yearConstructed.text.trim(),
-                description: _description.text.trim(),
-                likes: _likes,
-                featured: false,
-                features: (_propertyType == "Shop" || _propertyType == "Office")
-                    ? [
-                        {"name": "Air conditioning", "value": _acValue},
-                        {
-                          "name": "Electricity",
-                          "value": _powerValue,
-                          "icon": "electricity"
-                        },
-                        {
-                          "quantity": _size.text,
-                          "name": _sizeUnit,
-                          "icon": "rulerCombined"
-                        },
-                      ]
-                    : [
-                        {
-                          "quantity": _bedrooms.text,
-                          "name": "Bedrooms",
-                          "icon": "bed"
-                        },
-                        {
-                          "quantity": _bathrooms.text,
-                          "name": "Bathrooms",
-                          "icon": "bathtub_outlined"
-                        },
-                        {
-                          "quantity": _kitchen.text,
-                          "name": "Kitchens",
-                          "icon": "kitchen"
-                        },
-                        {
-                          "quantity": _garages.text,
-                          "name": "Garages",
-                          "icon": "garage"
-                        },
-                        {
-                          "quantity": _size.text,
-                          "name": _sizeUnit,
-                          "icon": "rulerCombined"
-                        },
-                        {"name": "Wifi", "value": _wifiValue, "icon": "wifi"},
-                        {
-                          "name": "TV Cable",
-                          "value": _tvCableValue,
-                          "icon": "tv"
-                        },
-                        {"name": "Gym", "value": _gymValue, "icon": "dumbbell"},
-                        {
-                          "name": "Swimming Pool",
-                          "value": _poolValue,
-                          "icon": "swimmingPool"
-                        },
-                        {
-                          "name": "Electricity",
-                          "value": _powerValue,
-                          "icon": "electricity"
-                        },
-                        {"name": "Pets", "value": _petsValue, "icon": "dog"},
-                        {
-                          "name": "Outdoor Shower",
-                          "value": _outdoorShowerValue
-                        },
-                        {"name": "Spa & Massage", "value": _spaValue},
-                        {"name": "Lawn", "value": _lawnValue},
-                        {"name": "Dryer", "value": _dryerValue},
-                        {"name": "Cooker", "value": _cookerValue},
-                        {"name": "Air conditioning", "value": _acValue},
-                        {"name": "Refrigerator", "value": _refrigeratorValue},
-                      ],
-                images: _images,
-                timestamp: Timestamp.fromDate(
-                  DateTime.now(),
-                ),
-              );
-              DatabaseServices.createListing(listing);
-              nav.pop();
-              nav.push(CupertinoPageRoute(
-                builder: (context) => RootApp(
-                  userProfile: widget.userProfile,
-                ),
-              ));
-              CustomPhotoGallery.images.clear();
-              setState(() {
-                _loading = false;
-              });
-              _showUploadListingNotification(
-                  "Upload Progress", "Property listing upload complete.");
-            } else if (CustomPhotoGallery.images.isEmpty) {
-              CherryToast(
-                      title: const Text(""),
-                      displayTitle: false,
-                      description: const Text("No images selected"),
-                      icon: Icons.error,
-                      themeColor: AppColor.darker,
-                      toastPosition: Position.bottom,
-                      animationDuration: const Duration(milliseconds: 1000),
-                      autoDismiss: true)
-                  .show(context);
-            } else if (_propertyType.isEmpty) {
-              CherryToast(
-                      title: const Text(""),
-                      displayTitle: false,
-                      description: const Text("Property type can't be empty"),
-                      icon: Icons.error,
-                      themeColor: AppColor.darker,
-                      toastPosition: Position.bottom,
-                      animationDuration: const Duration(milliseconds: 1000),
-                      autoDismiss: true)
-                  .show(context);
-            } else if (_status.isEmpty) {
-              CherryToast(
-                      title: const Text(""),
-                      displayTitle: false,
-                      description: const Text("Status can't be empty"),
-                      icon: Icons.error,
-                      themeColor: AppColor.darker,
-                      toastPosition: Position.bottom,
-                      animationDuration: const Duration(milliseconds: 1000),
-                      autoDismiss: true)
-                  .show(context);
-            }
+          onPressed: () {
+              _buildAddFeaturedDialog();
           },
           child: const Row(
             children: [
@@ -694,6 +538,84 @@ class _AddListingPageState extends State<AddListingPage> {
         ),
       ],
     );
+  }
+
+  _uploadListing() {
+    Listing listing = Listing(
+      id: '',
+      userId: _brokerId,
+      name: _name.text.trim(),
+      location: _location.text.trim(),
+      price: (_status == "Rent" || _status == "To Let")
+          ? "${_numberFormat(_price.text.trim())}/month"
+          : "${_numberFormat(_price.text.trim())}",
+      currency: _currency,
+      status: _status,
+      propertyType: _propertyType,
+      yearConstructed: _yearConstructed.text.trim(),
+      description: _description.text.trim(),
+      likes: _likes,
+      featured: _featured,
+      features: (_propertyType == "Shop" || _propertyType == "Office")
+          ? [
+              {"name": "Air conditioning", "value": _acValue},
+              {
+                "name": "Electricity",
+                "value": _powerValue,
+                "icon": "electricity"
+              },
+              {
+                "quantity": _size.text,
+                "name": _sizeUnit,
+                "icon": "rulerCombined"
+              },
+            ]
+          : [
+              {"quantity": _bedrooms.text, "name": "Bedrooms", "icon": "bed"},
+              {
+                "quantity": _bathrooms.text,
+                "name": "Bathrooms",
+                "icon": "bathtub_outlined"
+              },
+              {
+                "quantity": _kitchen.text,
+                "name": "Kitchens",
+                "icon": "kitchen"
+              },
+              {"quantity": _garages.text, "name": "Garages", "icon": "garage"},
+              {
+                "quantity": _size.text,
+                "name": _sizeUnit,
+                "icon": "rulerCombined"
+              },
+              {"name": "Wifi", "value": _wifiValue, "icon": "wifi"},
+              {"name": "TV Cable", "value": _tvCableValue, "icon": "tv"},
+              {"name": "Gym", "value": _gymValue, "icon": "dumbbell"},
+              {
+                "name": "Swimming Pool",
+                "value": _poolValue,
+                "icon": "swimmingPool"
+              },
+              {
+                "name": "Electricity",
+                "value": _powerValue,
+                "icon": "electricity"
+              },
+              {"name": "Pets", "value": _petsValue, "icon": "dog"},
+              {"name": "Outdoor Shower", "value": _outdoorShowerValue},
+              {"name": "Spa & Massage", "value": _spaValue},
+              {"name": "Lawn", "value": _lawnValue},
+              {"name": "Dryer", "value": _dryerValue},
+              {"name": "Cooker", "value": _cookerValue},
+              {"name": "Air conditioning", "value": _acValue},
+              {"name": "Refrigerator", "value": _refrigeratorValue},
+            ],
+      images: _images,
+      timestamp: Timestamp.fromDate(
+        DateTime.now(),
+      ),
+    );
+    DatabaseServices.createListing(listing);
   }
 
   _checkBox(String text, bool value, ValueChanged<bool?> onChanged) {
@@ -953,6 +875,166 @@ class _AddListingPageState extends State<AddListingPage> {
             body: body,
             payload: "test"),
         context);
+  }
+
+  _buildAddFeaturedDialog() {
+    return Alert(
+      context: context,
+      type: AlertType.none,
+      title: "Promote Listing",
+      desc: "Promote this listing...\nPromoted listings receive more views",
+      buttons: [
+        DialogButton(border: Border.all(color: AppColor.darker),
+          onPressed: () {
+            _upload();
+          },
+          color: Colors.white,
+          child: const Text(
+            "Post",
+            style: TextStyle(color: AppColor.darker, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () {
+            setState(() {
+              _buildAddFeaturedConfirmDialog();
+            });
+          },
+          color: AppColor.green_700,
+          child: const Text(
+            "Promote",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
+
+  _upload() async {
+    var nav = Navigator.of(context);
+
+    setState(() {
+      _loading = true;
+    });
+    _loading
+        ? {
+      showDialog(
+          barrierDismissible: false,
+          builder: (ctx) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+          context: context),
+      _showUploadListingNotification(
+          "Upload In Progress", "Uploading property listing...")
+    }
+        : const SizedBox.shrink();
+
+    if (_formKey.currentState!.validate() &&
+        _propertyType.isNotEmpty &&
+        _status.isNotEmpty &&
+        CustomPhotoGallery.images.isNotEmpty) {
+      _images = (await StorageServices.uploadListingImages(
+          CustomPhotoGallery.images));
+
+      _uploadListing();
+
+      nav.pop();
+      nav.push(CupertinoPageRoute(
+        builder: (context) => RootApp(
+          userProfile: widget.userProfile,
+        ),
+      ));
+      CustomPhotoGallery.images.clear();
+      setState(() {
+        _loading = false;
+      });
+      _showUploadListingNotification(
+          "Upload Progress", "Property listing upload complete.");
+    } else if (CustomPhotoGallery.images.isEmpty) {
+      CherryToast(
+          title: const Text(""),
+          displayTitle: false,
+          description: const Text("No images selected"),
+          icon: Icons.error,
+          themeColor: AppColor.darker,
+          toastPosition: Position.bottom,
+          animationDuration: const Duration(milliseconds: 1000),
+          autoDismiss: true)
+          .show(context);
+    } else if (_propertyType.isEmpty) {
+      CherryToast(
+          title: const Text(""),
+          displayTitle: false,
+          description: const Text("Property type can't be empty"),
+          icon: Icons.error,
+          themeColor: AppColor.darker,
+          toastPosition: Position.bottom,
+          animationDuration: const Duration(milliseconds: 1000),
+          autoDismiss: true)
+          .show(context);
+    } else if (_status.isEmpty) {
+      CherryToast(
+          title: const Text(""),
+          displayTitle: false,
+          description: const Text("Status can't be empty"),
+          icon: Icons.error,
+          themeColor: AppColor.darker,
+          toastPosition: Position.bottom,
+          animationDuration: const Duration(milliseconds: 1000),
+          autoDismiss: true)
+          .show(context);
+    }
+  }
+
+  _buildAddFeaturedConfirmDialog() {
+    return Alert(
+      context: context,
+      type: AlertType.info,
+      title: "Proceed?",
+      desc:
+          "Promoting is done at a fee\tYou shall be charged a promotion fee for this listing monthly.",
+      buttons: [
+        DialogButton(
+          onPressed: () => Navigator.pop(context),
+          color: AppColor.red_700,
+          child: const Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () {
+            setState(() {
+              _loading = true;
+            });
+            _loading
+                ? {
+                    showDialog(
+                        barrierDismissible: false,
+                        builder: (ctx) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        context: context),
+                    _showUploadListingNotification(
+                        "Upload In Progress", "Uploading property listing...")
+                  }
+                : const SizedBox.shrink();
+
+            _featured = true;
+            _upload();
+          },
+          color: AppColor.green_700,
+          child: const Text(
+            "Continue",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
   }
 
   @override

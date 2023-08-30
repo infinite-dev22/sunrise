@@ -29,11 +29,6 @@ class _RootAppState extends State<RootApp> {
         "active_icon": Icons.home_rounded,
         "page": HomePage(userProfile: widget.userProfile),
       },
-      // {
-      //   "icon": Icons.search_outlined,
-      //   "active_icon": Icons.search,
-      //   "page": const ExplorePage(),
-      // },
       {
         "icon": Icons.favorite_border,
         "active_icon": Icons.favorite_outlined,
@@ -73,6 +68,7 @@ class _RootAppState extends State<RootApp> {
             //   title: const Text("You are back Online."),
             //   animationType: AnimationType.fromTop,
             // ).show(context);
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: const Row(
                 children: [
@@ -98,6 +94,7 @@ class _RootAppState extends State<RootApp> {
           showBanner = true;
           showBanner
               ? {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar(),
                   ScaffoldMessenger.of(context).removeCurrentMaterialBanner(
                       reason: MaterialBannerClosedReason.remove),
                   ScaffoldMessenger.of(context)
