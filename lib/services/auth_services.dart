@@ -11,7 +11,7 @@ class AuthServices {
 
       if (signedInUser != null) {
         usersRef.doc(signedInUser.uid).set({
-          'userId': signedInUser.uid ?? '',
+          'userId': signedInUser.uid,
           'name': signedInUser.displayName ?? '',
           'email': signedInUser.email ?? '',
           'bio': '',

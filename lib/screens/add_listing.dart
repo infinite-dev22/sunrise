@@ -549,7 +549,7 @@ class _AddListingPageState extends State<AddListingPage> {
                 userId: _brokerId,
                 name: _name.text.trim(),
                 location: _location.text.trim(),
-                price: "${_numberFormat(_price.text.trim())}",
+                price: (_status == "Rent") ? "${_numberFormat(_price.text.trim())}/month" : "${_numberFormat(_price.text.trim())}",
                 currency: _currency,
                 status: _status,
                 propertyType: _propertyType,

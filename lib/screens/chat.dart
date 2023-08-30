@@ -189,14 +189,6 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {});
   }
 
-  void _updateMassageStatus(types.Message message, bool seen) {
-    if (seen) {
-      final updatedMessage = message.copyWith(status: Status.seen);
-      FirebaseChatCore.instance.updateMessage(updatedMessage, widget.room.id);
-      setState(() {});
-    }
-  }
-
   void _handleSendPressed(types.PartialText message) {
     FirebaseChatCore.instance.sendMessage(
       message,
@@ -212,7 +204,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Image: ${widget.room.imageUrl}");
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.light,
@@ -249,8 +240,6 @@ class _ChatPageState extends State<ChatPage> {
             ),
             onMessageVisibilityChanged: (p0, visible) {
               if (visible) {
-                print("${p0.author.id} ${user!.uid}");
-                print("${p0.author.id != user!.uid}");
                 if (p0.author.id != user!.uid) {
                   final updatedMessage = p0.copyWith(status: Status.seen);
                   FirebaseChatCore.instance
@@ -265,8 +254,8 @@ class _ChatPageState extends State<ChatPage> {
               }
             },
             theme: const DefaultChatTheme(
-              primaryColor: AppColor.chat_blue,
-              secondaryColor: AppColor.chat_gray,
+              primaryColor: AppColor.chatBlue,
+              secondaryColor: AppColor.chatGray,
               inputBorderRadius: BorderRadius.all(Radius.circular(50)),
               inputMargin: EdgeInsets.only(bottom: 5, left: 5, right: 5),
               inputPadding: EdgeInsets.all(12),

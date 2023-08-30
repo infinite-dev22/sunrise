@@ -28,7 +28,9 @@ class SignInPage extends StatelessWidget {
             FirebaseAuth.instance.currentUser!.uid);
 
         nav.push(CupertinoPageRoute(
-            builder: (BuildContext context) => RootApp(userProfile: userProfile,)));
+            builder: (BuildContext context) => RootApp(
+                  userProfile: userProfile,
+                )));
       },
     );
 
@@ -40,13 +42,19 @@ class SignInPage extends StatelessWidget {
           _navigateToForgotPassword(context, email);
         }),
         AuthStateChangeAction<SignedIn>((context, state) async {
-          AuthServices.createUserProfile();
           if (!state.user!.emailVerified) {
             _navigateToVerifyEmail(context);
           } else {
-            UserProfile userProfile = await DatabaseServices.getUserProfile(
-                FirebaseAuth.instance.currentUser!.uid);
-            _navigateToRootApp(nav, userProfile);
+            try {
+              UserProfile userProfile = await DatabaseServices.getUserProfile(
+                  FirebaseAuth.instance.currentUser!.uid);
+              _navigateToRootApp(nav, userProfile);
+            } catch (e) {
+              AuthServices.createUserProfile();
+              UserProfile userProfile = await DatabaseServices.getUserProfile(
+                  FirebaseAuth.instance.currentUser!.uid);
+              _navigateToRootApp(nav, userProfile);
+            }
           }
         }),
         AuthStateChangeAction<UserCreated>((context, state) async {
@@ -60,13 +68,18 @@ class SignInPage extends StatelessWidget {
           }
         }),
         AuthStateChangeAction<CredentialLinked>((context, state) async {
-          AuthServices.createUserProfile();
           if (!state.user.emailVerified) {
             _navigateToVerifyEmail(context);
-          } else {
+          } else {try {
             UserProfile userProfile = await DatabaseServices.getUserProfile(
                 FirebaseAuth.instance.currentUser!.uid);
             _navigateToRootApp(nav, userProfile);
+          } catch (e) {
+            AuthServices.createUserProfile();
+            UserProfile userProfile = await DatabaseServices.getUserProfile(
+                FirebaseAuth.instance.currentUser!.uid);
+            _navigateToRootApp(nav, userProfile);
+          }
           }
         }),
         mfaAction,
@@ -79,8 +92,8 @@ class SignInPage extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             action == AuthAction.signIn
-                ? 'Welcome to HomePal Broker! Please sign in to continue.'
-                : 'Welcome to HomePal Broker! Please create an account to continue',
+                ? 'Welcome to Home Pal! Please sign in to continue.'
+                : 'Welcome to Home Pal! Please create an account to continue',
           ),
         );
       },

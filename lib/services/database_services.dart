@@ -420,4 +420,16 @@ class DatabaseServices {
   static deleteUserRecents() {
     recentsRef.doc(user!.uid).delete();
   }
+
+  static Future<List> getFavorite(String listingId) async {
+    QuerySnapshot listingsSnap = await db
+        .collectionGroup('Favorites')
+        .where("listingId", isEqualTo: listingId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    List<Favorite> listings =
+        listingsSnap.docs.map((doc) => Favorite.fromDoc(doc)).toList();
+    return listings;
+  }
 }

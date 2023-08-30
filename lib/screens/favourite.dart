@@ -23,8 +23,6 @@ class FavouritePage extends StatefulWidget {
 }
 
 class _FavouritePageState extends State<FavouritePage> {
-  List _listings = [];
-
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -126,19 +124,7 @@ class _FavouritePageState extends State<FavouritePage> {
     return const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "All Properties",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 30),
+          // SizedBox(height: 30),
           Center(
             child: CircularProgressIndicator(),
           ),
@@ -196,17 +182,17 @@ class _FavouritePageState extends State<FavouritePage> {
         }
 
         return Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
-                    Favorite favorite = Favorite.fromDoc(document);
+          children: snapshot.data!.docs
+              .map((DocumentSnapshot document) {
+                Favorite favorite = Favorite.fromDoc(document);
 
-                    index++;
+                index++;
 
-                    return _getListings(favorite, index);
-                  })
-                  .toList()
-                  .cast(),
-            );
+                return _getListings(favorite, index);
+              })
+              .toList()
+              .cast(),
+        );
       },
     );
   }
@@ -229,35 +215,17 @@ class _FavouritePageState extends State<FavouritePage> {
           return Column(
             children: snapshot.data!.docs
                 .map((DocumentSnapshot document) {
-              Listing listing = Listing.fromDoc(document);
+                  Listing listing = Listing.fromDoc(document);
 
-              if (listing.id == favorite.listingId) {
-                return _buildFavourites(listing, index, favorite);
-              }
+                  if (listing.id == favorite.listingId) {
+                    return _buildFavourites(listing, index, favorite);
+                  }
 
-              return const SizedBox.shrink();
-            })
+                  return const SizedBox.shrink();
+                })
                 .toList()
                 .cast(),
           );
         });
-  }
-
-  _setupData() async {
-    _showFavorites();
-
-    List listings = await DatabaseServices.getListings();
-
-    if (mounted) {
-      setState(() {
-        _listings = listings;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _setupData();
   }
 }

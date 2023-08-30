@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/models/activity.dart';
+import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/search.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/theme/color.dart';
@@ -32,11 +33,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List _favorites = [];
-  var _current;
+  late Widget _current;
   bool _noData = false;
   int _selectedCategory = 0;
-  late UserProfile _brokerProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +88,12 @@ class _HomePageState extends State<HomePage> {
               trBackground: true,
               borderColor: AppColor.primary,
               radius: 10,
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      ProfilePage(userProfile: widget.userProfile),
+                ));
+              },
             ),
           ],
         ),
@@ -146,18 +151,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _buildNavigateToViewPage(Listing listing, favorite) async {
+  _buildNavigateToViewPage(Listing listing) async {
     var nav = Navigator.of(context);
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
 
     DatabaseServices.addRecent(user!.uid, listing);
 
+    List favorite = await DatabaseServices.getFavorite(listing.id);
+
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
               user: brokerProfile,
-              favorite: favorite,
+              favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
 
@@ -174,17 +181,16 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  _buildPopulars(Listing listing, Favorite? favorite) {
+  _buildPopulars(Listing listing) {
     return PropertyItem(
       data: listing,
-      favorite: favorite,
       onTap: () {
-        _buildNavigateToViewPage(listing, favorite);
+        _buildNavigateToViewPage(listing);
       },
     );
   }
 
-  _buildRecommended(Listing listing, favorite) {
+  _buildRecommended(Listing listing) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -192,14 +198,14 @@ class _HomePageState extends State<HomePage> {
         child: RecommendItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
         ),
       ),
     );
   }
 
-  _buildRecent(Listing listing, favorite) {
+  _buildRecent(Listing listing) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -207,7 +213,7 @@ class _HomePageState extends State<HomePage> {
         child: RecentItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
         ),
       ),
@@ -215,7 +221,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showRecents() {
-    Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collection("recents")
@@ -249,26 +254,26 @@ class _HomePageState extends State<HomePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Recent",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  GestureDetector(
-                      child: const Text(
-                        "Clear",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: AppColor.darker,
-                            decoration: TextDecoration.underline),
-                      ),
-                      onTap: () {
-                        DatabaseServices.deleteUserRecents();
-                      }),
+                  // GestureDetector(
+                  //     child: const Text(
+                  //       "Clear",
+                  //       style: TextStyle(
+                  //           fontSize: 16,
+                  //           color: AppColor.darker,
+                  //           decoration: TextDecoration.underline),
+                  //     ),
+                  //     onTap: () {
+                  //       DatabaseServices.deleteUserRecents();
+                  //     }),
                 ],
               ),
             ),
@@ -284,7 +289,7 @@ class _HomePageState extends State<HomePage> {
                       RecentlyViewed recentlyViewed =
                           RecentlyViewed.fromDoc(document);
 
-                      return _getListingsRealtime(recentlyViewed, favorite);
+                      return _getListings(recentlyViewed);
                     })
                     .toList()
                     .cast(),
@@ -299,7 +304,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _getListingsRealtime(RecentlyViewed recentlyViewed, Favorite? favorite) {
+  _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
         stream: db
             .collectionGroup('Listings')
@@ -320,18 +325,7 @@ class _HomePageState extends State<HomePage> {
                   Listing listing = Listing.fromDoc(document);
 
                   if (recentlyViewed.listingId == listing.id) {
-                    // for (Favorite fav in _favorites) {
-                    //   if (fav.listingId == listing.id) {
-                    //     favorite = fav;
-                    //     return _buildRecent(
-                    //         listing, favorite);
-                    //   } else {
-                    //     favorite = null;
-                    //     return _buildRecent(
-                    //         listing, favorite);
-                    //   }
-                    // }
-                    return _buildRecent(listing, favorite);
+                    return _buildRecent(listing);
                   }
 
                   return const SizedBox.shrink();
@@ -342,7 +336,7 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  _buildAllListings(Listing listing, favorite) {
+  _buildAllListings(Listing listing) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -350,7 +344,7 @@ class _HomePageState extends State<HomePage> {
         child: ListingItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
         ),
       ),
@@ -381,8 +375,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showPopulars() {
-    var popularItemWidgets = [];
-
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
@@ -454,31 +446,7 @@ class _HomePageState extends State<HomePage> {
                   .map((DocumentSnapshot document1) {
                     Listing listing = Listing.fromDoc(document1);
 
-                    db
-                        .collection("favorites")
-                        .doc(user!.uid)
-                        .collection('Favorites')
-                        .orderBy('timestamp', descending: true)
-                        .snapshots()
-                        .listen((snapshot2) {
-                      popularItemWidgets.addAll(snapshot2.docs.map((document2) {
-                        Favorite favorite = Favorite.fromDoc(document2);
-
-                        if (favorite.listingId == listing.id) {
-                          return _buildPopulars(listing, favorite);
-                        } else {
-                          return _buildPopulars(listing, null);
-                        }
-                      }).toList());
-                    });
-
-                    if (popularItemWidgets.isNotEmpty) {
-                      for (var popularItem in popularItemWidgets) {
-                        return popularItem;
-                      }
-                    } else {
-                      return _buildPopulars(listing, null);
-                    }
+                    return _buildPopulars(listing);
                   })
                   .toList()
                   .cast(),
@@ -493,7 +461,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showFeatured() {
-    Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
@@ -562,15 +529,7 @@ class _HomePageState extends State<HomePage> {
                     .map((DocumentSnapshot document) {
                       Listing listing = Listing.fromDoc(document);
 
-                      for (Favorite fav in _favorites) {
-                        if (fav.listingId == listing.id) {
-                          favorite = fav;
-                        } else {
-                          favorite = null;
-                        }
-                      }
-
-                      return _buildRecommended(listing, favorite);
+                      return _buildRecommended(listing);
                     })
                     .toList()
                     .cast(),
@@ -586,7 +545,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showListings() {
-    Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
@@ -658,15 +616,7 @@ class _HomePageState extends State<HomePage> {
                   .map((DocumentSnapshot document) {
                     Listing listing = Listing.fromDoc(document);
 
-                    for (Favorite fav in _favorites) {
-                      if (fav.listingId == listing.id) {
-                        favorite = fav;
-                      } else {
-                        favorite = null;
-                      }
-                    }
-
-                    return _buildAllListings(listing, favorite);
+                    return _buildAllListings(listing);
                   })
                   .toList()
                   .cast(),
@@ -678,7 +628,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showFilteredListings(String filter) {
-    Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
@@ -759,15 +708,7 @@ class _HomePageState extends State<HomePage> {
                   .map((DocumentSnapshot document) {
                     Listing listing = Listing.fromDoc(document);
 
-                    for (Favorite fav in _favorites) {
-                      if (fav.listingId == listing.id) {
-                        favorite = fav;
-                      } else {
-                        favorite = null;
-                      }
-                    }
-
-                    return _buildAllListings(listing, favorite);
+                    return _buildAllListings(listing);
                   })
                   .toList()
                   .cast(),
@@ -791,13 +732,7 @@ class _HomePageState extends State<HomePage> {
 
   _setupData() async {
     _setListings("All");
-    List favorites = await DatabaseServices.getFavorites();
-
-    if (mounted) {
-      setState(() {
-        _favorites = favorites;
-      });
-    }
+    setState(() {});
   }
 
   @override

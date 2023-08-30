@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:sunrise/models/activity.dart';
-import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
-import 'package:sunrise/utilities/global_values.dart';
 
 import '../models/property.dart';
 import 'custom_image.dart';
-import 'icon_box.dart';
 
 class PropertyItem extends StatefulWidget {
-  const PropertyItem(
-      {super.key, required this.data, this.favorite, this.onTap});
+  const PropertyItem({super.key, required this.data, this.onTap});
 
   final Listing data;
-  final Favorite? favorite;
   final GestureTapCallback? onTap;
 
   @override
@@ -21,9 +15,6 @@ class PropertyItem extends StatefulWidget {
 }
 
 class _PropertyItemState extends State<PropertyItem> {
-  late IconData _favoriteIcon =
-      widget.favorite != null ? Icons.favorite : Icons.favorite_border;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -53,44 +44,12 @@ class _PropertyItemState extends State<PropertyItem> {
               radius: 25,
             ),
             Positioned(
-              right: 20,
-              top: 180,
-              child: _buildFavorite(),
-            ),
-            Positioned(
               left: 15,
               top: 210,
               child: _buildInfo(),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFavorite() {
-    return IconBox(
-      onTap: () {
-        (widget.favorite != null)
-            ? {
-                DatabaseServices.unlikeListing(
-                    getAuthUser()!.uid, widget.data, widget.favorite!.id),
-                setState(() {
-                  _favoriteIcon = Icons.favorite_border;
-                })
-              }
-            : {
-                DatabaseServices.likeListing(getAuthUser()!.uid, widget.data),
-                setState(() {
-                  _favoriteIcon = Icons.favorite;
-                })
-              };
-      },
-      bgColor: AppColor.red,
-      child: Icon(
-        _favoriteIcon,
-        color: Colors.white,
-        size: 20,
       ),
     );
   }

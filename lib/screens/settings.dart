@@ -9,9 +9,11 @@ import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/widgets/custom_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/color.dart';
 import '../widgets/settings_section.dart';
+import 'detail.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.userProfile});
@@ -43,7 +45,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _buildUser() {
     return Container(
-      height: 220,
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.all(10),
       decoration: const BoxDecoration(
@@ -54,7 +55,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 10, left: 40),
+                padding: const EdgeInsets.only(top: 10, left: 20),
                 child: CustomImage(widget.userProfile.profilePicture),
               ),
               const SizedBox(width: 20),
@@ -67,14 +68,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         width: 213,
                         child: Text(
                           widget.userProfile.name,
-                          softWrap: true, maxLines: 2,
+                          softWrap: true,
+                          maxLines: 2,
                           style: const TextStyle(
                               fontSize: 25,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               overflow: TextOverflow.ellipsis),
                         )),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 5),
                     Text(
                       widget.userProfile.email,
                       style: const TextStyle(fontSize: 16, color: Colors.white),
@@ -150,6 +152,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 title: const Text("Privacy Policy"),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => const DetailPage(
+                          showingContent: 'Privacy Policy',
+                        ),
+                      ));
+                },
               ),
               SettingsTile.navigation(
                 leading: Container(
@@ -162,6 +173,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 title: const Text("About"),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => const DetailPage(
+                          showingContent: 'About',
+                        ),
+                      ));
+                },
               ),
             ],
           ),
@@ -180,6 +200,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 title: const Text("Send Feedback"),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  launchUrl(Uri(
+                    scheme: "mailto",
+                    path: "support@homepal.org",
+                    query: encodeQueryParameters(<String, String>{
+                      'subject': 'Feedback mail',
+                    }),
+                  ));
+                },
               ),
             ],
           ),
@@ -312,5 +341,12 @@ class _SettingsPageState extends State<SettingsPage> {
         context,
         CupertinoPageRoute(
             builder: (BuildContext context) => const SignInPage()));
+  }
+
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
   }
 }

@@ -25,7 +25,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   List _favorites = [];
-  SpeechToText _speechToText = SpeechToText();
+  final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   TextEditingController searchController = TextEditingController();
 
@@ -135,7 +135,7 @@ class _SearchPageState extends State<SearchPage> {
           );
         }
 
-        if (!snapshot.hasData) return const Text("No matched properties");
+        if (!snapshot.hasData) return const Center(child: Text("No matched properties"),);
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _loadingWidget();

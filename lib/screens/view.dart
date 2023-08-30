@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
@@ -41,8 +40,6 @@ class _ViewPageState extends State<ViewPage> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var imageHeight = screenHeight * 0.5;
-    StreamController<Widget> overlayController =
-        StreamController<Widget>.broadcast();
 
     return Scaffold(
       backgroundColor: AppColor.appBgColor,
@@ -123,20 +120,19 @@ class _ViewPageState extends State<ViewPage> {
     return IconBox(
       bgColor: AppColor.red,
       onTap: () {
-        (widget.favorite != null)
-            ? {
-                DatabaseServices.unlikeListing(
-                    getAuthUser()!.uid, widget.listing, widget.favorite!.id),
-                setState(() {
-                  _favoriteIcon = Icons.favorite_border;
-                })
-              }
-            : {
-                DatabaseServices.likeListing(getAuthUser()!.uid, widget.listing),
-                setState(() {
-                  _favoriteIcon = Icons.favorite;
-                })
-              };
+        setState(() {
+          (widget.favorite != null)
+              ? {
+                  DatabaseServices.unlikeListing(
+                      getAuthUser()!.uid, widget.listing, widget.favorite!.id),
+                  _favoriteIcon = Icons.favorite_border
+                }
+              : {
+                  DatabaseServices.likeListing(
+                      getAuthUser()!.uid, widget.listing),
+                  _favoriteIcon = Icons.favorite
+                };
+        });
       },
       child: Icon(
         _favoriteIcon,
@@ -205,7 +201,13 @@ class _ViewPageState extends State<ViewPage> {
       padding: const EdgeInsets.only(left: 10, right: 10),
       child: ContactItem(
         onCallTap: () async {
-          await FlutterPhoneDirectCaller.callNumber(widget.user.phoneNumber);
+          try {
+            await FlutterPhoneDirectCaller.callNumber(widget.user.phoneNumber);
+          } catch (e) {
+            if (kDebugMode) {
+              print(e);
+            }
+          }
         },
         onMessageTap: () {
           _handlePressed(widget.user, context);
@@ -232,7 +234,6 @@ class _ViewPageState extends State<ViewPage> {
       'name': userProfile.name
     });
 
-    navigator.pop();
     await navigator.push(
       CupertinoPageRoute(
         builder: (context) => ChatPage(
@@ -283,6 +284,20 @@ class _ViewPageState extends State<ViewPage> {
                   ),
                   Text(
                     widget.listing.location,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    CupertinoIcons.calendar,
+                    color: Colors.grey,
+                    size: 16,
+                  ),
+                  Text(
+                    "Constructed: ${widget.listing.yearConstructed}",
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
@@ -356,7 +371,7 @@ class _ViewPageState extends State<ViewPage> {
       type: AlertType.error,
       title: "Delete",
       desc:
-          "Are you sure you want to delete this property listing?\nThis action can\'t be undone.",
+          "Are you sure you want to delete this property listing?\nThis action can't be undone.",
       buttons: [
         DialogButton(
           onPressed: () => Navigator.pop(context),

@@ -77,7 +77,7 @@ class EditEmailFormPageState extends State<EditEmailFormPage> {
                       border: OutlineInputBorder(),
                       labelText: 'Email',
                     ),
-                    controller: emailController,
+                    controller: emailController,keyboardType: TextInputType.emailAddress,
                   ),
                 ),
               ),

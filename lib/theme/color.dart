@@ -23,25 +23,8 @@ class AppColor {
   static const sky = Color(0xFFABDEE6);
   static const blue = Color(0xFF509BE4);
 
-  static const chat_blue = Color(0xFF6F61E8);
-  static const chat_gray = Color(0xFFF5F5F7);
-
-  // static const orange_500 = Color(0xFFFFEACC);
-  // static const orange_700 = Color(0xFFFF9D0B);
-  // static const blue_500 = Color(0xFFC0DCEF);
-  // static const blue_300 = Color(0xFFD3E9FD);
-  // static const blue_700 = Color(0xFF2196F3);
-  // static const green_500 = Color(0xFFDBEFDC);
-  // static const green_700 = Color(0xFF55B359);
-  // static const grey_100 = Color(0xFFececec);
-  // static const grey_200 = Color(0xFFebebeb);
-  // static const grey_300 = Color(0xFF9e9e9e);
-  // static const grey_500 = Color(0xFFd8d9db);
-  // static const grey_700 = Color(0xFF3e4249);
-  // static const red_500 = Color(0xFFFDD9D7);
-  // static const red_700 = Color(0xFFF44236);
-  // static const purple_500 = Color(0xFFf44236);
-  // static const purple_700 = Color(0xFFf44236);
+  static const chatBlue = Color(0xFF6F61E8);
+  static const chatGray = Color(0xFFF5F5F7);
 
   static const orange_500 = Color(0xFF30FF9D0B);
   static const orange_700 = Color(0xFFFF9D0B);

@@ -25,9 +25,15 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
   }
 
   void updateUserValue(String phone) {
-    print(phone.length);
-    String formattedPhoneNumber =
-    (phone.length == 12) ? "+(${phone.substring(0, 3)}) ${phone.substring(3, 6)}-${phone.substring(6, phone.length)}" : "${phone.substring(0, 3)} ${phone.substring(3, phone.length)}";
+    String formattedPhoneNumber = "";
+
+    if (phone.length == 12) {
+      formattedPhoneNumber = "+(${phone.substring(0, 3)}) ${phone.substring(3, 6)}-${phone.substring(6, phone.length)}";
+    } else if(phone.length == 11) {
+      formattedPhoneNumber = "${phone.substring(0, 1)} (${phone.substring(1, 4)}) ${phone.substring(4, phone.length)}";
+    } else  if(phone.length == 10) {
+      formattedPhoneNumber = "${phone.substring(0, 3)} ${phone.substring(3, phone.length)}";
+    }
     widget.userProfile.phoneNumber = formattedPhoneNumber;
     DatabaseServices.updateUserData(widget.userProfile);
   }
@@ -82,6 +88,7 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
                       border: OutlineInputBorder(),
                       labelText: 'Phone Number',
                     ),
+                    keyboardType: TextInputType.number,
                   ),
                 ),
               ),

@@ -9,7 +9,7 @@ class CategoryItem extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  final data;
+  final Map data;
   final bool selected;
   final GestureTapCallback? onTap;
 
