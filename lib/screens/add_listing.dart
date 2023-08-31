@@ -67,10 +67,6 @@ class _AddListingPageState extends State<AddListingPage> {
   final _size = TextEditingController();
   final _facilitiesController = TextEditingController();
 
-  // late String _name = (widget.listing != null) ? widget.listing!.name : "";
-  // late String _location =
-  //     (widget.listing != null) ? widget.listing!.location : "";
-  // late String _price = (widget.listing != null) ? widget.listing!.price : "";
   late String _currency =
       (widget.listing != null) ? widget.listing!.currency : "";
 
@@ -78,20 +74,11 @@ class _AddListingPageState extends State<AddListingPage> {
   late String _propertyType =
       (widget.listing != null) ? widget.listing!.propertyType : "";
 
-  // late String _yearConstructed =
-  //     (widget.listing != null) ? widget.listing!.yearConstructed : "";
-  // late String _description =
-  //     (widget.listing != null) ? widget.listing!.description : "";
   late int _likes = (widget.listing != null) ? widget.listing!.likes : 0;
   late List _features = (widget.listing != null)
       ? widget.listing!.features
       : List.empty(growable: true);
 
-  // late String _bedrooms;
-  // late String _bathrooms;
-  // late String _kitchen;
-  // late String _garages;
-  // late String _size;
   late String _sizeUnit;
   late List _images = (widget.listing != null)
       ? widget.listing!.images
@@ -689,25 +676,6 @@ class _AddListingPageState extends State<AddListingPage> {
     DatabaseServices.createListing(listing);
   }
 
-  _checkBox(String text, bool value, ValueChanged<bool?> onChanged) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Checkbox(
-              value: value,
-              onChanged: onChanged,
-            ),
-            Text(text)
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-      ],
-    );
-  }
-
   _resetFeatures() {
     _acValue = false;
     _powerValue = false;
@@ -902,12 +870,10 @@ class _AddListingPageState extends State<AddListingPage> {
 
     if (_facilitiesController.text.isNotEmpty) {
       items = _facilitiesController.text.split(", ").toList(growable: true);
-      // .map((item) => MultiSelectItem(item, item))
-      // .toList();
     }
 
     await showModalBottomSheet(
-      isScrollControlled: true, // required for min/max child size
+      isScrollControlled: true,
       context: context,
       builder: (ctx) {
         return MultiSelectBottomSheet(
