@@ -78,6 +78,7 @@ dependencies:
   avatar_glow: ^2.0.2
   flutter_native_splash: ^2.3.2
   super_bullet_list: ^0.0.2
+  multi_select_flutter: ^4.1.3
 
 #  awesome_notifications: ^0.7.0-beta.7
 #  awesome_notifications_fcm: ^0.7.4+1

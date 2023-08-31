@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -38,6 +40,7 @@ class _AddListingPageState extends State<AddListingPage> {
 
   bool _acValue = false;
   bool _powerValue = false;
+  bool _heaterValue = false;
   bool _refrigeratorValue = false;
   bool _wifiValue = false;
   bool _tvCableValue = false;
@@ -49,8 +52,6 @@ class _AddListingPageState extends State<AddListingPage> {
   bool _cookerValue = false;
   bool _petsValue = false;
   bool _poolValue = false;
-
-  bool _featured = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -64,6 +65,7 @@ class _AddListingPageState extends State<AddListingPage> {
   final _kitchen = TextEditingController();
   final _garages = TextEditingController();
   final _size = TextEditingController();
+  final _facilitiesController = TextEditingController();
 
   // late String _name = (widget.listing != null) ? widget.listing!.name : "";
   // late String _location =
@@ -81,7 +83,7 @@ class _AddListingPageState extends State<AddListingPage> {
   // late String _description =
   //     (widget.listing != null) ? widget.listing!.description : "";
   late int _likes = (widget.listing != null) ? widget.listing!.likes : 0;
-  late final List _features = (widget.listing != null)
+  late List _features = (widget.listing != null)
       ? widget.listing!.features
       : List.empty(growable: true);
 
@@ -123,6 +125,43 @@ class _AddListingPageState extends State<AddListingPage> {
     "Acre",
     "Decimal",
     "Hectare",
+  ];
+
+  final List<MultiSelectItem<String>> _officeFeatures = [
+    MultiSelectItem("Air Conditioning", "Air Conditioning"),
+    MultiSelectItem("Wifi", "Wifi"),
+    MultiSelectItem("Electricity", "Electricity"),
+  ];
+
+  final List<MultiSelectItem<String>> _homeBuyFeatures = [
+    MultiSelectItem("Air Conditioning", "Air Conditioning"),
+    MultiSelectItem("Refrigerator", "Refrigerator"),
+    MultiSelectItem("Wifi", "Wifi"),
+    MultiSelectItem("Outdoor Shower", "Outdoor Shower"),
+    MultiSelectItem("TV Cable", "TV Cable"),
+    MultiSelectItem("Gym", "Gym"),
+    MultiSelectItem("Spa & Massage", "Spa & Massage"),
+    MultiSelectItem("Lawn", "Lawn"),
+    MultiSelectItem("Dryer", "Dryer"),
+    MultiSelectItem("Swimming Pool", "Swimming Pool"),
+    MultiSelectItem("Hot Water", "Hot Water"),
+    MultiSelectItem("Cooker", "Cooker"),
+  ];
+
+  final List<MultiSelectItem<String>> _homeRentFeatures = [
+    MultiSelectItem("Air Conditioning", "Air Conditioning"),
+    MultiSelectItem("Refrigerator", "Refrigerator"),
+    MultiSelectItem("Wifi", "Wifi"),
+    MultiSelectItem("Outdoor Shower", "Outdoor Shower"),
+    MultiSelectItem("TV Cable", "TV Cable"),
+    MultiSelectItem("Gym", "Gym"),
+    MultiSelectItem("Spa & Massage", "Spa & Massage"),
+    MultiSelectItem("Lawn", "Lawn"),
+    MultiSelectItem("Dryer", "Dryer"),
+    MultiSelectItem("Swimming Pool", "Swimming Pool"),
+    MultiSelectItem("Hot Water", "Hot Water"),
+    MultiSelectItem("Cooker", "Cooker"),
+    MultiSelectItem("Pets", "Pets"),
   ];
 
   @override
@@ -226,29 +265,36 @@ class _AddListingPageState extends State<AddListingPage> {
           _propertyType = value!;
           setState(() {});
         }),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         _textFieldWithAction("Location", Icons.location_on, () {}, _location),
         _numberField("Year Constructed", _yearConstructed),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         _dropdownMenuEntries("Status", statuses.toList(), (value) {
           _status = value!;
           setState(() {});
         }),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         _textFieldWithUnit("Size", "Unit", areaUnit, _size, (dropDownValue) {
           setState(() {
             _sizeUnit = dropDownValue!;
           });
         }),
-        (_propertyType == "Shop" || _propertyType == "Office")
-            ? _buildWorkPlaceFeatures()
-            : _buildHomeFeatures(),
+        // (_propertyType == "Shop" || _propertyType == "Office")
+        //     ? _buildWorkPlaceFeatures()
+        //     : _buildHomeFeatures(),
+        TextFormField(
+          readOnly: true,
+          decoration: const InputDecoration(
+              contentPadding: EdgeInsets.only(left: 20),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              labelText: "Facilities"),
+          onTap: () => _showMultiSelect(context),
+          minLines: 1,
+          maxLines: 10,
+          controller: _facilitiesController,
+        ),
+        const SizedBox(height: 20),
         _textArea("Description", _description),
         _formButtons(),
         const SizedBox(height: 100),
@@ -483,7 +529,6 @@ class _AddListingPageState extends State<AddListingPage> {
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               labelText: label),
           keyboardType: TextInputType.multiline,
-          keyboardAppearance: Brightness.dark,
           maxLines: 6,
           // Handles Form Validation
           validator: (value) {
@@ -522,7 +567,23 @@ class _AddListingPageState extends State<AddListingPage> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
-            _buildAddFeaturedDialog();
+            if (_formKey.currentState!.validate() &&
+                _propertyType.isNotEmpty &&
+                _status.isNotEmpty &&
+                CustomPhotoGallery.images.isNotEmpty) {
+              _buildAddFeaturedDialog();
+            } else if (CustomPhotoGallery.images.isEmpty) {
+              CherryToast(
+                      title: const Text(""),
+                      displayTitle: false,
+                      description: const Text("No images selected"),
+                      icon: Icons.error,
+                      themeColor: AppColor.darker,
+                      toastPosition: Position.bottom,
+                      animationDuration: const Duration(milliseconds: 1000),
+                      autoDismiss: true)
+                  .show(context);
+            }
           },
           child: const Row(
             children: [
@@ -542,6 +603,10 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _uploadListing(bool feature) {
+    for (var feature in _features) {
+      _setFeature(feature);
+    }
+
     Listing listing = Listing(
       id: '',
       userId: _brokerId,
@@ -590,6 +655,11 @@ class _AddListingPageState extends State<AddListingPage> {
                 "icon": "rulerCombined"
               },
               {"name": "Wifi", "value": _wifiValue, "icon": "wifi"},
+              {
+                "name": "Hot Water",
+                "value": _heaterValue,
+                "icon": "hotTubPerson"
+              },
               {"name": "TV Cable", "value": _tvCableValue, "icon": "tv"},
               {"name": "Gym", "value": _gymValue, "icon": "dumbbell"},
               {
@@ -638,234 +708,54 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _buildHomeFeatures() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _maskedNumberField("Bedrooms", _bedrooms),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _maskedNumberField("Bathrooms", _bathrooms),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _maskedNumberField("Kitchen", _kitchen),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _maskedNumberField("Garages", _garages),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Air Conditioning", _acValue, (value) {
-                setState(() {
-                  _acValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Refrigerator", _refrigeratorValue, (value) {
-                setState(() {
-                  _refrigeratorValue = value!;
-                });
-              }),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Wifi", _wifiValue, (value) {
-                setState(() {
-                  _wifiValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Outdoor Shower", _outdoorShowerValue, (value) {
-                setState(() {
-                  _outdoorShowerValue = value!;
-                });
-              }),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("TV Cable", _tvCableValue, (value) {
-                setState(() {
-                  _tvCableValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Gym", _gymValue, (value) {
-                setState(() {
-                  _gymValue = value!;
-                });
-              }),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Spa & Massage", _spaValue, (value) {
-                setState(() {
-                  _spaValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Lawn", _lawnValue, (value) {
-                setState(() {
-                  _lawnValue = value!;
-                });
-              }),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Dryer", _dryerValue, (value) {
-                setState(() {
-                  _dryerValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Swimming Pool", _poolValue, (value) {
-                setState(() {
-                  _poolValue = value!;
-                });
-              }),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox("Cooker", _cookerValue, (value) {
-                setState(() {
-                  _cookerValue = value!;
-                });
-              }),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            (_status == "Rent")
-                ? SizedBox(
-                    width: halfScreen * .9,
-                    child: _checkBox("Pets", _petsValue, (value) {
-                      setState(() {
-                        _petsValue = value!;
-                      });
-                    }),
-                  )
-                : Container(),
-          ],
-        ),
-      ],
-    );
+  _resetFeatures() {
+    _acValue = false;
+    _powerValue = false;
+    _heaterValue = false;
+    _refrigeratorValue = false;
+    _wifiValue = false;
+    _tvCableValue = false;
+    _gymValue = false;
+    _outdoorShowerValue = false;
+    _spaValue = false;
+    _lawnValue = false;
+    _dryerValue = false;
+    _cookerValue = false;
+    _petsValue = false;
+    _poolValue = false;
   }
 
-  _buildWorkPlaceFeatures() {
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox(
-                "Air Conditioning",
-                _acValue,
-                (value) {
-                  setState(() {
-                    _acValue = value!;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox(
-                "Wifi",
-                _wifiValue,
-                (value) {
-                  setState(() {
-                    _wifiValue = value!;
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: halfScreen * .9,
-              child: _checkBox(
-                "Electricity",
-                _powerValue,
-                (value) {
-                  setState(() {
-                    _powerValue = value!;
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+  _setFeature(String feature) {
+    switch (feature) {
+      case "Air Conditioning":
+        _acValue = true;
+      case "Refrigerator":
+        _refrigeratorValue = true;
+      case "Wifi":
+        _wifiValue = true;
+      case "Outdoor Shower":
+        _outdoorShowerValue = true;
+      case "TV Cable":
+        _tvCableValue = true;
+      case "Gym":
+        _gymValue = true;
+      case "Spa & Massage":
+        _spaValue = true;
+      case "Lawn":
+        _lawnValue = true;
+      case "Dryer":
+        _dryerValue = true;
+      case "Swimming Pool":
+        _poolValue = true;
+      case "Cooker":
+        _cookerValue = true;
+      case "Pets":
+        _petsValue = true;
+      case "Electricity":
+        _powerValue = true;
+      case "Hot Water":
+        _heaterValue = true;
+    }
   }
 
   _showUploadListingNotification(String title, String body) async {
@@ -941,61 +831,23 @@ class _AddListingPageState extends State<AddListingPage> {
           }
         : const SizedBox.shrink();
 
-    if (_formKey.currentState!.validate() &&
-        _propertyType.isNotEmpty &&
-        _status.isNotEmpty &&
-        CustomPhotoGallery.images.isNotEmpty) {
-      _images = (await StorageServices.uploadListingImages(
-          CustomPhotoGallery.images));
+    _images =
+        (await StorageServices.uploadListingImages(CustomPhotoGallery.images));
 
-      _uploadListing(feature);
+    _uploadListing(feature);
 
-      nav.pop();
-      nav.push(CupertinoPageRoute(
-        builder: (context) => RootApp(
-          userProfile: widget.userProfile,
-        ),
-      ));
-      CustomPhotoGallery.images.clear();
-      setState(() {
-        _loading = false;
-      });
-      _showUploadListingNotification(
-          "Upload Progress", "Property listing upload complete.");
-    } else if (CustomPhotoGallery.images.isEmpty) {
-      CherryToast(
-              title: const Text(""),
-              displayTitle: false,
-              description: const Text("No images selected"),
-              icon: Icons.error,
-              themeColor: AppColor.darker,
-              toastPosition: Position.bottom,
-              animationDuration: const Duration(milliseconds: 1000),
-              autoDismiss: true)
-          .show(context);
-    } else if (_propertyType.isEmpty) {
-      CherryToast(
-              title: const Text(""),
-              displayTitle: false,
-              description: const Text("Property type can't be empty"),
-              icon: Icons.error,
-              themeColor: AppColor.darker,
-              toastPosition: Position.bottom,
-              animationDuration: const Duration(milliseconds: 1000),
-              autoDismiss: true)
-          .show(context);
-    } else if (_status.isEmpty) {
-      CherryToast(
-              title: const Text(""),
-              displayTitle: false,
-              description: const Text("Status can't be empty"),
-              icon: Icons.error,
-              themeColor: AppColor.darker,
-              toastPosition: Position.bottom,
-              animationDuration: const Duration(milliseconds: 1000),
-              autoDismiss: true)
-          .show(context);
-    }
+    nav.pop();
+    nav.push(CupertinoPageRoute(
+      builder: (context) => RootApp(
+        userProfile: widget.userProfile,
+      ),
+    ));
+    CustomPhotoGallery.images.clear();
+    setState(() {
+      _loading = false;
+    });
+    _showUploadListingNotification(
+        "Upload Progress", "Property listing upload complete.");
   }
 
   _promoteAdConfirmDialog(int amount) {
@@ -1033,7 +885,6 @@ class _AddListingPageState extends State<AddListingPage> {
                   }
                 : const SizedBox.shrink();
 
-            _featured = true;
             _uploadListingAd(true);
           },
           color: AppColor.green_700,
@@ -1044,6 +895,45 @@ class _AddListingPageState extends State<AddListingPage> {
         )
       ],
     ).show();
+  }
+
+  void _showMultiSelect(BuildContext context) async {
+    List items = [];
+
+    if (_facilitiesController.text.isNotEmpty) {
+      items = _facilitiesController.text.split(", ").toList(growable: true);
+      // .map((item) => MultiSelectItem(item, item))
+      // .toList();
+    }
+
+    await showModalBottomSheet(
+      isScrollControlled: true, // required for min/max child size
+      context: context,
+      builder: (ctx) {
+        return MultiSelectBottomSheet(
+          title: const Text(
+            "Select Property Facilities",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          items: (_propertyType == "Office" || _propertyType == "Shop")
+              ? _officeFeatures
+              : (_status == "Rent")
+                  ? _homeRentFeatures
+                  : _homeBuyFeatures,
+          initialValue: items,
+          onConfirm: (values) {
+            _resetFeatures();
+            _features.addAll(values);
+            _features = Set.from(_features).toList();
+            setState(() {
+              _facilitiesController.text =
+                  values.toString().replaceAll('[', '').replaceAll(']', '');
+            });
+          },
+          maxChildSize: 0.8,
+        );
+      },
+    );
   }
 
   @override

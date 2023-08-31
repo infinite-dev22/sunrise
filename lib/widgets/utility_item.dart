@@ -97,6 +97,8 @@ class UtilityItem extends StatelessWidget {
         return FontAwesomeIcons.dog;
       case "electricity":
         return Icons.electrical_services_rounded;
+      case "hotTubPerson":
+        return FontAwesomeIcons.hotTubPerson;
     }
   }
 }
