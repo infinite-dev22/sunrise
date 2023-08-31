@@ -13,6 +13,7 @@ import 'package:string_validator/string_validator.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/utilities/global_values.dart';
+import 'package:sunrise/widgets/wide_button.dart';
 
 import '../models/account.dart';
 import '../services/database_services.dart';
@@ -521,7 +522,7 @@ class _AddListingPageState extends State<AddListingPage> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
-              _buildAddFeaturedDialog();
+            _buildAddFeaturedDialog();
           },
           child: const Row(
             children: [
@@ -530,7 +531,7 @@ class _AddListingPageState extends State<AddListingPage> {
                 width: 10,
               ),
               Text(
-                "Create",
+                "Next",
                 style: TextStyle(fontSize: 13, color: AppColor.appBgColor),
               ),
             ],
@@ -540,7 +541,7 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _uploadListing() {
+  _uploadListing(bool feature) {
     Listing listing = Listing(
       id: '',
       userId: _brokerId,
@@ -555,7 +556,7 @@ class _AddListingPageState extends State<AddListingPage> {
       yearConstructed: _yearConstructed.text.trim(),
       description: _description.text.trim(),
       likes: _likes,
-      featured: _featured,
+      featured: feature,
       features: (_propertyType == "Shop" || _propertyType == "Office")
           ? [
               {"name": "Air conditioning", "value": _acValue},
@@ -878,39 +879,48 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _buildAddFeaturedDialog() {
-    return Alert(
+    return showModalBottomSheet(
       context: context,
-      type: AlertType.none,
-      title: "Promote Listing",
-      desc: "Promote this listing...\nPromoted listings receive more views",
-      buttons: [
-        DialogButton(border: Border.all(color: AppColor.darker),
-          onPressed: () {
-            _upload();
-          },
-          color: Colors.white,
-          child: const Text(
-            "Post",
-            style: TextStyle(color: AppColor.darker, fontSize: 20),
+      builder: (context) => Column(
+        children: [
+          const SizedBox(
+            height: 50,
           ),
-        ),
-        DialogButton(
-          onPressed: () {
-            setState(() {
-              _buildAddFeaturedConfirmDialog();
-            });
-          },
-          color: AppColor.green_700,
-          child: const Text(
-            "Promote",
-            style: TextStyle(color: Colors.white, fontSize: 20),
+          WideButton(
+            "Promote Ad \$30/month",
+            color: Colors.white,
+            bgColor: AppColor.green_700,
+            onPressed: () {
+              _promoteAdConfirmDialog(30);
+            },
           ),
-        )
-      ],
-    ).show();
+          const SizedBox(height: 20),
+          WideButton(
+            "Promote Ad \$10/week",
+            color: Colors.white,
+            bgColor: AppColor.green_500,
+            onPressed: () {
+              _promoteAdConfirmDialog(10);
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          WideButton(
+            "Post Ad",
+            color: AppColor.darker,
+            bgColor: Colors.white,
+            onPressed: () {
+              _uploadListingAd(false);
+            },
+          ),
+          const SizedBox(height: 50),
+        ],
+      ),
+    );
   }
 
-  _upload() async {
+  _uploadListingAd(bool feature) async {
     var nav = Navigator.of(context);
 
     setState(() {
@@ -918,17 +928,17 @@ class _AddListingPageState extends State<AddListingPage> {
     });
     _loading
         ? {
-      showDialog(
-          barrierDismissible: false,
-          builder: (ctx) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-          context: context),
-      _showUploadListingNotification(
-          "Upload In Progress", "Uploading property listing...")
-    }
+            showDialog(
+                barrierDismissible: false,
+                builder: (ctx) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+                context: context),
+            _showUploadListingNotification(
+                "Upload In Progress", "Uploading property listing...")
+          }
         : const SizedBox.shrink();
 
     if (_formKey.currentState!.validate() &&
@@ -938,7 +948,7 @@ class _AddListingPageState extends State<AddListingPage> {
       _images = (await StorageServices.uploadListingImages(
           CustomPhotoGallery.images));
 
-      _uploadListing();
+      _uploadListing(feature);
 
       nav.pop();
       nav.push(CupertinoPageRoute(
@@ -954,47 +964,46 @@ class _AddListingPageState extends State<AddListingPage> {
           "Upload Progress", "Property listing upload complete.");
     } else if (CustomPhotoGallery.images.isEmpty) {
       CherryToast(
-          title: const Text(""),
-          displayTitle: false,
-          description: const Text("No images selected"),
-          icon: Icons.error,
-          themeColor: AppColor.darker,
-          toastPosition: Position.bottom,
-          animationDuration: const Duration(milliseconds: 1000),
-          autoDismiss: true)
+              title: const Text(""),
+              displayTitle: false,
+              description: const Text("No images selected"),
+              icon: Icons.error,
+              themeColor: AppColor.darker,
+              toastPosition: Position.bottom,
+              animationDuration: const Duration(milliseconds: 1000),
+              autoDismiss: true)
           .show(context);
     } else if (_propertyType.isEmpty) {
       CherryToast(
-          title: const Text(""),
-          displayTitle: false,
-          description: const Text("Property type can't be empty"),
-          icon: Icons.error,
-          themeColor: AppColor.darker,
-          toastPosition: Position.bottom,
-          animationDuration: const Duration(milliseconds: 1000),
-          autoDismiss: true)
+              title: const Text(""),
+              displayTitle: false,
+              description: const Text("Property type can't be empty"),
+              icon: Icons.error,
+              themeColor: AppColor.darker,
+              toastPosition: Position.bottom,
+              animationDuration: const Duration(milliseconds: 1000),
+              autoDismiss: true)
           .show(context);
     } else if (_status.isEmpty) {
       CherryToast(
-          title: const Text(""),
-          displayTitle: false,
-          description: const Text("Status can't be empty"),
-          icon: Icons.error,
-          themeColor: AppColor.darker,
-          toastPosition: Position.bottom,
-          animationDuration: const Duration(milliseconds: 1000),
-          autoDismiss: true)
+              title: const Text(""),
+              displayTitle: false,
+              description: const Text("Status can't be empty"),
+              icon: Icons.error,
+              themeColor: AppColor.darker,
+              toastPosition: Position.bottom,
+              animationDuration: const Duration(milliseconds: 1000),
+              autoDismiss: true)
           .show(context);
     }
   }
 
-  _buildAddFeaturedConfirmDialog() {
+  _promoteAdConfirmDialog(int amount) {
     return Alert(
       context: context,
       type: AlertType.info,
-      title: "Proceed?",
-      desc:
-          "Promoting is done at a fee\tYou shall be charged a promotion fee for this listing monthly.",
+      title: "Your account is to be credited \$$amount.",
+      desc: "Do you wish to continue",
       buttons: [
         DialogButton(
           onPressed: () => Navigator.pop(context),
@@ -1025,7 +1034,7 @@ class _AddListingPageState extends State<AddListingPage> {
                 : const SizedBox.shrink();
 
             _featured = true;
-            _upload();
+            _uploadListingAd(true);
           },
           color: AppColor.green_700,
           child: const Text(

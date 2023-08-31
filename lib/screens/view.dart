@@ -255,7 +255,7 @@ class _ViewPageState extends State<ViewPage> {
               Row(
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * .75,
+                    width: MediaQuery.of(context).size.width * .65,
                     child: Expanded(
                       child: Text(
                         widget.listing.name,
