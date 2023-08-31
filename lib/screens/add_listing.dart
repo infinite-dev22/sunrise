@@ -309,7 +309,7 @@ class _AddListingPageState extends State<AddListingPage> {
       decoration: InputDecoration(
         // Add Horizontal padding using menuItemStyleData.padding so it matches
         // the menu padding when button's width is not specified.
-        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
         ),
