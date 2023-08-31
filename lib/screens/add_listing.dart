@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:platform_local_notifications/platform_local_notifications.dart';
@@ -37,6 +36,7 @@ class AddListingPage extends StatefulWidget {
 class _AddListingPageState extends State<AddListingPage> {
   bool _loading = false;
   late double halfScreen;
+  late Listing? listing;
 
   bool _acValue = false;
   bool _powerValue = false;
@@ -54,6 +54,8 @@ class _AddListingPageState extends State<AddListingPage> {
   bool _poolValue = false;
 
   final _formKey = GlobalKey<FormState>();
+
+  final _key = GlobalKey();
 
   final _name = TextEditingController();
   final _location = TextEditingController();
@@ -219,7 +221,7 @@ class _AddListingPageState extends State<AddListingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CustomPhotoGallery(),
+          CustomPhotoGallery(key: _key),
           const SizedBox(
             height: 20,
           ),
@@ -538,14 +540,14 @@ class _AddListingPageState extends State<AddListingPage> {
       children: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.red_700),
-          onPressed: () {},
+          onPressed: () => _resetScreen(),
           child: const Row(
             children: [
               Icon(Icons.cancel_outlined, color: AppColor.appBgColor),
               SizedBox(
                 width: 10,
               ),
-              Text("Cancel",
+              Text("Clear",
                   style: TextStyle(fontSize: 13, color: AppColor.appBgColor)),
             ],
           ),
@@ -594,7 +596,7 @@ class _AddListingPageState extends State<AddListingPage> {
       _setFeature(feature);
     }
 
-    Listing listing = Listing(
+    listing = Listing(
       id: '',
       userId: _brokerId,
       name: _name.text.trim(),
@@ -673,7 +675,7 @@ class _AddListingPageState extends State<AddListingPage> {
         DateTime.now(),
       ),
     );
-    DatabaseServices.createListing(listing);
+    DatabaseServices.createListing(listing!);
   }
 
   _resetFeatures() {
@@ -902,6 +904,41 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
+  _resetScreen() {
+    setState(() {
+      _name.text = "";
+      _location.text = "";
+      _price.text = "";
+      _yearConstructed.text = "";
+      _description.text = "";
+      _bedrooms.text = "";
+      _bathrooms.text = "";
+      _kitchen.text = "";
+      _garages.text = "";
+      _size.text = "";
+      _facilitiesController.text = "";
+
+      _currency = '';
+      _status = '';
+      _propertyType = '';
+      _likes = 0;
+      _features.clear();
+      _sizeUnit = '';
+      _images.clear();
+      _brokerId = '';
+
+      listing = null;
+
+      _key.currentState?.setState(() {
+        CustomPhotoGallery.images.clear();
+      });
+
+      _resetFeatures();
+      _features.clear();
+      _images.clear();
+    });
+  }
+
   @override
   void dispose() {
     _name.dispose();
@@ -914,15 +951,7 @@ class _AddListingPageState extends State<AddListingPage> {
     _kitchen.dispose();
     _garages.dispose();
     _size.dispose();
-
-    _currency = '';
-    _status = '';
-    _propertyType = '';
-    _likes = 0;
-    _features.clear();
-    _sizeUnit = '';
-    _images.clear();
-    _brokerId = '';
+    _facilitiesController.dispose();
 
     super.dispose();
   }
