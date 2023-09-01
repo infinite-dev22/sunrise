@@ -1,11 +1,13 @@
 import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:sunrise/models/account.dart';
+import 'package:sunrise/screens/admin.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/widgets/custom_image.dart';
@@ -126,6 +128,33 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ),
+        if (kDebugMode)
+          CustomSettingsSection(
+            child: RaisedSettingsSection(
+              children: [
+                SettingsTile.navigation(
+                  leading: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: AppColor.blue_500,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: const Icon(Icons.shield_rounded,
+                        color: AppColor.blue_700),
+                  ),
+                  title: const Text("My Admin"),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                  onPressed: (context) {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) =>
+                              AdminApp(userProfile: widget.userProfile),
+                        ));
+                  },
+                ),
+              ],
+            ),
+          ),
         CustomSettingsSection(
           child: RaisedSettingsSection(
             children: [

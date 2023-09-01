@@ -116,16 +116,17 @@ class _SearchPageState extends State<SearchPage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("name", isEqualTo: filter)
+          .where("name", isGreaterThanOrEqualTo: filter)
+          .orderBy('name', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
+          print(snapshot.error.toString());
           return Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text('Something went wrong'),
+                Text('Something went wrong ${snapshot.error.toString()}'),
                 IconButton(
                   onPressed: () {
                     _showSearchedListings(filter);

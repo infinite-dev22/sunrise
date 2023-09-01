@@ -254,20 +254,22 @@ class _ViewPageState extends State<ViewPage> {
             children: [
               Row(
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * .61,
-                    child: Expanded(
+                  // SizedBox(
+                  //   width: MediaQuery.of(context).size.width * .61,
+                  //   child:
+                    Expanded(
                       child: Text(
                         widget.listing.name,
                         softWrap: true,
                         overflow: TextOverflow.clip,
+                        maxLines: 3,
                         style: const TextStyle(
                           fontSize: 18,
                           color: AppColor.darker,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
+                    // ),
                   ),
                   const Spacer(),
                   Text(

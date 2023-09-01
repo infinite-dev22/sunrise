@@ -64,6 +64,8 @@ class _RoomsPageState extends State<RoomsPage> {
     final hasImage = room.imageUrl != null;
     final name = room.name ?? '';
 
+    print(room.lastMessages);
+
     return Container(
       margin: const EdgeInsets.only(right: 16),
       child: CircleAvatar(
@@ -216,6 +218,14 @@ class _RoomsPageState extends State<RoomsPage> {
                                   ),
                                 ],
                               ),
+                            ),
+                            Text(
+                              room.lastMessages != null ?
+                              room.lastMessages!.where((message) =>
+                                      message.status == "delivered")
+                                  .toList(growable: true)
+                                  .length
+                                  .toString() : "",
                             ),
                           ],
                         ),

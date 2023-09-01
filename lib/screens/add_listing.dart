@@ -243,8 +243,8 @@ class _AddListingPageState extends State<AddListingPage> {
   _buildForm() {
     return Column(
       children: [
-        _buildTextField("Name", _name),
-        _textFieldWithUnit("Price", "Currency", currencies, _price,
+        _buildTextField("Name", 30, _name),
+        _textFieldWithUnit("Price", "Currency", currencies, 15, _price,
             (dropDownValue) {
           setState(() {
             _currency = dropDownValue!;
@@ -255,15 +255,16 @@ class _AddListingPageState extends State<AddListingPage> {
           setState(() {});
         }),
         const SizedBox(height: 20),
-        _textFieldWithAction("Location", Icons.location_on, () {}, _location),
-        _numberField("Year Constructed", _yearConstructed),
+        _textFieldWithAction(
+            "Location", 20, Icons.location_on, () {}, _location),
+        _numberField("Year Constructed", 4, _yearConstructed),
         const SizedBox(height: 20),
         _dropdownMenuEntries("Status", statuses.toList(), (value) {
           _status = value!;
           setState(() {});
         }),
         const SizedBox(height: 20),
-        _textFieldWithUnit("Size", "Unit", areaUnit, _size, (dropDownValue) {
+        _textFieldWithUnit("Size", "Unit", areaUnit, 6, _size, (dropDownValue) {
           setState(() {
             _sizeUnit = dropDownValue!;
           });
@@ -271,7 +272,8 @@ class _AddListingPageState extends State<AddListingPage> {
         TextFormField(
           readOnly: true,
           decoration: const InputDecoration(
-              contentPadding: EdgeInsets.only(left: 20, top: 10, bottom: 10, right: 10),
+              contentPadding:
+                  EdgeInsets.only(left: 20, top: 10, bottom: 10, right: 10),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               labelText: "Facilities"),
@@ -357,10 +359,11 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _buildTextField(String label, TextEditingController controller) {
+  _buildTextField(String label, maxLength, TextEditingController controller) {
     return Column(
       children: [
         TextFormField(
+          maxLength: maxLength,
           decoration: InputDecoration(
               contentPadding: const EdgeInsets.only(left: 20),
               border: const OutlineInputBorder(
@@ -386,6 +389,7 @@ class _AddListingPageState extends State<AddListingPage> {
       String label,
       String unitFieldLabel,
       List units,
+      maxLength,
       TextEditingController controller,
       ValueChanged<String?> onDropdownChanged) {
     return Column(
@@ -393,7 +397,7 @@ class _AddListingPageState extends State<AddListingPage> {
         Row(
           children: [
             Expanded(
-              child: _maskedNumberField(label, controller),
+              child: _maskedNumberField(label, maxLength, controller),
             ),
             const SizedBox(
               width: 10,
@@ -412,11 +416,12 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _textFieldWithAction(String label, IconData icon, Function()? onPressed,
-      TextEditingController controller) {
+  _textFieldWithAction(String label, maxLength, IconData icon,
+      Function()? onPressed, TextEditingController controller) {
     return Column(
       children: [
         TextFormField(
+          maxLength: maxLength,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.only(left: 20),
             border: const OutlineInputBorder(
@@ -443,8 +448,10 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _maskedNumberField(String label, TextEditingController controller) {
+  _maskedNumberField(
+      String label, maxLength, TextEditingController controller) {
     return TextFormField(
+      maxLength: maxLength,
       decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(left: 20),
           border: const OutlineInputBorder(
@@ -468,8 +475,9 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _numberField(String label, TextEditingController controller) {
+  _numberField(String label, maxLength, TextEditingController controller) {
     return TextFormField(
+      maxLength: maxLength,
       decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(left: 20),
           border: const OutlineInputBorder(
