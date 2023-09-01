@@ -121,28 +121,36 @@ class _SearchPageState extends State<SearchPage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text('Something went wrong'),
-              IconButton(
-                onPressed: () {
-                  _showSearchedListings(filter);
-                },
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
+          return Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Something went wrong'),
+                IconButton(
+                  onPressed: () {
+                    _showSearchedListings(filter);
+                  },
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
           );
         }
 
-        if (!snapshot.hasData) return const Center(child: Text("No matched properties"),);
+        if (!snapshot.hasData) {
+          return _loadingWidget();
+        }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _loadingWidget();
         }
 
         if (snapshot.data!.docs.isEmpty) {
-          return Container();
+          return searchController.text.isEmpty
+              ? Container()
+              : const Center(
+                  child: Text("No matched properties"),
+                );
         }
 
         return Column(
