@@ -268,13 +268,10 @@ class _AddListingPageState extends State<AddListingPage> {
             _sizeUnit = dropDownValue!;
           });
         }),
-        // (_propertyType == "Shop" || _propertyType == "Office")
-        //     ? _buildWorkPlaceFeatures()
-        //     : _buildHomeFeatures(),
         TextFormField(
           readOnly: true,
           decoration: const InputDecoration(
-              contentPadding: EdgeInsets.only(left: 20),
+              contentPadding: EdgeInsets.only(left: 20, top: 10, bottom: 10, right: 10),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               labelText: "Facilities"),
@@ -397,21 +394,6 @@ class _AddListingPageState extends State<AddListingPage> {
           children: [
             Expanded(
               child: _maskedNumberField(label, controller),
-              // child: TextFormField(
-              //   decoration: InputDecoration(
-              //       contentPadding: const EdgeInsets.only(left: 20),
-              //       border: const OutlineInputBorder(
-              //           borderRadius: BorderRadius.all(Radius.circular(15))),
-              //       labelText: label),
-              //   // Handles Form Validation
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return '$label can\'t be empty.';
-              //     }
-              //     return null;
-              //   },
-              //   controller: controller,
-              // ),
             ),
             const SizedBox(
               width: 10,
