@@ -365,6 +365,7 @@ class _AddListingPageState extends State<AddListingPage> {
         TextFormField(
           maxLength: maxLength,
           decoration: InputDecoration(
+              counterText: "",
               contentPadding: const EdgeInsets.only(left: 20),
               border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15))),
@@ -423,6 +424,7 @@ class _AddListingPageState extends State<AddListingPage> {
         TextFormField(
           maxLength: maxLength,
           decoration: InputDecoration(
+            counterText: "",
             contentPadding: const EdgeInsets.only(left: 20),
             border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(15))),
@@ -452,7 +454,9 @@ class _AddListingPageState extends State<AddListingPage> {
       String label, maxLength, TextEditingController controller) {
     return TextFormField(
       maxLength: maxLength,
+
       decoration: InputDecoration(
+          counterText: "",
           contentPadding: const EdgeInsets.only(left: 20),
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))),
@@ -479,6 +483,7 @@ class _AddListingPageState extends State<AddListingPage> {
     return TextFormField(
       maxLength: maxLength,
       decoration: InputDecoration(
+          counterText: "",
           contentPadding: const EdgeInsets.only(left: 20),
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))),
