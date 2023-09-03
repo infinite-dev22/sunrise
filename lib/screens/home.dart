@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              user: brokerProfile,
+              userProfile: brokerProfile,
               favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
@@ -267,17 +267,6 @@ class _HomePageState extends State<HomePage> {
                     "Recent",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  // GestureDetector(
-                  //     child: const Text(
-                  //       "Clear",
-                  //       style: TextStyle(
-                  //           fontSize: 16,
-                  //           color: AppColor.darker,
-                  //           decoration: TextDecoration.underline),
-                  //     ),
-                  //     onTap: () {
-                  //       DatabaseServices.deleteUserRecents();
-                  //     }),
                 ],
               ),
             ),

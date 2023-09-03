@@ -122,7 +122,7 @@ class _FavouriteItemState extends State<FavouriteItem> {
                     };
             },
             icon: IconBox(
-              bgColor: AppColor.blue,
+              bgColor: AppColor.primary,
               child: Icon(
                 _favoriteIcon,
                 color: Colors.white,

@@ -69,6 +69,7 @@ class _SearchPageState extends State<SearchPage> {
 
   _buildHeader() {
     return AppBar(
+      backgroundColor: AppColor.appBgColor,
       title: Row(
         children: [
           Expanded(
@@ -221,7 +222,7 @@ class _SearchPageState extends State<SearchPage> {
       CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
           listing: listing,
-          user: brokerProfile,
+          userProfile: brokerProfile,
           favorite: favorite,
         ),
       ),

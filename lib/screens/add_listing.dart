@@ -1,5 +1,3 @@
-import 'package:cherry_toast/cherry_toast.dart';
-import 'package:cherry_toast/resources/arrays.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,9 +10,11 @@ import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:sunrise/models/property.dart';
+import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/utilities/global_values.dart';
 import 'package:sunrise/widgets/wide_button.dart';
+import 'package:toast/toast.dart';
 
 import '../models/account.dart';
 import '../services/database_services.dart';
@@ -34,6 +34,8 @@ class AddListingPage extends StatefulWidget {
 }
 
 class _AddListingPageState extends State<AddListingPage> {
+  ToastContext toast = ToastContext();
+
   bool _loading = false;
   late double halfScreen;
   late Listing? listing;
@@ -157,6 +159,8 @@ class _AddListingPageState extends State<AddListingPage> {
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     halfScreen = screenWidth * 0.5;
+
+    toast.init(context);
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -551,22 +555,22 @@ class _AddListingPageState extends State<AddListingPage> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
-            if (_formKey.currentState!.validate() &&
-                _propertyType.isNotEmpty &&
-                _status.isNotEmpty &&
-                CustomPhotoGallery.images.isNotEmpty) {
-              _buildAddFeaturedDialog();
-            } else if (CustomPhotoGallery.images.isEmpty) {
-              CherryToast(
-                      title: const Text(""),
-                      displayTitle: false,
-                      description: const Text("No images selected"),
-                      icon: Icons.error,
-                      themeColor: AppColor.darker,
-                      toastPosition: Position.bottom,
-                      animationDuration: const Duration(milliseconds: 1000),
-                      autoDismiss: true)
-                  .show(context);
+            if (widget.userProfile.phoneNumber.isEmpty ||
+                widget.userProfile.name.isEmpty) {
+              Toast.show("Add your Phone number and Name to continue", duration: Toast.lengthLong, gravity:  Toast.bottom);
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    ProfilePage(userProfile: widget.userProfile),
+              ));
+            } else {
+              if (_formKey.currentState!.validate() &&
+                  _propertyType.isNotEmpty &&
+                  _status.isNotEmpty &&
+                  CustomPhotoGallery.images.isNotEmpty) {
+                _buildAddFeaturedDialog();
+              } else if (CustomPhotoGallery.images.isEmpty) {
+                Toast.show("No images selected", duration: Toast.lengthLong, gravity:  Toast.bottom);
+              }
             }
           },
           child: const Row(

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  static const primary = Color(0xFF3498db);
+  static const primary = Color(0xFFEA9F29);
+  // static const primary = Color(0xFF3498db);
   // static const primary = Color(0xFFFFF4CC);
   static const secondary = Color(0xFF2ecc71);
 
   static const darker = Color(0xFF3E4249);
   static const cardColor = Colors.white;
   static const mainColor = Color(0xFF000000);
-  static const appBgColor = Color(0xFFFAFAFA);
+  // static const appBgColor = Color(0xFFFAFAFA);
+  static const appBgColor = Color(0xFFfffaf2);
   static const shadowColor = Colors.black87;
   static const textBoxColor = Colors.white;
 

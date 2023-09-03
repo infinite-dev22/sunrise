@@ -119,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _buildSettings() {
     return SettingsList(
-      applicationType: ApplicationType.both,
+      applicationType: ApplicationType.both,lightTheme: const SettingsThemeData(settingsListBackground: AppColor.appBgColor),
       sections: [
         CustomSettingsSection(
           child: Column(

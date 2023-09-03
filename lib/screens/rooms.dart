@@ -95,6 +95,7 @@ class _RoomsPageState extends State<RoomsPage> {
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.light,
+        backgroundColor: AppColor.appBgColor,
         title: Text(
           "Chats",
           style: GoogleFonts.lato(
@@ -209,6 +210,17 @@ class _RoomsPageState extends State<RoomsPage> {
                                     height: 1,
                                   ),
                                   Text(
+                                    room.metadata!["listingName"],
+                                    style: const TextStyle(
+                                        fontSize: 16, color: AppColor.grey_300),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  Text(
                                     room.lastMessages?.last.toString() ?? '',
                                     style: const TextStyle(
                                         fontSize: 16, color: AppColor.darker),
@@ -220,12 +232,14 @@ class _RoomsPageState extends State<RoomsPage> {
                               ),
                             ),
                             Text(
-                              room.lastMessages != null ?
-                              room.lastMessages!.where((message) =>
-                                      message.status == "delivered")
-                                  .toList(growable: true)
-                                  .length
-                                  .toString() : "",
+                              room.lastMessages != null
+                                  ? room.lastMessages!
+                                      .where((message) =>
+                                          message.status == "delivered")
+                                      .toList(growable: true)
+                                      .length
+                                      .toString()
+                                  : "",
                             ),
                           ],
                         ),

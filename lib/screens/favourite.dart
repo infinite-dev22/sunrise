@@ -98,7 +98,7 @@ class _FavouritePageState extends State<FavouritePage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: data,
-              user: brokerProfile,
+              userProfile: brokerProfile,
               favorite: favorite,
             )));
   }

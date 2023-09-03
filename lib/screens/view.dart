@@ -22,10 +22,13 @@ import 'chat.dart';
 
 class ViewPage extends StatefulWidget {
   const ViewPage(
-      {super.key, required this.listing, required this.user, this.favorite});
+      {super.key,
+      required this.listing,
+      required this.userProfile,
+      this.favorite});
 
   final Listing listing;
-  final UserProfile user;
+  final UserProfile userProfile;
   final Favorite? favorite;
 
   @override
@@ -162,7 +165,7 @@ class _ViewPageState extends State<ViewPage> {
       margin: const EdgeInsets.only(left: 10, right: 10),
       padding: const EdgeInsets.all(5),
       decoration: const BoxDecoration(
-          color: Colors.white,
+          color: Color.fromRGBO(227, 204, 168, .2),
           borderRadius: BorderRadius.all(Radius.circular(15))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +206,8 @@ class _ViewPageState extends State<ViewPage> {
       child: ContactItem(
         onCallTap: () async {
           try {
-            await FlutterPhoneDirectCaller.callNumber(widget.user.phoneNumber);
+            await FlutterPhoneDirectCaller.callNumber(
+                widget.userProfile.phoneNumber);
           } catch (e) {
             if (kDebugMode) {
               print(e);
@@ -211,9 +215,9 @@ class _ViewPageState extends State<ViewPage> {
           }
         },
         onMessageTap: () {
-          _handlePressed(widget.user, context);
+          _handlePressed(widget.userProfile, context);
         },
-        user: widget.user,
+        user: widget.userProfile,
       ),
     );
   }
@@ -232,13 +236,16 @@ class _ViewPageState extends State<ViewPage> {
 
     final room = await FirebaseChatCore.instance.createRoom(user, metadata: {
       'imageUrl': userProfile.profilePicture,
-      'name': userProfile.name
+      'name': userProfile.name,
+      'listingId': widget.listing.id,
+      'listingName': widget.listing.name,
     });
 
     await navigator.push(
       CupertinoPageRoute(
         builder: (context) => ChatPage(
           room: room,
+          userProfile: widget.userProfile,
         ),
       ),
     );
@@ -257,18 +264,18 @@ class _ViewPageState extends State<ViewPage> {
                   // SizedBox(
                   //   width: MediaQuery.of(context).size.width * .61,
                   //   child:
-                    Expanded(
-                      child: Text(
-                        widget.listing.name,
-                        softWrap: true,
-                        overflow: TextOverflow.clip,
-                        maxLines: 3,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: AppColor.darker,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  Expanded(
+                    child: Text(
+                      widget.listing.name,
+                      softWrap: true,
+                      overflow: TextOverflow.clip,
+                      maxLines: 3,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: AppColor.darker,
+                        fontWeight: FontWeight.w700,
                       ),
+                    ),
                     // ),
                   ),
                   const Spacer(),
@@ -355,7 +362,7 @@ class _ViewPageState extends State<ViewPage> {
           height: 20,
         ),
         user != null
-            ? widget.user.userId == user!.uid
+            ? widget.userProfile.userId == user!.uid
                 ? _buildListingDelete()
                 : _buildBlockerContact()
             : _buildBlockerContact(),

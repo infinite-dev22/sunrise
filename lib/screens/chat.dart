@@ -2,27 +2,37 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sunrise/models/property.dart';
+import 'package:sunrise/screens/view.dart';
+import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/utilities/global_values.dart';
+import 'package:sunrise/widgets/custom_image.dart';
+
+import '../models/account.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({
     super.key,
     required this.room,
+    this.userProfile,
   });
 
   final types.Room room;
+  final UserProfile? userProfile;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -30,6 +40,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   bool _isAttachmentUploading = false;
+  late Listing? _listing;
+  late UserProfile? _brokerProfile;
 
   void _handleAttachmentPressed() {
     showModalBottomSheet<void>(
@@ -204,8 +216,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    _getListing();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColor.appBgColor,
+        bottom: _buildListing(),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Row(
           children: [
@@ -218,70 +233,180 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
         leadingWidth: 20,
+        actions: [
+          IconButton(
+              onPressed: () async {
+                try {
+                  await FlutterPhoneDirectCaller.callNumber(
+                      (widget.userProfile != null)
+                          ? widget.userProfile!.phoneNumber
+                          : _brokerProfile!.phoneNumber);
+                } catch (e) {
+                  if (kDebugMode) {
+                    print(e);
+                  }
+                }
+              },
+              icon: const Icon(
+                Icons.phone,
+                color: AppColor.primary,
+              ))
+        ],
       ),
       backgroundColor: AppColor.appBgColor,
       body: StreamBuilder<types.Room>(
         initialData: widget.room,
         stream: FirebaseChatCore.instance.room(widget.room.id),
         builder: (context, snapshot) => StreamBuilder<List<types.Message>>(
-          initialData: const [],
-          stream: FirebaseChatCore.instance.messages(snapshot.data!),
-          builder: (context, snapshot) => Chat(
-            typingIndicatorOptions: const TypingIndicatorOptions(),
-            isAttachmentUploading: _isAttachmentUploading,
-            messages: snapshot.data ?? [],
-            onAttachmentPressed: _handleAttachmentPressed,
-            onMessageTap: _handleMessageTap,
-            onPreviewDataFetched: _handlePreviewDataFetched,
-            onSendPressed: _handleSendPressed,
-            scrollToUnreadOptions: const ScrollToUnreadOptions(
-              lastReadMessageId: 'lastReadMessageId',
-              scrollOnOpen: true,
-            ),
-            onMessageVisibilityChanged: (p0, visible) {
-              if (visible) {
-                if (p0.author.id != user!.uid) {
-                  final updatedMessage = p0.copyWith(status: Status.seen);
-                  FirebaseChatCore.instance
-                      .updateMessage(updatedMessage, widget.room.id);
-                  setState(() {});
-                } else {
-                  final updatedMessage = p0.copyWith(status: Status.delivered);
-                  FirebaseChatCore.instance
-                      .updateMessage(updatedMessage, widget.room.id);
-                  setState(() {});
-                }
-              }
-            },
-            theme: const DefaultChatTheme(
-              primaryColor: AppColor.chatBlue,
-              secondaryColor: AppColor.chatGray,
-              inputBorderRadius: BorderRadius.all(Radius.circular(50)),
-              inputMargin: EdgeInsets.only(bottom: 5, left: 5, right: 5),
-              inputPadding: EdgeInsets.all(12),
-            ),
-            usePreviewData: true,
-            textMessageOptions:
-                const TextMessageOptions(isTextSelectable: false),
-            user: types.User(
-              id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
-            ),
-          ),
-        ),
+            initialData: const [],
+            stream: FirebaseChatCore.instance.messages(snapshot.data!),
+            builder: (context, snapshot) => Chat(
+                  typingIndicatorOptions: const TypingIndicatorOptions(),
+                  isAttachmentUploading: _isAttachmentUploading,
+                  messages: snapshot.data ?? [],
+                  onAttachmentPressed: _handleAttachmentPressed,
+                  onMessageTap: _handleMessageTap,
+                  onPreviewDataFetched: _handlePreviewDataFetched,
+                  onSendPressed: _handleSendPressed,
+                  scrollToUnreadOptions: const ScrollToUnreadOptions(
+                    lastReadMessageId: 'lastReadMessageId',
+                    scrollOnOpen: true,
+                  ),
+                  onMessageVisibilityChanged: (p0, visible) {
+                    if (visible) {
+                      if (p0.author.id != user!.uid) {
+                        final updatedMessage = p0.copyWith(status: Status.seen);
+                        FirebaseChatCore.instance
+                            .updateMessage(updatedMessage, widget.room.id);
+                      } else {
+                        final updatedMessage =
+                            p0.copyWith(status: Status.delivered);
+                        FirebaseChatCore.instance
+                            .updateMessage(updatedMessage, widget.room.id);
+                      }
+
+                      setState(() {});
+                    }
+                  },
+                  theme: const DefaultChatTheme(
+                      primaryColor: AppColor.chatBlue,
+                      secondaryColor: AppColor.chatGray,
+                      inputBorderRadius: BorderRadius.all(Radius.circular(50)),
+                      inputMargin:
+                          EdgeInsets.only(bottom: 5, left: 5, right: 5),
+                      inputPadding: EdgeInsets.all(12),
+                      inputBackgroundColor: AppColor.primary),
+                  usePreviewData: true,
+                  textMessageOptions:
+                      const TextMessageOptions(isTextSelectable: false),
+                  user: types.User(
+                    id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
+                  ),
+                )),
       ),
     );
   }
 
   _buildProfilePicture(String url) {
-    return Container(
+    return CustomImage(
+      url,
       width: 45,
       height: 45,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          image: DecorationImage(
-            image: NetworkImage(url),
-            fit: BoxFit.cover,
-          )),
     );
+  }
+
+  _getListing() async {
+    List listings = await DatabaseServices.getListing();
+
+    for (Listing listing in listings) {
+      if (listing.id == widget.room.metadata!["listingId"]) {
+        if (widget.userProfile == null) {
+          _brokerProfile =
+              await DatabaseServices.getUserProfile(listing.userId);
+        }
+        setState(() {
+          _listing = listing;
+        });
+      }
+    }
+  }
+
+  _buildNavigateToViewPage(Listing listing) async {
+    var nav = Navigator.of(context);
+
+    // These variables below affect performance significantly, try putting them
+    // into their respective screen(ViewPage).
+    UserProfile brokerProfile =
+        await DatabaseServices.getUserProfile(listing.userId);
+    List favorite = await DatabaseServices.getFavorite(listing.id);
+
+    return nav.push(MaterialPageRoute(
+        builder: (BuildContext context) => ViewPage(
+              listing: listing,
+              userProfile: brokerProfile,
+              favorite: favorite.isEmpty ? null : favorite[0],
+            )));
+  }
+
+  _buildListing() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(60),
+      child: GestureDetector(
+        child: Padding(
+          padding:
+              const EdgeInsets.only(left: 10, right: 10, bottom: 5, top: 5),
+          child: Row(
+            children: [
+              CustomImage(
+                _listing!.images[0],
+                width: 50,
+                height: 50,
+                radius: 10,
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _listing!.name,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        "${_listing!.price} - ",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColor.primary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        _listing!.location,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColor.grey_300,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        onTap: () => _buildNavigateToViewPage(_listing!),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _listing = null;
+    _brokerProfile = null;
+
+    super.dispose();
   }
 }

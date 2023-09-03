@@ -133,7 +133,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              user: brokerProfile,
+              userProfile: brokerProfile,
               favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }

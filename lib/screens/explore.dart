@@ -36,6 +36,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
   _buildHeader() {
     return AppBar(
+      backgroundColor: AppColor.appBgColor,
       title: Row(
         children: [
           Expanded(
@@ -168,7 +169,7 @@ class _ExplorePageState extends State<ExplorePage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              user: brokerProfile,
+              userProfile: brokerProfile,
               favorite: favorite,
             )));
   }
