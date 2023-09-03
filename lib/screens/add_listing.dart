@@ -561,12 +561,16 @@ class _AddListingPageState extends State<AddListingPage> {
               ));
             } else {
               if (_formKey.currentState!.validate() &&
-                  _propertyType.isNotEmpty || _propertyUse.isNotEmpty &&
-                  _status.isNotEmpty &&
-                  CustomPhotoGallery.images.isNotEmpty) {
+                      _propertyType.isNotEmpty ||
+                  _propertyUse.isNotEmpty &&
+                      _status.isNotEmpty &&
+                      CustomPhotoGallery.images.isNotEmpty) {
                 _buildAddFeaturedDialog();
               } else if (CustomPhotoGallery.images.isEmpty) {
                 Toast.show("No images selected",
+                    duration: Toast.lengthLong, gravity: Toast.bottom);
+              } else if (CustomPhotoGallery.images.length < 3) {
+                Toast.show("Please select at least 3 images",
                     duration: Toast.lengthLong, gravity: Toast.bottom);
               }
             }
