@@ -5,6 +5,7 @@ import 'package:sunrise/screens/rooms.dart';
 import 'package:sunrise/screens/settings.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/widgets/bottombar_item.dart';
+import 'package:toast/toast.dart';
 
 import 'add_listing.dart';
 import 'favourite.dart';
@@ -21,6 +22,7 @@ class RootApp extends StatefulWidget {
 
 class _RootAppState extends State<RootApp> {
   int _activeTab = 0;
+  ToastContext toast = ToastContext();
 
   _barItems() {
     return [
@@ -54,58 +56,14 @@ class _RootAppState extends State<RootApp> {
 
   @override
   Widget build(BuildContext context) {
-    bool showBanner = false;
+    toast.init(context);
+
     return InternetConnectivityListener(
       connectivityListener: (BuildContext context, bool hasInternetAccess) {
         if (hasInternetAccess) {
-          if (showBanner) {
-            showBanner = false;
-            ScaffoldMessenger.of(context).hideCurrentMaterialBanner(
-                reason: MaterialBannerClosedReason.remove);
-            // CherryToast.success(
-            //   iconWidget: const Icon(Icons.wifi_rounded),
-            //   backgroundColor: AppColor.green_700,
-            //   title: const Text("You are back Online."),
-            //   animationType: AnimationType.fromTop,
-            // ).show(context);
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.wifi_rounded),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text("You are back Online!"),
-                ],
-              ),
-              backgroundColor: AppColor.green_700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              margin: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).size.height - 140,
-                  right: 20,
-                  left: 20),
-            ));
-          }
+          Toast.show("You are back Online", duration: Toast.lengthLong, gravity:  Toast.top, backgroundColor: AppColor.green_700);
         } else {
-          showBanner = true;
-          showBanner
-              ? {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-                  ScaffoldMessenger.of(context).removeCurrentMaterialBanner(
-                      reason: MaterialBannerClosedReason.remove),
-                  ScaffoldMessenger.of(context)
-                      .showMaterialBanner(const MaterialBanner(
-                    backgroundColor: AppColor.red_500,
-                    content: Text("No internet connection"),
-                    actions: [Icon(Icons.wifi_off_rounded)],
-                  ))
-                }
-              : Container();
-          // context.showBanner('No internet connection', color: Colors.red);
+          Toast.show("No internet connection", duration: 10, gravity:  Toast.top, backgroundColor: AppColor.red_700);
         }
       },
       child: Scaffold(
@@ -165,5 +123,10 @@ class _RootAppState extends State<RootApp> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 }
