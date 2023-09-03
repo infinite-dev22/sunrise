@@ -8,6 +8,7 @@ class Listing {
   String price;
   String currency;
   String propertyType;
+  String propertyUse;
   String status;
   String yearConstructed;
   String description;
@@ -26,6 +27,7 @@ class Listing {
     required this.currency,
     required this.status,
     required this.propertyType,
+    required this.propertyUse,
     required this.yearConstructed,
     required this.description,
     required this.likes,
@@ -45,6 +47,7 @@ class Listing {
       currency: doc['currency'],
       status: doc['status'],
       propertyType: doc['propertyType'],
+      propertyUse: doc['propertyUse'],
       yearConstructed: doc['yearConstructed'],
       description: doc['description'],
       likes: doc['likes'],

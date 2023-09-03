@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sunrise/constants/constants.dart';
-import 'package:sunrise/utilities/global_values.dart';
 
 import '../models/account.dart';
 import '../models/activity.dart';
@@ -273,7 +273,7 @@ class DatabaseServices {
 
     var snapShots = db
         .collection("favorites")
-        .doc(user!.uid)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('Favorites')
         .orderBy('timestamp', descending: true)
         .snapshots();
@@ -286,7 +286,7 @@ class DatabaseServices {
 
   static getUserFavorites() async {
     QuerySnapshot favoritesSnap = await favoritesRef
-        .doc(getAuthUser()!.uid)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('Favorites')
         .orderBy('timestamp', descending: true)
         .get();
@@ -306,6 +306,7 @@ class DatabaseServices {
       'currency': listing.currency,
       'status': listing.status,
       'propertyType': listing.propertyType,
+      'propertyUse': listing.propertyUse,
       'yearConstructed': listing.yearConstructed,
       'description': listing.description,
       'likes': listing.likes,
@@ -329,6 +330,7 @@ class DatabaseServices {
       'currency': listing.currency,
       'status': listing.status,
       'propertyType': listing.propertyType,
+      'propertyUse': listing.propertyUse,
       'yearConstructed': listing.yearConstructed,
       'description': listing.description,
       'likes': listing.likes,
@@ -353,7 +355,7 @@ class DatabaseServices {
         .doc(listing.id)
         .delete();
 
-    db.collection('recents').doc(user!.uid).delete();
+    db.collection('recents').doc(FirebaseAuth.instance.currentUser!.uid).delete();
   }
 
   static void addRecent(String currentUserId, Listing listing) {
@@ -369,7 +371,7 @@ class DatabaseServices {
 
     Stream snapShots = db
         .collection("recents")
-        .doc(user!.uid)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('Recents')
         .orderBy('timestamp', descending: true)
         .snapshots();
@@ -381,12 +383,12 @@ class DatabaseServices {
   }
 
   static deleteUserRecents() {
-    recentsRef.doc(user!.uid).delete();
+    recentsRef.doc(FirebaseAuth.instance.currentUser!.uid).delete();
   }
 
   static Future<List> getFavorite(String listingId) async {
     QuerySnapshot favoritesSnap = await favoritesRef
-        .doc(user!.uid)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('Favorites')
         .where("listingId", isEqualTo: listingId)
         .orderBy('timestamp', descending: true)

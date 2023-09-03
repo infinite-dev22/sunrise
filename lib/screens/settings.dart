@@ -9,7 +9,7 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/admin.dart';
 import 'package:sunrise/screens/profile.dart';
-import 'package:sunrise/screens/sign_in.dart';
+import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/widgets/custom_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,9 +18,9 @@ import '../widgets/settings_section.dart';
 import 'detail.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, required this.userProfile});
+  const SettingsPage({super.key, this.userProfile});
 
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 10, left: 20),
-                child: CustomImage(widget.userProfile.profilePicture),
+                child: CustomImage(widget.userProfile!.profilePicture),
               ),
               const SizedBox(width: 20),
               Padding(
@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     SizedBox(
                         width: 213,
                         child: Text(
-                          widget.userProfile.name,
+                          widget.userProfile!.name,
                           softWrap: true,
                           maxLines: 2,
                           style: const TextStyle(
@@ -80,7 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         )),
                     const SizedBox(height: 5),
                     Text(
-                      widget.userProfile.email,
+                      widget.userProfile!.email,
                       style: const TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ],
@@ -107,7 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     context,
                     CupertinoPageRoute(
                       builder: (context) =>
-                          ProfilePage(userProfile: widget.userProfile),
+                          ProfilePage(userProfile: widget.userProfile!),
                     ));
               },
             ),
@@ -119,12 +119,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _buildSettings() {
     return SettingsList(
-      applicationType: ApplicationType.both,lightTheme: const SettingsThemeData(settingsListBackground: AppColor.appBgColor),
+      applicationType: ApplicationType.both,
+      lightTheme:
+          const SettingsThemeData(settingsListBackground: AppColor.appBgColor),
       sections: [
         CustomSettingsSection(
           child: Column(
             children: [
-              _buildUser(),
+              if (widget.userProfile != null) _buildUser(),
             ],
           ),
         ),
@@ -148,7 +150,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         context,
                         CupertinoPageRoute(
                           builder: (context) =>
-                              AdminApp(userProfile: widget.userProfile),
+                              AdminApp(userProfile: widget.userProfile!),
                         ));
                   },
                 ),
@@ -323,7 +325,7 @@ class _SettingsPageState extends State<SettingsPage> {
         DialogButton(
           onPressed: () {
             _signOut();
-            _buildSignInPage();
+            _buildHomePage();
           },
           color: AppColor.green_700,
           child: const Text(
@@ -344,7 +346,7 @@ class _SettingsPageState extends State<SettingsPage> {
       buttons: [
         DialogButton(
           onPressed: () {
-            _buildSignInPage();
+            _buildHomePage();
           },
           color: AppColor.green_700,
           child: const Text(
@@ -364,12 +366,10 @@ class _SettingsPageState extends State<SettingsPage> {
     await FirebaseAuth.instance.currentUser?.delete();
   }
 
-  _buildSignInPage() {
-    Navigator.pop(context);
-    Navigator.push(
-        context,
-        CupertinoPageRoute(
-            builder: (BuildContext context) => const SignInPage()));
+  _buildHomePage() {
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (BuildContext context) => const RootApp()),
+        (Route<dynamic> route) => false);
   }
 
   String? encodeQueryParameters(Map<String, String> params) {

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -12,7 +12,6 @@ import 'package:string_validator/string_validator.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/root.dart';
-import 'package:sunrise/utilities/global_values.dart';
 import 'package:sunrise/widgets/wide_button.dart';
 import 'package:toast/toast.dart';
 
@@ -20,14 +19,13 @@ import '../models/account.dart';
 import '../services/database_services.dart';
 import '../services/storage_services.dart';
 import '../theme/color.dart';
-import '../widgets/custom_image.dart';
 import '../widgets/custom_photo_gallery.dart';
 
 class AddListingPage extends StatefulWidget {
-  const AddListingPage({super.key, this.listing, required this.userProfile});
+  const AddListingPage({super.key, this.listing, this.userProfile});
 
   final Listing? listing;
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
 
   @override
   State<AddListingPage> createState() => _AddListingPageState();
@@ -77,6 +75,8 @@ class _AddListingPageState extends State<AddListingPage> {
   late String _status = (widget.listing != null) ? widget.listing!.status : "";
   late String _propertyType =
       (widget.listing != null) ? widget.listing!.propertyType : "";
+  late String _propertyUse =
+      (widget.listing != null) ? widget.listing!.propertyUse : "";
 
   late int _likes = (widget.listing != null) ? widget.listing!.likes : 0;
   late List _features = (widget.listing != null)
@@ -87,17 +87,26 @@ class _AddListingPageState extends State<AddListingPage> {
   late List _images = (widget.listing != null)
       ? widget.listing!.images
       : List.empty(growable: true);
-  late String _brokerId = getAuthUser()?.uid;
+  late String _brokerId = FirebaseAuth.instance.currentUser!.uid;
 
   List<String> listingType = [
     "Apartment",
     "Condo",
     "Family Home",
+    "Land & Plots",
     "Office",
     "Mansion",
     "Shop",
     "Studio",
     "Villa",
+  ];
+
+  List<String> landType = [
+    "Commercial",
+    "Farm",
+    "Industrial",
+    "Mixed Use",
+    "Residential",
   ];
 
   List<String> statuses = ["Not Available", "Sale", "Rent", "To Let"];
@@ -179,34 +188,15 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _buildHeader() {
-    return Column(
+    return const Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Add Listing",
-                  style: TextStyle(
-                    color: AppColor.darker,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            CustomImage(
-              widget.userProfile.profilePicture,
-              width: 35,
-              height: 35,
-              trBackground: true,
-              borderColor: AppColor.primary,
-              radius: 10,
-            ),
-          ],
+        Text(
+          "Add Listing",
+          style: TextStyle(
+            color: AppColor.darker,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -259,6 +249,12 @@ class _AddListingPageState extends State<AddListingPage> {
           setState(() {});
         }),
         const SizedBox(height: 20),
+        if (_propertyType == "Land & Plots")
+          _dropdownMenuEntries("Property Use", landType, (value) {
+            _propertyUse = value!;
+            setState(() {});
+          }),
+        if (_propertyType == "Land & Plots") const SizedBox(height: 20),
         _textFieldWithAction(
             "Location", 20, Icons.location_on, () {}, _location),
         _numberField("Year Constructed", 4, _yearConstructed),
@@ -555,21 +551,23 @@ class _AddListingPageState extends State<AddListingPage> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
-            if (widget.userProfile.phoneNumber.isEmpty ||
-                widget.userProfile.name.isEmpty) {
-              Toast.show("Add your Phone number and Name to continue", duration: Toast.lengthLong, gravity:  Toast.bottom);
+            if (widget.userProfile!.phoneNumber.isEmpty ||
+                widget.userProfile!.name.isEmpty) {
+              Toast.show("Add your Phone number and Name to continue",
+                  duration: Toast.lengthLong, gravity: Toast.bottom);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (BuildContext context) =>
-                    ProfilePage(userProfile: widget.userProfile),
+                    ProfilePage(userProfile: widget.userProfile!),
               ));
             } else {
               if (_formKey.currentState!.validate() &&
-                  _propertyType.isNotEmpty &&
+                  _propertyType.isNotEmpty || _propertyUse.isNotEmpty &&
                   _status.isNotEmpty &&
                   CustomPhotoGallery.images.isNotEmpty) {
                 _buildAddFeaturedDialog();
               } else if (CustomPhotoGallery.images.isEmpty) {
-                Toast.show("No images selected", duration: Toast.lengthLong, gravity:  Toast.bottom);
+                Toast.show("No images selected",
+                    duration: Toast.lengthLong, gravity: Toast.bottom);
               }
             }
           },
@@ -606,6 +604,7 @@ class _AddListingPageState extends State<AddListingPage> {
       currency: _currency,
       status: _status,
       propertyType: _propertyType,
+      propertyUse: _propertyUse,
       yearConstructed: _yearConstructed.text.trim(),
       description: _description.text.trim(),
       likes: _likes,
@@ -805,12 +804,12 @@ class _AddListingPageState extends State<AddListingPage> {
 
     _uploadListing(feature);
 
-    nav.pop();
-    nav.push(CupertinoPageRoute(
-      builder: (context) => RootApp(
-        userProfile: widget.userProfile,
-      ),
-    ));
+    nav.pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => RootApp(
+                  userProfile: widget.userProfile,
+                )),
+        (Route<dynamic> route) => false);
     CustomPhotoGallery.images.clear();
     setState(() {
       _loading = false;

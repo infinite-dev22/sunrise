@@ -6,7 +6,6 @@ import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:sunrise/screens/root.dart';
-import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/screens/verify_email.dart';
 import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
@@ -43,7 +42,8 @@ Future<void> main() async {
 
   if (FirebaseAuth.instance.currentUser != null) {
     // Get user profile.
-    UserProfile userProfile = await DatabaseServices.getUserProfile(user!.uid);
+    UserProfile userProfile =
+        await DatabaseServices.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
 
     // Run app UI.
     runApp(MyApp(userProfile: userProfile));
@@ -80,14 +80,14 @@ class MyApp extends StatelessWidget {
   _home() {
     final auth = FirebaseAuth.instance;
 
-    if (auth.currentUser == null) {
-      return const SignInPage();
-    }
+    if (auth.currentUser != null) {
+      if (!auth.currentUser!.emailVerified && auth.currentUser!.email != null) {
+        return const VerifyEmailPage();
+      }
 
-    if (!auth.currentUser!.emailVerified && auth.currentUser!.email != null) {
-      return const VerifyEmailPage();
+      return RootApp(userProfile: userProfile);
+    } else {
+      return const RootApp(userProfile: null);
     }
-
-    return RootApp(userProfile: userProfile!);
   }
 }

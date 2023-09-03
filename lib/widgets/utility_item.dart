@@ -14,7 +14,7 @@ class UtilityItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return (data["icon"] != null)
-        ? ((data["value"] != null)
+        ? ((data["value"] != "" || data["value"] != null)
             ? ((data["value"] == true)
                 ? _buildFeature()
                 : const SizedBox.shrink())
@@ -58,7 +58,9 @@ class UtilityItem extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                  (data.containsKey("quantity")) ? "${data["quantity"]} ${data["name"]}" : data["name"],
+                (data.containsKey("quantity"))
+                    ? "${data["quantity"]} ${data["name"]}"
+                    : data["name"],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

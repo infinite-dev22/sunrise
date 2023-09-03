@@ -17,6 +17,7 @@ class CustomImage extends StatelessWidget {
     this.canClose = false,
     this.onClose,
     this.onTap,
+    this.isFile = false,
   });
 
   final file;
@@ -27,6 +28,7 @@ class CustomImage extends StatelessWidget {
   final Color? bgColor;
   final bool trBackground;
   final bool isNetwork;
+  final bool isFile;
   final bool canClose;
   final double radius;
   final BoxFit imageFit;
@@ -62,10 +64,15 @@ class CustomImage extends StatelessWidget {
                       image: NetworkImage(file),
                       fit: imageFit,
                     )
-                  : DecorationImage(
-                      image: FileImage(file),
-                      fit: imageFit,
-                    ),
+                  : (isFile)
+                      ? DecorationImage(
+                          image: FileImage(file),
+                          fit: imageFit,
+                        )
+                      : DecorationImage(
+                          image: AssetImage(file),
+                          fit: imageFit,
+                        ),
             ),
           ),
         ),

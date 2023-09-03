@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/rooms.dart';
 import 'package:sunrise/screens/settings.dart';
+import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/widgets/bottombar_item.dart';
 import 'package:toast/toast.dart';
@@ -12,9 +14,9 @@ import 'favourite.dart';
 import 'home.dart';
 
 class RootApp extends StatefulWidget {
-  const RootApp({Key? key, required this.userProfile}) : super(key: key);
+  const RootApp({Key? key, this.userProfile}) : super(key: key);
 
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
 
   @override
   State<RootApp> createState() => _RootAppState();
@@ -61,9 +63,15 @@ class _RootAppState extends State<RootApp> {
     return InternetConnectivityListener(
       connectivityListener: (BuildContext context, bool hasInternetAccess) {
         if (hasInternetAccess) {
-          Toast.show("You are back Online", duration: Toast.lengthLong, gravity:  Toast.top, backgroundColor: AppColor.green_700);
+          Toast.show("You are back Online",
+              duration: Toast.lengthLong,
+              gravity: Toast.top,
+              backgroundColor: AppColor.green_700);
         } else {
-          Toast.show("No internet connection", duration: 10, gravity:  Toast.top, backgroundColor: AppColor.red_700);
+          Toast.show("No internet connection",
+              duration: 10,
+              gravity: Toast.top,
+              backgroundColor: AppColor.red_700);
         }
       },
       child: Scaffold(
@@ -115,9 +123,28 @@ class _RootAppState extends State<RootApp> {
             isActive: _activeTab == index,
             activeColor: AppColor.primary,
             onTap: () {
-              setState(() {
-                _activeTab = index;
-              });
+              if (index == 1 || index == 2 || index == 3 || index == 4) {
+                FirebaseAuth.instance.authStateChanges().listen((User? user) {
+                  if (user == null) {
+                    Toast.show("Sign in to continue",
+                        duration: Toast.lengthLong, gravity: Toast.bottom);
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInPage(),
+                        ));
+                  } else {
+                    setState(() {
+                      _activeTab = index;
+                    });
+                  }
+                });
+              } else {
+                setState(() {
+                  _activeTab = index;
+                });
+              }
             },
           ),
         ),

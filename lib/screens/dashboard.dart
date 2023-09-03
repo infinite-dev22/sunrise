@@ -133,7 +133,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              userProfile: brokerProfile,
+              brokerProfile: brokerProfile,
               favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
@@ -194,7 +194,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collection("recents")
-          .doc(user!.uid)
+          .doc(getAuthUser()!.uid)
           .collection('Recents')
           .limit(10)
           .orderBy('timestamp', descending: true)

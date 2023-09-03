@@ -27,10 +27,12 @@ class SignInPage extends StatelessWidget {
         UserProfile userProfile = await DatabaseServices.getUserProfile(
             FirebaseAuth.instance.currentUser!.uid);
 
-        nav.push(CupertinoPageRoute(
-            builder: (BuildContext context) => RootApp(
-                  userProfile: userProfile,
-                )));
+        nav.pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => RootApp(
+                      userProfile: userProfile,
+                    )),
+            (Route<dynamic> route) => false);
       },
     );
 
@@ -51,6 +53,7 @@ class SignInPage extends StatelessWidget {
               _navigateToRootApp(nav, userProfile);
             } catch (e) {
               AuthServices.createUserProfile();
+
               UserProfile userProfile = await DatabaseServices.getUserProfile(
                   FirebaseAuth.instance.currentUser!.uid);
               _navigateToRootApp(nav, userProfile);
@@ -70,16 +73,19 @@ class SignInPage extends StatelessWidget {
         AuthStateChangeAction<CredentialLinked>((context, state) async {
           if (!state.user.emailVerified) {
             _navigateToVerifyEmail(context);
-          } else {try {
-            UserProfile userProfile = await DatabaseServices.getUserProfile(
-                FirebaseAuth.instance.currentUser!.uid);
-            _navigateToRootApp(nav, userProfile);
-          } catch (e) {
-            AuthServices.createUserProfile();
-            UserProfile userProfile = await DatabaseServices.getUserProfile(
-                FirebaseAuth.instance.currentUser!.uid);
-            _navigateToRootApp(nav, userProfile);
-          }
+          } else {
+            try {
+              UserProfile userProfile = await DatabaseServices.getUserProfile(
+                  FirebaseAuth.instance.currentUser!.uid);
+              _navigateToRootApp(nav, userProfile);
+            } catch (e) {
+              AuthServices.createUserProfile();
+              nav.pop();
+
+              UserProfile userProfile = await DatabaseServices.getUserProfile(
+                  FirebaseAuth.instance.currentUser!.uid);
+              _navigateToRootApp(nav, userProfile);
+            }
           }
         }),
         mfaAction,
@@ -114,18 +120,19 @@ class SignInPage extends StatelessWidget {
   }
 
   _navigateToRootApp(NavigatorState nav, UserProfile userProfile) {
-    nav.pop();
-    nav.push(MaterialPageRoute(
-        builder: (BuildContext context) => RootApp(
-              userProfile: userProfile,
-            )));
+    nav.pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => RootApp(
+                  userProfile: userProfile,
+                )),
+        (Route<dynamic> route) => false);
   }
 
   _navigateToVerifyEmail(BuildContext context) {
-    Navigator.push(
-        context,
-        CupertinoPageRoute(
-            builder: (BuildContext context) => const VerifyEmailPage()));
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => const VerifyEmailPage()),
+        (Route<dynamic> route) => false);
   }
 
   _navigateToForgotPassword(BuildContext context, String? email) {

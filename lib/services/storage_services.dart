@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,7 +19,7 @@ class StorageServices {
       uniquePhotoId = exp.firstMatch(url)?[1];
     }
     UploadTask uploadTask = storageRef
-        .child('images/users/${user!.uid}/userProfile_$uniquePhotoId.jpg')
+        .child('images/users/${FirebaseAuth.instance.currentUser!.uid}/userProfile_$uniquePhotoId.jpg')
         .putFile(image);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
@@ -26,7 +27,7 @@ class StorageServices {
   }
 
   static deleteProfilePicture() {
-    storageRef.child("images/users/${user!.uid}").delete();
+    storageRef.child("images/users/${FirebaseAuth.instance.currentUser!.uid}").delete();
   }
 
   static Future<String> uploadListingImage(File imageFile) async {
@@ -34,7 +35,7 @@ class StorageServices {
     File image = await compressImage(uniquePhotoId, imageFile);
 
     UploadTask uploadTask = storageRef
-        .child('images/listings/${user!.uid}/listing_$uniquePhotoId.jpg')
+        .child('images/listings/${FirebaseAuth.instance.currentUser!.uid}/listing_$uniquePhotoId.jpg')
         .putFile(image);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();

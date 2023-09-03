@@ -223,7 +223,7 @@ class _AdsPageState extends State<AdsPage> {
         CupertinoPageRoute(
             builder: (BuildContext context) => ViewPage(
                   listing: data,
-                  userProfile: widget.userProfile,
+                  brokerProfile: widget.userProfile,
                 )));
   }
 

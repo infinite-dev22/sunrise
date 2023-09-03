@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/search.dart';
@@ -127,12 +128,16 @@ class _ExplorePageState extends State<ExplorePage> {
               .map((DocumentSnapshot document) {
                 Listing listing = Listing.fromDoc(document);
 
-                for (Favorite fav in _favorites) {
-                  if (fav.listingId == listing.id) {
-                    favorite = fav;
-                  } else {
-                    favorite = null;
+                if (_favorites.isNotEmpty) {
+                  for (Favorite fav in _favorites) {
+                    if (fav.listingId == listing.id) {
+                      favorite = fav;
+                    } else {
+                      favorite = null;
+                    }
                   }
+                } else {
+                  favorite = null;
                 }
 
                 return _buildAllListings(listing, favorite);
@@ -164,12 +169,14 @@ class _ExplorePageState extends State<ExplorePage> {
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
 
-    DatabaseServices.addRecent(user!.uid, listing);
+    if (FirebaseAuth.instance.currentUser != null) {
+      DatabaseServices.addRecent(getAuthUser()!.uid, listing);
+    }
 
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              userProfile: brokerProfile,
+              brokerProfile: brokerProfile,
               favorite: favorite,
             )));
   }
@@ -180,14 +187,18 @@ class _ExplorePageState extends State<ExplorePage> {
     ));
   }
 
-  _setupData() async {
-    List favorites = await DatabaseServices.getFavorites();
+  _setupData() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        List favorites = await DatabaseServices.getFavorites();
 
-    if (mounted) {
-      setState(() {
-        _favorites = favorites;
-      });
-    }
+        if (mounted) {
+          setState(() {
+            _favorites = favorites;
+          });
+        }
+      }
+    });
   }
 
   _showFeatured() {
@@ -234,12 +245,16 @@ class _ExplorePageState extends State<ExplorePage> {
               .map((DocumentSnapshot document) {
                 Listing listing = Listing.fromDoc(document);
 
-                for (Favorite fav in _favorites) {
-                  if (fav.listingId == listing.id) {
-                    favorite = fav;
-                  } else {
-                    favorite = null;
+                if (_favorites.isNotEmpty) {
+                  for (Favorite fav in _favorites) {
+                    if (fav.listingId == listing.id) {
+                      favorite = fav;
+                    } else {
+                      favorite = null;
+                    }
                   }
+                } else {
+                  favorite = null;
                 }
 
                 return _buildAllListings(listing, favorite);

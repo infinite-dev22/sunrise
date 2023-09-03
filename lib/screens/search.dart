@@ -1,5 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -13,7 +14,6 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
-import '../utilities/global_values.dart';
 import '../widgets/listing_item.dart';
 
 class SearchPage extends StatefulWidget {
@@ -177,12 +177,16 @@ class _SearchPageState extends State<SearchPage> {
                   .map((DocumentSnapshot document) {
                     Listing listing = Listing.fromDoc(document);
 
-                    for (Favorite fav in _favorites) {
-                      if (fav.listingId == listing.id) {
-                        favorite = fav;
-                      } else {
-                        favorite = null;
+                    if (_favorites.isNotEmpty) {
+                      for (Favorite fav in _favorites) {
+                        if (fav.listingId == listing.id) {
+                          favorite = fav;
+                        } else {
+                          favorite = null;
+                        }
                       }
+                    } else {
+                      favorite = null;
                     }
 
                     return _buildAllListings(listing, favorite);
@@ -216,13 +220,16 @@ class _SearchPageState extends State<SearchPage> {
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
 
-    DatabaseServices.addRecent(user!.uid, listing);
+    if (FirebaseAuth.instance.currentUser != null) {
+      DatabaseServices.addRecent(
+          FirebaseAuth.instance.currentUser!.uid, listing);
+    }
 
     return nav.push(
       CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
           listing: listing,
-          userProfile: brokerProfile,
+          brokerProfile: brokerProfile,
           favorite: favorite,
         ),
       ),
@@ -237,13 +244,17 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   _setupData() async {
-    List favorites = await DatabaseServices.getFavorites();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        List favorites = await DatabaseServices.getFavorites();
 
-    if (mounted) {
-      setState(() {
-        _favorites = favorites;
-      });
-    }
+        if (mounted) {
+          setState(() {
+            _favorites = favorites;
+          });
+        }
+      }
+    });
   }
 
   _showListenDialog() {

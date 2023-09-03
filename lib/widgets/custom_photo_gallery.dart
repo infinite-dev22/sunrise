@@ -39,6 +39,7 @@ class _CustomPhotoGalleryState extends State<CustomPhotoGallery>
                   isNetwork: isNetwork,
                   width: double.infinity,
                   height: imageHeight,
+                  isFile: true,
                   radius: 10,
                   bgColor: AppColor.appBgColor,
                   imageFit: BoxFit.contain,
@@ -70,6 +71,7 @@ class _CustomPhotoGalleryState extends State<CustomPhotoGallery>
           width: 100,
           height: 100,
           radius: 10,
+          isFile: true,
           bgColor: AppColor.appBgColor,
           canClose: true,
           onTap: () {

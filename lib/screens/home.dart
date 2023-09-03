@@ -1,21 +1,23 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/models/activity.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/search.dart';
+import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/utilities/data.dart';
-import 'package:sunrise/utilities/global_values.dart';
 import 'package:sunrise/widgets/category_item.dart';
 import 'package:sunrise/widgets/custom_image.dart';
 import 'package:sunrise/widgets/custom_textbox.dart';
 import 'package:sunrise/widgets/property_item.dart';
 import 'package:sunrise/widgets/recent_item.dart';
 import 'package:sunrise/widgets/recommend_item.dart';
+import 'package:toast/toast.dart';
 
 import '../constants/constants.dart';
 import '../models/property.dart';
@@ -26,19 +28,23 @@ import 'explore.dart';
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.userProfile}) : super(key: key);
 
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  ToastContext toast = ToastContext();
+
   late Widget _current;
   bool _noData = false;
   int _selectedCategory = 0;
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
@@ -81,20 +87,38 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               width: 20,
             ),
-            CustomImage(
-              widget.userProfile.profilePicture,
-              width: 35,
-              height: 35,
-              trBackground: true,
-              borderColor: AppColor.primary,
-              radius: 10,
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      ProfilePage(userProfile: widget.userProfile),
-                ));
-              },
-            ),
+            widget.userProfile != null
+                ? CustomImage(
+                    widget.userProfile!.profilePicture,
+                    width: 35,
+                    height: 35,
+                    trBackground: true,
+                    borderColor: AppColor.primary,
+                    radius: 10,
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            ProfilePage(userProfile: widget.userProfile!),
+                      ));
+                    },
+                  )
+                : CustomImage(
+                    "assets/images/user-placeholder.png",
+                    width: 35,
+                    height: 35,
+                    trBackground: true,
+                    borderColor: AppColor.primary,
+                    isNetwork: false,
+                    radius: 10,
+                    onTap: () {
+                      Toast.show("Sign in to continue",
+                          duration: Toast.lengthLong, gravity: Toast.bottom);
+
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => const SignInPage(),
+                      ));
+                    },
+                  ),
           ],
         ),
       ],
@@ -109,7 +133,7 @@ class _HomePageState extends State<HomePage> {
           (!_noData) ? _buildCategories() : Container(),
           _showPopulars(),
           _showFeatured(),
-          _showRecents(),
+          if (FirebaseAuth.instance.currentUser != null) _showRecents(),
           _current,
           const SizedBox(
             height: 100,
@@ -152,18 +176,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildNavigateToViewPage(Listing listing) async {
+    List favorite = [];
+
     var nav = Navigator.of(context);
 
     // These variables below affect performance significantly, try putting them
     // into their respective screen(ViewPage).
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
-    List favorite = await DatabaseServices.getFavorite(listing.id);
+
+    // FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+    //   if (user != null) {
+    //     favorite = await DatabaseServices.getFavorite(listing.id);
+    //   }
+    // });
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      favorite = await DatabaseServices.getFavorite(listing.id);
+    }
 
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              userProfile: brokerProfile,
+              brokerProfile: brokerProfile,
               favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
@@ -224,7 +259,7 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collection("recents")
-          .doc(user!.uid)
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('Recents')
           .limit(10)
           .orderBy('timestamp', descending: true)

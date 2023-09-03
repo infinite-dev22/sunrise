@@ -10,13 +10,12 @@ import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
-import '../utilities/global_values.dart';
 import '../widgets/favourite_item.dart';
 
 class FavouritePage extends StatefulWidget {
-  const FavouritePage({super.key, required this.userProfile});
+  const FavouritePage({super.key, this.userProfile});
 
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
 
   @override
   State<FavouritePage> createState() => _FavouritePageState();
@@ -81,7 +80,7 @@ class _FavouritePageState extends State<FavouritePage> {
           const SizedBox(
             height: 15,
           ),
-          _showFavorites(),
+          if (widget.userProfile != null) _showFavorites(),
           const SizedBox(
             height: 100,
           ),
@@ -98,7 +97,7 @@ class _FavouritePageState extends State<FavouritePage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: data,
-              userProfile: brokerProfile,
+              brokerProfile: brokerProfile,
               favorite: favorite,
             )));
   }
@@ -136,7 +135,8 @@ class _FavouritePageState extends State<FavouritePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collection("favorites")
-          .doc(user!.uid)
+          // .doc(user!.uid)
+          .doc(widget.userProfile!.userId)
           .collection('Favorites')
           .orderBy('timestamp', descending: true)
           .snapshots(),

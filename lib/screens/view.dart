@@ -1,4 +1,5 @@
 import 'package:card_swiper/card_swiper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sunrise/models/property.dart';
+import 'package:sunrise/screens/sign_in.dart';
+import 'package:toast/toast.dart';
 
 import '../models/account.dart';
 import '../models/activity.dart';
@@ -24,11 +27,11 @@ class ViewPage extends StatefulWidget {
   const ViewPage(
       {super.key,
       required this.listing,
-      required this.userProfile,
+      required this.brokerProfile,
       this.favorite});
 
   final Listing listing;
-  final UserProfile userProfile;
+  final UserProfile brokerProfile;
   final Favorite? favorite;
 
   @override
@@ -36,14 +39,21 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
+  ToastContext toast = ToastContext();
+
   late IconData _favoriteIcon =
       widget.favorite != null ? Icons.favorite : Icons.favorite_border;
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+
     var screenHeight = MediaQuery.of(context).size.height;
     var imageHeight = screenHeight * 0.5;
-    DatabaseServices.addRecent(user!.uid, widget.listing);
+
+    if (getAuthUser() != null) {
+      DatabaseServices.addRecent(getAuthUser()!.uid, widget.listing);
+    }
 
     return Scaffold(
       backgroundColor: AppColor.appBgColor,
@@ -124,18 +134,30 @@ class _ViewPageState extends State<ViewPage> {
     return IconBox(
       bgColor: AppColor.red,
       onTap: () {
-        setState(() {
-          (widget.favorite != null)
-              ? {
-                  DatabaseServices.unlikeListing(
-                      getAuthUser()!.uid, widget.listing, widget.favorite!.id),
-                  _favoriteIcon = Icons.favorite_border
-                }
-              : {
-                  DatabaseServices.likeListing(
-                      getAuthUser()!.uid, widget.listing),
-                  _favoriteIcon = Icons.favorite
-                };
+        FirebaseAuth.instance.authStateChanges().listen((User? user) {
+          if (user == null) {
+            Toast.show("Sign in to continue",
+                duration: Toast.lengthLong, gravity: Toast.bottom);
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SignInPage(),
+                ));
+          } else {
+            setState(() {
+              (widget.favorite != null)
+                  ? {
+                      DatabaseServices.unlikeListing(
+                          user.uid, widget.listing, widget.favorite!.id),
+                      _favoriteIcon = Icons.favorite_border
+                    }
+                  : {
+                      DatabaseServices.likeListing(user.uid, widget.listing),
+                      _favoriteIcon = Icons.favorite
+                    };
+            });
+          }
         });
       },
       child: Icon(
@@ -205,19 +227,41 @@ class _ViewPageState extends State<ViewPage> {
       padding: const EdgeInsets.only(left: 10, right: 10),
       child: ContactItem(
         onCallTap: () async {
-          try {
-            await FlutterPhoneDirectCaller.callNumber(
-                widget.userProfile.phoneNumber);
-          } catch (e) {
-            if (kDebugMode) {
-              print(e);
+          if (FirebaseAuth.instance.currentUser == null) {
+            Toast.show("Sign in to continue",
+                duration: Toast.lengthLong, gravity: Toast.bottom);
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SignInPage(),
+                ));
+          } else {
+            try {
+              await FlutterPhoneDirectCaller.callNumber(
+                  widget.brokerProfile.phoneNumber);
+            } catch (e) {
+              if (kDebugMode) {
+                print(e);
+              }
             }
           }
         },
         onMessageTap: () {
-          _handlePressed(widget.userProfile, context);
+          if (FirebaseAuth.instance.currentUser == null) {
+            Toast.show("Sign in to continue",
+                duration: Toast.lengthLong, gravity: Toast.bottom);
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SignInPage(),
+                ));
+          } else {
+            _handlePressed(widget.brokerProfile, context);
+          }
         },
-        user: widget.userProfile,
+        user: widget.brokerProfile,
       ),
     );
   }
@@ -245,7 +289,7 @@ class _ViewPageState extends State<ViewPage> {
       CupertinoPageRoute(
         builder: (context) => ChatPage(
           room: room,
-          userProfile: widget.userProfile,
+          userProfile: widget.brokerProfile,
         ),
       ),
     );
@@ -361,8 +405,9 @@ class _ViewPageState extends State<ViewPage> {
         const SizedBox(
           height: 20,
         ),
-        user != null
-            ? widget.userProfile.userId == user!.uid
+        FirebaseAuth.instance.currentUser != null
+            ? widget.brokerProfile.userId ==
+                    FirebaseAuth.instance.currentUser!.uid
                 ? _buildListingDelete()
                 : _buildBlockerContact()
             : _buildBlockerContact(),
@@ -483,19 +528,21 @@ class _ViewPageState extends State<ViewPage> {
   }
 
   _buildFeaturesWithoutIcons(data) {
-    return (data["icon"] == null)
-        ? Row(
-            children: [
-              const Checkbox(value: true, onChanged: null),
-              Text(
-                data["name"],
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
+    return (data["icon"] == null || data["icon"] == "")
+        ? (data["value"] == true)
+            ? Row(
+                children: [
+                  const Checkbox(value: true, onChanged: null),
+                  Text(
+                    data["name"],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  )
+                ],
               )
-            ],
-          )
+            : const SizedBox.shrink()
         : const SizedBox.shrink();
   }
 }

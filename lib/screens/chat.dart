@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -274,7 +275,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   onMessageVisibilityChanged: (p0, visible) {
                     if (visible) {
-                      if (p0.author.id != user!.uid) {
+                      if (p0.author.id != FirebaseAuth.instance.currentUser!.uid) {
                         final updatedMessage = p0.copyWith(status: Status.seen);
                         FirebaseChatCore.instance
                             .updateMessage(updatedMessage, widget.room.id);
@@ -343,7 +344,7 @@ class _ChatPageState extends State<ChatPage> {
     return nav.push(MaterialPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              userProfile: brokerProfile,
+              brokerProfile: brokerProfile,
               favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
@@ -404,9 +405,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
-    _listing = null;
-    _brokerProfile = null;
-
     super.dispose();
   }
 }
