@@ -552,9 +552,7 @@ class _AddListingPageState extends State<AddListingPage> {
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
             if (widget.userProfile!.phoneNumber.isEmpty ||
-                widget.userProfile!.name.isEmpty ||
-                CustomPhotoGallery.images.isNotEmpty ||
-                CustomPhotoGallery.images.length > 2) {
+                widget.userProfile!.name.isEmpty) {
               Toast.show("Add your Phone number and Name to continue",
                   duration: Toast.lengthLong, gravity: Toast.bottom);
               Navigator.of(context).push(MaterialPageRoute(
@@ -566,7 +564,8 @@ class _AddListingPageState extends State<AddListingPage> {
                       _propertyType.isNotEmpty ||
                   _propertyUse.isNotEmpty &&
                       _status.isNotEmpty &&
-                      CustomPhotoGallery.images.isNotEmpty) {
+                  CustomPhotoGallery.images.isNotEmpty &&
+                  CustomPhotoGallery.images.length > 2) {
                 _buildAddFeaturedDialog();
               } else if (CustomPhotoGallery.images.isEmpty) {
                 Toast.show("No images selected",

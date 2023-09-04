@@ -23,8 +23,8 @@ class RootApp extends StatefulWidget {
 }
 
 class _RootAppState extends State<RootApp> {
-  int _activeTab = 0;
   ToastContext toast = ToastContext();
+  int _activeTab = 0;
 
   _barItems() {
     return [
@@ -124,20 +124,13 @@ class _RootAppState extends State<RootApp> {
             activeColor: AppColor.primary,
             onTap: () {
               if (index == 1 || index == 2 || index == 3 || index == 4) {
-                  if (FirebaseAuth.instance.currentUser == null) {
-                    Toast.show("Sign in to continue",
-                        duration: Toast.lengthLong, gravity: Toast.bottom);
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInPage(),
-                        ));
-                  } else {
-                    setState(() {
-                      _activeTab = index;
-                    });
-                  }
+                if (FirebaseAuth.instance.currentUser == null) {
+                  _buildSignInModal();
+                } else {
+                  setState(() {
+                    _activeTab = index;
+                  });
+                }
               } else {
                 setState(() {
                   _activeTab = index;
@@ -145,6 +138,58 @@ class _RootAppState extends State<RootApp> {
               }
             },
           ),
+        ),
+      ),
+    );
+  }
+
+  _buildSignInModal() {
+    return showModalBottomSheet(
+      isDismissible: false,
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
+        height: 230,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          children: [
+            const Text(
+              "Sign In Required To Continue!",
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateColor.resolveWith(
+                        (states) => AppColor.green_700)),
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignInPage(),
+                    )),
+                child: const Text(
+                  "Sign In",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateColor.resolveWith(
+                        (states) => AppColor.red_700)),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

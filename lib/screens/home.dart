@@ -78,6 +78,7 @@ class _HomePageState extends State<HomePage> {
                     }
                   });
                 },
+                autoFocus: false,
                 readOnly: true,
                 onTap: () {
                   _buildNavigateToSearchPage();
