@@ -11,7 +11,6 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
-import '../utilities/global_values.dart';
 import '../widgets/listing_item.dart';
 
 class ExplorePage extends StatefulWidget {
@@ -170,7 +169,8 @@ class _ExplorePageState extends State<ExplorePage> {
         await DatabaseServices.getUserProfile(listing.userId);
 
     if (FirebaseAuth.instance.currentUser != null) {
-      DatabaseServices.addRecent(getAuthUser()!.uid, listing);
+      DatabaseServices.addRecent(
+          FirebaseAuth.instance.currentUser!.uid, listing);
     }
 
     return nav.push(CupertinoPageRoute(

@@ -124,8 +124,7 @@ class _RootAppState extends State<RootApp> {
             activeColor: AppColor.primary,
             onTap: () {
               if (index == 1 || index == 2 || index == 3 || index == 4) {
-                FirebaseAuth.instance.authStateChanges().listen((User? user) {
-                  if (user == null) {
+                  if (FirebaseAuth.instance.currentUser == null) {
                     Toast.show("Sign in to continue",
                         duration: Toast.lengthLong, gravity: Toast.bottom);
 
@@ -139,7 +138,6 @@ class _RootAppState extends State<RootApp> {
                       _activeTab = index;
                     });
                   }
-                });
               } else {
                 setState(() {
                   _activeTab = index;

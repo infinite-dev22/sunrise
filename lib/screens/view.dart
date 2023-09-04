@@ -16,7 +16,6 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
-import '../utilities/global_values.dart';
 import '../widgets/contact_item.dart';
 import '../widgets/custom_image.dart';
 import '../widgets/icon_box.dart';
@@ -51,8 +50,9 @@ class _ViewPageState extends State<ViewPage> {
     var screenHeight = MediaQuery.of(context).size.height;
     var imageHeight = screenHeight * 0.5;
 
-    if (getAuthUser() != null) {
-      DatabaseServices.addRecent(getAuthUser()!.uid, widget.listing);
+    if (FirebaseAuth.instance.currentUser != null) {
+      DatabaseServices.addRecent(
+          FirebaseAuth.instance.currentUser!.uid, widget.listing);
     }
 
     return Scaffold(

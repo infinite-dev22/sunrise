@@ -1,10 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
-import '../utilities/global_values.dart';
 import 'custom_image.dart';
 import 'icon_box.dart';
 
@@ -108,14 +108,16 @@ class _FavouriteItemState extends State<FavouriteItem> {
               (widget.favorite != null)
                   ? {
                       DatabaseServices.unlikeListing(
-                          getAuthUser()!.uid, widget.data, widget.favorite!.id),
+                          FirebaseAuth.instance.currentUser!.uid,
+                          widget.data,
+                          widget.favorite!.id),
                       setState(() {
                         _favoriteIcon = Icons.favorite_border;
                       })
                     }
                   : {
                       DatabaseServices.likeListing(
-                          getAuthUser()!.uid, widget.data),
+                          FirebaseAuth.instance.currentUser!.uid, widget.data),
                       setState(() {
                         _favoriteIcon = Icons.favorite;
                       })
@@ -139,13 +141,15 @@ class _FavouriteItemState extends State<FavouriteItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: MediaQuery.of(context).size.width * .52,
+        SizedBox(
+          width: MediaQuery.of(context).size.width * .52,
           child: Text(
-          widget.data.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),),
+            widget.data.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
         const SizedBox(
           height: 2.5,
         ),

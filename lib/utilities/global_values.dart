@@ -11,5 +11,5 @@ getAuthUser() {
 }
 
 getAuthUserName() {
-  return getAuthUser()?.displayName;
+  return FirebaseAuth.instance.currentUser?.displayName;
 }

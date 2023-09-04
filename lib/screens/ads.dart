@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
@@ -6,7 +7,6 @@ import 'package:sunrise/theme/color.dart';
 
 import '../models/property.dart';
 import '../services/database_services.dart';
-import '../utilities/global_values.dart';
 import '../widgets/listing_item.dart';
 
 class AdsPage extends StatefulWidget {
@@ -261,8 +261,8 @@ class _AdsPageState extends State<AdsPage> {
       _loading = true;
     });
 
-    List brokerListings =
-        await DatabaseServices.getUserListings(getAuthUser()!.uid);
+    List brokerListings = await DatabaseServices.getUserListings(
+        FirebaseAuth.instance.currentUser!.uid);
 
     if (mounted) {
       setState(() {

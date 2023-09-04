@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
@@ -8,7 +9,6 @@ import 'package:sunrise/screens/search.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/utilities/data.dart';
-import 'package:sunrise/utilities/global_values.dart';
 import 'package:sunrise/widgets/bar_chart1.dart';
 import 'package:sunrise/widgets/category_item.dart';
 import 'package:sunrise/widgets/property_item.dart';
@@ -194,7 +194,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collection("recents")
-          .doc(getAuthUser()!.uid)
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('Recents')
           .limit(10)
           .orderBy('timestamp', descending: true)

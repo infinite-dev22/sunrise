@@ -26,7 +26,7 @@ import '../widgets/listing_item.dart';
 import 'explore.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.userProfile}) : super(key: key);
+  const HomePage({Key? key, this.userProfile}) : super(key: key);
 
   final UserProfile? userProfile;
 
@@ -184,12 +184,6 @@ class _HomePageState extends State<HomePage> {
     // into their respective screen(ViewPage).
     UserProfile brokerProfile =
         await DatabaseServices.getUserProfile(listing.userId);
-
-    // FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-    //   if (user != null) {
-    //     favorite = await DatabaseServices.getFavorite(listing.id);
-    //   }
-    // });
 
     if (FirebaseAuth.instance.currentUser != null) {
       favorite = await DatabaseServices.getFavorite(listing.id);
