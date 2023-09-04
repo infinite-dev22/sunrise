@@ -309,6 +309,7 @@ class DatabaseServices {
       'propertyUse': listing.propertyUse,
       'yearConstructed': listing.yearConstructed,
       'description': listing.description,
+      'isPropertyOwner': listing.isPropertyOwner,
       'likes': listing.likes,
       'featured': listing.featured,
       'features': listing.features,
@@ -333,6 +334,7 @@ class DatabaseServices {
       'propertyUse': listing.propertyUse,
       'yearConstructed': listing.yearConstructed,
       'description': listing.description,
+      'isPropertyOwner': listing.isPropertyOwner,
       'likes': listing.likes,
       'featured': listing.featured,
       'features': listing.features,
@@ -355,7 +357,10 @@ class DatabaseServices {
         .doc(listing.id)
         .delete();
 
-    db.collection('recents').doc(FirebaseAuth.instance.currentUser!.uid).delete();
+    db
+        .collection('recents')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .delete();
   }
 
   static void addRecent(String currentUserId, Listing listing) {

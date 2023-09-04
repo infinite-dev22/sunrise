@@ -52,6 +52,12 @@ class _AddListingPageState extends State<AddListingPage> {
   bool _cookerValue = false;
   bool _petsValue = false;
   bool _poolValue = false;
+  bool _sewageValue = false;
+  bool _waterValue = false;
+  bool _gasValue = false;
+  bool _drainageValue = false;
+  bool _roadValue = false;
+  bool _isOwnerValue = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -164,6 +170,15 @@ class _AddListingPageState extends State<AddListingPage> {
     MultiSelectItem("Pets", "Pets"),
   ];
 
+  final List<MultiSelectItem<String>> _landFeatures = [
+    MultiSelectItem("Electricity", "Electricity"),
+    MultiSelectItem("Sewage", "Sewage"),
+    MultiSelectItem("Piped Water", "Piped Water"),
+    MultiSelectItem("Gas Supply", "Gas Supply"),
+    MultiSelectItem("Water Drainage", "Water Drainage"),
+    MultiSelectItem("Access Road", "Access Road"),
+  ];
+
   @override
   Widget build(BuildContext context) {
     toast.init(context);
@@ -256,8 +271,9 @@ class _AddListingPageState extends State<AddListingPage> {
         if (_propertyType == "Land & Plots") const SizedBox(height: 20),
         _textFieldWithAction(
             "Location", 20, Icons.location_on, () {}, _location),
-        _numberField("Year Constructed", 4, _yearConstructed),
-        const SizedBox(height: 20),
+        if (_propertyType != "Land & Plots")
+          _numberField("Year Constructed", 4, _yearConstructed),
+        if (_propertyType != "Land & Plots") const SizedBox(height: 20),
         _dropdownMenuEntries("Status", statuses.toList(), (value) {
           _status = value!;
           setState(() {});
@@ -283,6 +299,16 @@ class _AddListingPageState extends State<AddListingPage> {
         ),
         const SizedBox(height: 20),
         _textArea("Description", _description),
+        CheckboxListTile(
+          controlAffinity: ListTileControlAffinity.leading,
+          value: _isOwnerValue,
+          onChanged: (value) {
+            setState(() {
+              _isOwnerValue = value!;
+            });
+          },
+          title: const Text("Property Owner"),
+        ),
         _formButtons(),
         const SizedBox(height: 100),
       ],
@@ -472,8 +498,10 @@ class _AddListingPageState extends State<AddListingPage> {
         return null;
       },
       inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        ThousandsFormatter()
+        ThousandsFormatter(
+          formatter: NumberFormat.decimalPattern(Intl.defaultLocale),
+          allowFraction: true,
+        )
       ],
     );
   }
@@ -563,8 +591,8 @@ class _AddListingPageState extends State<AddListingPage> {
                       _propertyType.isNotEmpty ||
                   _propertyUse.isNotEmpty &&
                       _status.isNotEmpty &&
-                  CustomPhotoGallery.images.isNotEmpty &&
-                  CustomPhotoGallery.images.length > 2) {
+                      CustomPhotoGallery.images.isNotEmpty &&
+                      CustomPhotoGallery.images.length > 2) {
                 _buildAddFeaturedDialog();
               } else if (CustomPhotoGallery.images.isEmpty) {
                 Toast.show("No images selected",
@@ -613,6 +641,7 @@ class _AddListingPageState extends State<AddListingPage> {
       description: _description.text.trim(),
       likes: _likes,
       featured: feature,
+      isPropertyOwner: _getPropertyOwner(),
       features: (_propertyType == "Shop" || _propertyType == "Office")
           ? [
               {"name": "Air conditioning", "value": _acValue},
@@ -670,6 +699,11 @@ class _AddListingPageState extends State<AddListingPage> {
               {"name": "Dryer", "value": _dryerValue},
               {"name": "Cooker", "value": _cookerValue},
               {"name": "Air conditioning", "value": _acValue},
+              {"name": "Sewage", "value": _sewageValue},
+              {"name": "Piped Water", "value": _waterValue},
+              {"name": "Gas Supply", "value": _gasValue},
+              {"name": "Water Drainage", "value": _drainageValue},
+              {"name": "Access Road", "value": _roadValue},
               {"name": "Refrigerator", "value": _refrigeratorValue},
             ],
       images: _images,
@@ -727,6 +761,16 @@ class _AddListingPageState extends State<AddListingPage> {
         _powerValue = true;
       case "Hot Water":
         _heaterValue = true;
+      case "Sewage":
+        _sewageValue = true;
+      case "Piped Water":
+        _waterValue = true;
+      case "Gas Supply":
+        _gasValue = true;
+      case "Water Drainage":
+        _drainageValue = true;
+      case "Access Road":
+        _roadValue = true;
     }
   }
 
@@ -869,6 +913,20 @@ class _AddListingPageState extends State<AddListingPage> {
     ).show();
   }
 
+  _getSelection() {
+    if (_propertyType == "Office" || _propertyType == "Shop") {
+      return _officeFeatures;
+    } else if (_propertyType == "Land & Plots") {
+      return _landFeatures;
+    } else {
+      if (_status == "Rent") {
+        return _homeRentFeatures;
+      } else {
+        return _homeBuyFeatures;
+      }
+    }
+  }
+
   void _showMultiSelect(BuildContext context) async {
     List items = [];
 
@@ -885,11 +943,7 @@ class _AddListingPageState extends State<AddListingPage> {
             "Select Property Facilities",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
-          items: (_propertyType == "Office" || _propertyType == "Shop")
-              ? _officeFeatures
-              : (_status == "Rent")
-                  ? _homeRentFeatures
-                  : _homeBuyFeatures,
+          items: _getSelection(),
           initialValue: items,
           onConfirm: (values) {
             _resetFeatures();
@@ -904,6 +958,14 @@ class _AddListingPageState extends State<AddListingPage> {
         );
       },
     );
+  }
+
+  String _getPropertyOwner() {
+    if (_isOwnerValue) {
+      return "Owner";
+    } else {
+      return "Broker";
+    }
   }
 
   _resetScreen() {
