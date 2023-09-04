@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
+import 'package:toast/toast.dart';
 
 import '../../services/database_services.dart';
 
@@ -17,6 +18,7 @@ class EditDescriptionFormPage extends StatefulWidget {
 class _EditDescriptionFormPageState extends State<EditDescriptionFormPage> {
   final _formKey = GlobalKey<FormState>();
   final descriptionController = TextEditingController();
+  ToastContext toast = ToastContext();
 
   @override
   void dispose() {
@@ -31,6 +33,9 @@ class _EditDescriptionFormPageState extends State<EditDescriptionFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+    descriptionController.text = widget.userProfile.bio;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Bio"),
@@ -89,6 +94,8 @@ class _EditDescriptionFormPageState extends State<EditDescriptionFormPage> {
                       onPressed: () {
                         // Validate returns true if the form is valid, or false otherwise.
                         if (_formKey.currentState!.validate()) {
+                          Toast.show("Description updated successfully",
+                              duration: Toast.lengthLong, gravity: Toast.bottom);
                           updateUserValue(descriptionController.text);
                           Navigator.pop(context);
                         }

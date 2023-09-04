@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sunrise/models/account.dart';
+import 'package:toast/toast.dart';
 
 import '../../services/database_services.dart';
 
@@ -10,12 +11,13 @@ class EditNameFormPage extends StatefulWidget {
   final UserProfile userProfile;
 
   @override
-  State<EditNameFormPage> createState() => EditNameFormPageState();
+  State<EditNameFormPage> createState() => _EditNameFormPageState();
 }
 
-class EditNameFormPageState extends State<EditNameFormPage> {
+class _EditNameFormPageState extends State<EditNameFormPage> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
+  ToastContext toast = ToastContext();
 
   @override
   void dispose() {
@@ -30,6 +32,9 @@ class EditNameFormPageState extends State<EditNameFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+    nameController.text = widget.userProfile.name;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Username"),
@@ -86,6 +91,8 @@ class EditNameFormPageState extends State<EditNameFormPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          Toast.show("Username updated successfully",
+                              duration: Toast.lengthLong, gravity: Toast.bottom);
                           updateUserValue(nameController.text.trim());
                           Navigator.pop(context);
                         }

@@ -12,6 +12,7 @@ import 'package:sunrise/widgets/user_profile/edit_description.dart';
 import 'package:sunrise/widgets/user_profile/edit_email.dart';
 import 'package:sunrise/widgets/user_profile/edit_name.dart';
 import 'package:sunrise/widgets/user_profile/edit_phone.dart';
+import 'package:toast/toast.dart';
 
 import '../models/account.dart';
 
@@ -25,8 +26,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  ToastContext toast = ToastContext();
+
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your User Profile"),
@@ -59,6 +64,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
             setState(() => widget.userProfile.profilePicture = newImageUrl);
             DatabaseServices.updateUserData(widget.userProfile);
+            Toast.show("Profile picture updated successfully",
+                duration: Toast.lengthLong, gravity: Toast.bottom);
           },
         )),
         buildUserInfoDisplay(

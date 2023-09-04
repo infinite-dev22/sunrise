@@ -1,5 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
 import '../../models/account.dart';
 import '../../services/database_services.dart';
@@ -12,12 +13,13 @@ class EditEmailFormPage extends StatefulWidget {
   final UserProfile userProfile;
 
   @override
-  State<EditEmailFormPage> createState() => EditEmailFormPageState();
+  State<EditEmailFormPage> createState() => _EditEmailFormPageState();
 }
 
-class EditEmailFormPageState extends State<EditEmailFormPage> {
+class _EditEmailFormPageState extends State<EditEmailFormPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
+  ToastContext toast = ToastContext();
 
   @override
   void dispose() {
@@ -32,6 +34,9 @@ class EditEmailFormPageState extends State<EditEmailFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+    emailController.text = widget.userProfile.email;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Email"),
@@ -93,6 +98,8 @@ class EditEmailFormPageState extends State<EditEmailFormPage> {
                         // Validate returns true if the form is valid, or false otherwise.
                         if (_formKey.currentState!.validate() &&
                             EmailValidator.validate(emailController.text)) {
+                          Toast.show("Email updated successfully",
+                              duration: Toast.lengthLong, gravity: Toast.bottom);
                           updateUserValue(emailController.text);
                           Navigator.pop(context);
                         }

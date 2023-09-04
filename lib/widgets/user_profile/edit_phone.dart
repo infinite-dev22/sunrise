@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:toast/toast.dart';
 
 import '../../models/account.dart';
 import '../../services/database_services.dart';
@@ -11,12 +12,13 @@ class EditPhoneFormPage extends StatefulWidget {
   final UserProfile userProfile;
 
   @override
-  State<EditPhoneFormPage> createState() => EditPhoneFormPageState();
+  State<EditPhoneFormPage> createState() => _EditPhoneFormPageState();
 }
 
-class EditPhoneFormPageState extends State<EditPhoneFormPage> {
+class _EditPhoneFormPageState extends State<EditPhoneFormPage> {
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
+  ToastContext toast = ToastContext();
 
   @override
   void dispose() {
@@ -30,7 +32,7 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
     if (phone.length == 12) {
       formattedPhoneNumber = "+(${phone.substring(0, 3)}) ${phone.substring(3, 6)}-${phone.substring(6, phone.length)}";
     } else if(phone.length == 11) {
-      formattedPhoneNumber = "${phone.substring(0, 1)} (${phone.substring(1, 4)}) ${phone.substring(4, phone.length)}";
+      formattedPhoneNumber = "+${phone.substring(0, 1)} (${phone.substring(1, 4)}) ${phone.substring(4, phone.length)}";
     } else  if(phone.length == 10) {
       formattedPhoneNumber = "+${phone.substring(0, 3)} ${phone.substring(3, phone.length)}";
     }
@@ -40,6 +42,9 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+    phoneController.text = widget.userProfile.phoneNumber;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit phone number"),
@@ -103,6 +108,8 @@ class EditPhoneFormPageState extends State<EditPhoneFormPage> {
                       onPressed: () {
                         if (_formKey.currentState!.validate() &&
                             isNumeric(phoneController.text)) {
+                          Toast.show("Phone number updated successfully",
+                              duration: Toast.lengthLong, gravity: Toast.bottom);
                           updateUserValue(phoneController.text);
                           Navigator.pop(context);
                         }

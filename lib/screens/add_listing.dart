@@ -166,10 +166,9 @@ class _AddListingPageState extends State<AddListingPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
     var screenWidth = MediaQuery.of(context).size.width;
     halfScreen = screenWidth * 0.5;
-
-    toast.init(context);
 
     return CustomScrollView(
       slivers: <Widget>[
