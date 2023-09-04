@@ -552,7 +552,9 @@ class _AddListingPageState extends State<AddListingPage> {
           style: ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
           onPressed: () {
             if (widget.userProfile!.phoneNumber.isEmpty ||
-                widget.userProfile!.name.isEmpty) {
+                widget.userProfile!.name.isEmpty ||
+                CustomPhotoGallery.images.isNotEmpty ||
+                CustomPhotoGallery.images.length > 2) {
               Toast.show("Add your Phone number and Name to continue",
                   duration: Toast.lengthLong, gravity: Toast.bottom);
               Navigator.of(context).push(MaterialPageRoute(

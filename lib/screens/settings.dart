@@ -160,19 +160,18 @@ class _SettingsPageState extends State<SettingsPage> {
         CustomSettingsSection(
           child: RaisedSettingsSection(
             children: [
-              if (kDebugMode)
-                SettingsTile.navigation(
-                  leading: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        color: AppColor.blue_300,
-                        borderRadius: BorderRadius.circular(50)),
-                    child: const Icon(Icons.notifications,
-                        color: AppColor.blue_700),
-                  ),
-                  title: const Text("Notification"),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.blue_300,
+                      borderRadius: BorderRadius.circular(50)),
+                  child:
+                      const Icon(Icons.notifications, color: AppColor.blue_700),
                 ),
+                title: const Text("Notification"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              ),
               SettingsTile.navigation(
                 leading: Container(
                   padding: const EdgeInsets.all(5),
