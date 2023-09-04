@@ -157,66 +157,67 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-        CustomSettingsSection(
-          child: RaisedSettingsSection(
-            children: [
-              SettingsTile.navigation(
-                leading: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                      color: AppColor.blue_300,
-                      borderRadius: BorderRadius.circular(50)),
-                  child:
-                      const Icon(Icons.notifications, color: AppColor.blue_700),
+        if (kDebugMode)
+          CustomSettingsSection(
+            child: RaisedSettingsSection(
+              children: [
+                SettingsTile.navigation(
+                  leading: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: AppColor.blue_300,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: const Icon(Icons.notifications,
+                        color: AppColor.blue_700),
+                  ),
+                  title: const Text("Notification"),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
                 ),
-                title: const Text("Notification"),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
-              ),
-              SettingsTile.navigation(
-                leading: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                      color: AppColor.red_500,
-                      borderRadius: BorderRadius.circular(50)),
-                  child: const Icon(Icons.privacy_tip_sharp,
-                      color: AppColor.red_700),
+                SettingsTile.navigation(
+                  leading: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: AppColor.red_500,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: const Icon(Icons.privacy_tip_sharp,
+                        color: AppColor.red_700),
+                  ),
+                  title: const Text("Privacy Policy"),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                  onPressed: (context) {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => const DetailPage(
+                            showingContent: 'Privacy Policy',
+                          ),
+                        ));
+                  },
                 ),
-                title: const Text("Privacy Policy"),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: (context) {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => const DetailPage(
-                          showingContent: 'Privacy Policy',
-                        ),
-                      ));
-                },
-              ),
-              SettingsTile.navigation(
-                leading: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                      color: AppColor.purple_500,
-                      borderRadius: BorderRadius.circular(50)),
-                  child: const Icon(Icons.info_rounded,
-                      color: AppColor.purple_700),
+                SettingsTile.navigation(
+                  leading: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: AppColor.purple_500,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: const Icon(Icons.info_rounded,
+                        color: AppColor.purple_700),
+                  ),
+                  title: const Text("About"),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                  onPressed: (context) {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => const DetailPage(
+                            showingContent: 'About',
+                          ),
+                        ));
+                  },
                 ),
-                title: const Text("About"),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: (context) {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => const DetailPage(
-                          showingContent: 'About',
-                        ),
-                      ));
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         CustomSettingsSection(
           child: RaisedSettingsSection(
             children: [

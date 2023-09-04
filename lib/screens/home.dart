@@ -26,7 +26,7 @@ import '../widgets/listing_item.dart';
 import 'explore.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.userProfile}) : super(key: key);
+  const HomePage({Key? key, this.userProfile}) : super(key: key);
 
   final UserProfile? userProfile;
 
