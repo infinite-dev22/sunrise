@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "632689866596-j55s8rug0n2ft5isbm6id1e1injfldpq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sunrise",
+            "certificate_hash": "32f29030c35f186e9842625526803343c78b5392"
+          }
+        },
+        {
           "client_id": "632689866596-ocq6qpeqmo8chh8e0vdmtmk7u3ov6lco.apps.googleusercontent.com",
           "client_type": 3
         }
