@@ -9,11 +9,12 @@ class ContactItem extends StatelessWidget {
       {Key? key,
       required this.onCallTap,
       required this.onMessageTap,
-      required this.user})
+      required this.user, required this.userType})
       : super(key: key);
 
   final GestureTapCallback? onCallTap, onMessageTap;
   final UserProfile user;
+  final String userType;
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +69,9 @@ class ContactItem extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              const Text(
-                "broker",
-                style: TextStyle(fontSize: 13, color: AppColor.darker),
+              Text(
+                userType,
+                style: const TextStyle(fontSize: 13, color: AppColor.darker),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 softWrap: false,

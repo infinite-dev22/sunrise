@@ -261,7 +261,7 @@ class _ViewPageState extends State<ViewPage> {
             _handlePressed(widget.brokerProfile, context);
           }
         },
-        user: widget.brokerProfile,
+        user: widget.brokerProfile, userType: widget.listing.isPropertyOwner,
       ),
     );
   }
