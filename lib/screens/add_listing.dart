@@ -258,6 +258,11 @@ class _AddListingPageState extends State<AddListingPage> {
             _currency = dropDownValue!;
           });
         }),
+        _textFieldWithUnit("Size", "Unit", areaUnit, 6, _size, (dropDownValue) {
+          setState(() {
+            _sizeUnit = dropDownValue!;
+          });
+        }),
         _dropdownMenuEntries("Property Type", listingType, (value) {
           _propertyType = value!;
           setState(() {});
@@ -278,12 +283,11 @@ class _AddListingPageState extends State<AddListingPage> {
           _status = value!;
           setState(() {});
         }),
+        if (_propertyType != "Land & Plots" &&
+            _propertyType != "Office" &&
+            _propertyType != "Shop")
+          _buildFeatures(),
         const SizedBox(height: 20),
-        _textFieldWithUnit("Size", "Unit", areaUnit, 6, _size, (dropDownValue) {
-          setState(() {
-            _sizeUnit = dropDownValue!;
-          });
-        }),
         TextFormField(
           readOnly: true,
           decoration: const InputDecoration(
@@ -589,7 +593,7 @@ class _AddListingPageState extends State<AddListingPage> {
             } else {
               if (_formKey.currentState!.validate() &&
                       _propertyType.isNotEmpty ||
-                  _propertyUse.isNotEmpty &&
+                  (_propertyType.isNotEmpty && _propertyUse.isNotEmpty) &&
                       _status.isNotEmpty &&
                       CustomPhotoGallery.images.isNotEmpty &&
                       CustomPhotoGallery.images.length > 2) {
@@ -615,6 +619,38 @@ class _AddListingPageState extends State<AddListingPage> {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  _buildFeatures() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: _numberField("Bedrooms", 4, _bedrooms),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: _numberField("Bathrooms", 4, _bathrooms),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: _numberField("Kitchens", 4, _kitchen),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: _numberField("Garages", 4, _garages),
+            ),
+          ],
         ),
       ],
     );

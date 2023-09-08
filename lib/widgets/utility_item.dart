@@ -13,13 +13,28 @@ class UtilityItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return (data["icon"] != null)
-        ? ((data["value"] != "" || data["value"] != null)
-            ? ((data["value"] == true)
-                ? _buildFeature()
-                : const SizedBox.shrink())
-            : _buildFeature())
-        : const SizedBox.shrink();
+    if (data["icon"] != null) {
+      if (data["value"] != "" || data["value"] != null) {
+        if (data["value"] == true) {
+          return _buildFeature();
+        } else if (data["quantity"] != "" || data["quantity"] != null){
+          return _buildFeature();
+        } else {
+          return const SizedBox.shrink();
+        }
+      } else {
+        return _buildFeature();
+      }
+    } else {
+      return const SizedBox.shrink();
+    }
+    // return (data["icon"] != null)
+    //     ? ((data["value"] != "" || data["value"] != null)
+    //         ? ((data["value"] == true)
+    //             ? _buildFeature()
+    //             : const SizedBox.shrink())
+    //         : _buildFeature())
+    //     : const SizedBox.shrink();
   }
 
   _buildFeature() {

@@ -305,9 +305,6 @@ class _ViewPageState extends State<ViewPage> {
             children: [
               Row(
                 children: [
-                  // SizedBox(
-                  //   width: MediaQuery.of(context).size.width * .61,
-                  //   child:
                   Expanded(
                     child: Text(
                       widget.listing.name,
@@ -352,19 +349,42 @@ class _ViewPageState extends State<ViewPage> {
                     ),
                   ),
                   const Spacer(),
-                  const Icon(
-                    CupertinoIcons.calendar,
-                    color: Colors.grey,
-                    size: 16,
-                  ),
-                  Text(
-                    "Constructed: ${widget.listing.yearConstructed}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
+                  if (widget.listing.yearConstructed.isNotEmpty)
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.calendar,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                        Text(
+                          "Constructed: ${widget.listing.yearConstructed}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.sparkles,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                        Text(
+                          widget.listing.propertyType,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                  )
                 ],
               ),
               const SizedBox(
@@ -385,6 +405,25 @@ class _ViewPageState extends State<ViewPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const Spacer(),
+                  if (widget.listing.yearConstructed.isNotEmpty)
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.sparkles,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                        Text(
+                          widget.listing.propertyType,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ],
