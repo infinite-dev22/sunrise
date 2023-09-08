@@ -905,6 +905,7 @@ class _AddListingPageState extends State<AddListingPage> {
 
   _promoteAdConfirmDialog(int amount) {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.info,
       title: "Your account is to be credited \$$amount.",

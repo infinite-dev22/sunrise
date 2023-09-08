@@ -9,6 +9,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sunrise/models/property.dart';
+import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/sign_in.dart';
 import 'package:toast/toast.dart';
 
@@ -261,7 +262,8 @@ class _ViewPageState extends State<ViewPage> {
             _handlePressed(widget.brokerProfile, context);
           }
         },
-        user: widget.brokerProfile, userType: widget.listing.isPropertyOwner,
+        user: widget.brokerProfile,
+        userType: widget.listing.isPropertyOwner,
       ),
     );
   }
@@ -488,6 +490,7 @@ class _ViewPageState extends State<ViewPage> {
 
   _buildDeleteConfirmDialog() {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.error,
       title: "Delete",
@@ -519,6 +522,7 @@ class _ViewPageState extends State<ViewPage> {
 
   _deleteSuccessDialog() {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.success,
       title: "Success",
@@ -526,9 +530,9 @@ class _ViewPageState extends State<ViewPage> {
       buttons: [
         DialogButton(
           onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (BuildContext context) => const RootApp()),
+                    (Route<dynamic> route) => false);
           },
           color: AppColor.green_700,
           child: const Text(

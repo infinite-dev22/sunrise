@@ -278,6 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _deleteAccountConfirmationDialog() {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.error,
       title: "Delete",
@@ -309,6 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _signOutAccountConfirmationDialog() {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.info,
       title: "Sign Out",
@@ -339,6 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _deleteSuccessDialog() {
     return Alert(
+      closeIcon: Container(),
       context: context,
       type: AlertType.success,
       title: "Success",
