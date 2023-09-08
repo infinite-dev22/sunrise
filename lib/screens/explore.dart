@@ -89,23 +89,13 @@ class _ExplorePageState extends State<ExplorePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
+          .where("show", isEqualTo: true)
           .orderBy('likes', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    _showPopulars();
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
+          return const Center(
+            child: Text('Something went wrong'),
           );
         }
 
@@ -206,24 +196,14 @@ class _ExplorePageState extends State<ExplorePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
           .where("featured", isEqualTo: true)
+          .where("show", isEqualTo: true)
+          .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    _showFeatured();
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
+          return const Center(
+            child: Text('Something went wrong'),
           );
         }
 

@@ -256,25 +256,13 @@ class _HomePageState extends State<HomePage> {
           .collection("recents")
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('Recents')
+          .where("show", isEqualTo: true)
           .limit(10)
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    build(context);
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         try {
@@ -413,24 +401,12 @@ class _HomePageState extends State<HomePage> {
           .collectionGroup('Listings')
           .orderBy('likes', descending: true)
           .where("likes", isGreaterThan: 0)
+          .where("show", isEqualTo: true)
           .limit(10)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    build(context);
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         try {
@@ -504,24 +480,12 @@ class _HomePageState extends State<HomePage> {
           .collectionGroup('Listings')
           .orderBy('timestamp', descending: true)
           .where("featured", isEqualTo: true)
+          .where("show", isEqualTo: true)
           .limit(10)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    build(context);
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         try {
@@ -590,23 +554,14 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
+          .where("show", isEqualTo: true)
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    build(context);
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
+          print(snapshot.error.toString());
+          return const Center(
+            child: Text('Something went wrong'),
           );
         }
 
@@ -672,24 +627,14 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: db
           .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
           .where("propertyType", isEqualTo: filter)
+          .where("show", isEqualTo: true)
+          .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Something went wrong'),
-                IconButton(
-                  onPressed: () {
-                    build(context);
-                  },
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
+          return const Center(
+            child: Text('Something went wrong'),
           );
         }
 

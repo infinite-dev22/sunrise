@@ -677,6 +677,7 @@ class _AddListingPageState extends State<AddListingPage> {
       description: _description.text.trim(),
       likes: _likes,
       featured: feature,
+      show: true,
       isPropertyOwner: _getPropertyOwner(),
       features: (_propertyType == "Shop" || _propertyType == "Office")
           ? [

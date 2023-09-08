@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/verify_email.dart';
@@ -39,6 +40,9 @@ Future<void> main() async {
   // local notifications.
   await PlatformNotifier.I.init(appName: "sunrise");
   await PlatformNotifier.I.requestPermissions();
+
+  // Clear app cache.
+  await DefaultCacheManager().emptyCache();
 
   if (FirebaseAuth.instance.currentUser != null) {
     // Get user profile.

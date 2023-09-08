@@ -138,25 +138,13 @@ class _FavouritePageState extends State<FavouritePage> {
           // .doc(user!.uid)
           .doc(widget.userProfile!.userId)
           .collection('Favorites')
+          .where("show", isEqualTo: true)
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Expanded(
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text('Something went wrong'),
-                  IconButton(
-                    onPressed: () {
-                      build(context);
-                    },
-                    icon: const Icon(Icons.refresh),
-                  ),
-                ],
-              ),
-            ),
+          return const Center(
+            child: Text('Something went wrong'),
           );
         }
 
@@ -202,6 +190,7 @@ class _FavouritePageState extends State<FavouritePage> {
     return StreamBuilder(
         stream: db
             .collectionGroup('Listings')
+            .where("show", isEqualTo: true)
             .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {

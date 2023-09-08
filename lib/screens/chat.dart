@@ -20,8 +20,8 @@ import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
-import 'package:sunrise/utilities/global_values.dart';
 import 'package:sunrise/widgets/custom_image.dart';
+import 'package:toast/toast.dart';
 
 import '../models/account.dart';
 
@@ -40,6 +40,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  ToastContext toast = ToastContext();
   bool _isAttachmentUploading = false;
   late Listing? _listing;
   late UserProfile? _brokerProfile;
@@ -217,7 +218,9 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
     _getListing();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColor.appBgColor,
@@ -275,7 +278,8 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   onMessageVisibilityChanged: (p0, visible) {
                     if (visible) {
-                      if (p0.author.id != FirebaseAuth.instance.currentUser!.uid) {
+                      if (p0.author.id !=
+                          FirebaseAuth.instance.currentUser!.uid) {
                         final updatedMessage = p0.copyWith(status: Status.seen);
                         FirebaseChatCore.instance
                             .updateMessage(updatedMessage, widget.room.id);
@@ -333,20 +337,25 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   _buildNavigateToViewPage(Listing listing) async {
-    var nav = Navigator.of(context);
+    if (_listing!.show) {
+      var nav = Navigator.of(context);
 
-    // These variables below affect performance significantly, try putting them
-    // into their respective screen(ViewPage).
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-    List favorite = await DatabaseServices.getFavorite(listing.id);
+      // These variables below affect performance significantly, try putting them
+      // into their respective screen(ViewPage).
+      UserProfile brokerProfile =
+          await DatabaseServices.getUserProfile(listing.userId);
+      List favorite = await DatabaseServices.getFavorite(listing.id);
 
-    return nav.push(MaterialPageRoute(
-        builder: (BuildContext context) => ViewPage(
-              listing: listing,
-              brokerProfile: brokerProfile,
-              favorite: favorite.isEmpty ? null : favorite[0],
-            )));
+      return nav.push(MaterialPageRoute(
+          builder: (BuildContext context) => ViewPage(
+                listing: listing,
+                brokerProfile: brokerProfile,
+                favorite: favorite.isEmpty ? null : favorite[0],
+              )));
+    } else {
+      Toast.show("Listing no longer Available",
+          duration: Toast.lengthLong, gravity: Toast.center);
+    }
   }
 
   _buildListing() {
@@ -369,7 +378,9 @@ class _ChatPageState extends State<ChatPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _listing!.name,
+                    _listing!.show
+                        ? _listing!.name
+                        : "${_listing!.name} - Not Available",
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w600),
                   ),

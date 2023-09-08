@@ -312,6 +312,7 @@ class DatabaseServices {
       'isPropertyOwner': listing.isPropertyOwner,
       'likes': listing.likes,
       'featured': listing.featured,
+      'show': listing.show,
       'features': listing.features,
       'images': listing.images,
       "timestamp": listing.timestamp,
@@ -337,25 +338,29 @@ class DatabaseServices {
       'isPropertyOwner': listing.isPropertyOwner,
       'likes': listing.likes,
       'featured': listing.featured,
+      'show': listing.show,
       'features': listing.features,
       'images': listing.images,
       "timestamp": listing.timestamp,
     });
   }
 
-  static deleteListing(Listing listing) {
-    for (var image in listing.images) {
-      storageRef
-          .child(
-              "images/listings/${listing.userId}/${image.toString().substring(image.toString().lastIndexOf("listing_"), image.toString().lastIndexOf("?"))}")
-          .delete();
-    }
+  static deleteListing(Listing listing) async {
+    // for (var image in listing.images) {
+    //   storageRef
+    //       .child(
+    //           "images/listings/${listing.userId}/${image.toString().substring(image.toString().lastIndexOf("listing_"), image.toString().lastIndexOf("?"))}")
+    //       .delete();
+    // }
 
-    listingsRef
+    var docSnapshot = listingsRef
         .doc(listing.userId)
         .collection('Listings')
-        .doc(listing.id)
-        .delete();
+        .doc(listing.id).get();
+
+    Listing item = await docSnapshot.then((doc) => Listing.fromDoc(doc));
+    item.show = false;
+    updateListing(item);
 
     db
         .collection('recents')
@@ -396,7 +401,6 @@ class DatabaseServices {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('Favorites')
         .where("listingId", isEqualTo: listingId)
-        .orderBy('timestamp', descending: true)
         .get();
 
     List<Favorite> favorites =

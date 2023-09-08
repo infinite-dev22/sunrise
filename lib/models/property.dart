@@ -15,6 +15,7 @@ class Listing {
   String isPropertyOwner;
   int likes;
   bool featured;
+  bool show;
   List<dynamic> features;
   List<dynamic> images;
   Timestamp timestamp;
@@ -34,6 +35,7 @@ class Listing {
     required this.isPropertyOwner,
     required this.likes,
     required this.featured,
+    required this.show,
     required this.features,
     required this.images,
     required this.timestamp,
@@ -55,6 +57,7 @@ class Listing {
       isPropertyOwner: doc['isPropertyOwner'],
       likes: doc['likes'],
       featured: doc['featured'],
+      show: doc['show'],
       features: doc['features'],
       images: doc['images'],
       timestamp: doc['timestamp'],
