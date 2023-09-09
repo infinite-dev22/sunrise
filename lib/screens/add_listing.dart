@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
-import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:sunrise/main.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/root.dart';
@@ -811,14 +811,14 @@ class _AddListingPageState extends State<AddListingPage> {
     }
   }
 
-  _showUploadListingNotification(String title, String body) async {
-    await PlatformNotifier.I.showPluginNotification(
-        ShowPluginNotificationModel(
-            id: DateTime.now().second,
-            title: title,
-            body: body,
-            payload: "test"),
-        context);
+  _showProgressUploadingNotification() async {
+    await NotificationController.dismissNotifications();
+    await NotificationController.createNewProgressNotification();
+  }
+
+  _showCompleteUploadNotification() async {
+    await NotificationController.dismissNotifications();
+    await NotificationController.createNewDoneNotification();
   }
 
   _buildAddFeaturedDialog() {
@@ -879,8 +879,7 @@ class _AddListingPageState extends State<AddListingPage> {
                   );
                 },
                 context: context),
-            _showUploadListingNotification(
-                "Upload In Progress", "Uploading property listing...")
+            _showProgressUploadingNotification()
           }
         : const SizedBox.shrink();
 
@@ -899,8 +898,7 @@ class _AddListingPageState extends State<AddListingPage> {
     setState(() {
       _loading = false;
     });
-    _showUploadListingNotification(
-        "Upload Progress", "Property listing upload complete.");
+    _showCompleteUploadNotification();
   }
 
   _promoteAdConfirmDialog(int amount) {
@@ -934,8 +932,7 @@ class _AddListingPageState extends State<AddListingPage> {
                           );
                         },
                         context: context),
-                    _showUploadListingNotification(
-                        "Upload In Progress", "Uploading property listing...")
+                    _showProgressUploadingNotification(),
                   }
                 : const SizedBox.shrink();
 

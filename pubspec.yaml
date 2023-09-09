@@ -67,7 +67,6 @@ dependencies:
   string_validator: ^1.0.0
   path_provider: ^2.1.0
   path: ^1.8.3
-  platform_local_notifications: ^0.0.4
   observe_internet_connectivity: ^1.0.2
   popup_banner: ^1.0.0
   intl: ^0.18.1
@@ -82,6 +81,7 @@ dependencies:
   chatview: ^1.3.1
   toast: ^0.3.0
   flutter_cache_manager: ^3.3.1
+  awesome_notifications: ^0.6.19
 
 #  awesome_notifications: ^0.7.0-beta.7
 #  awesome_notifications_fcm: ^0.7.4+1

@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:platform_local_notifications/platform_local_notifications.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/theme/color.dart';
 
+import '../main.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
 import '../widgets/custom_photo_gallery.dart';
@@ -87,27 +87,25 @@ class _PostPageState extends State<PostPage> {
                   );
                 },
                 context: context),
-            _showUploadListingNotification(
-                "Upload In Progress", "Uploading property listing...")
+      _showProgressUploadingNotification()
           }
         : const SizedBox.shrink();
 
     DatabaseServices.createListing(widget.listing);
 
-    _showUploadListingNotification(
-        "Upload Progress", "Property listing upload complete.");
+    _showCompleteUploadNotification();
 
     _navigateToRootPage();
   }
 
-  _showUploadListingNotification(String title, String body) async {
-    await PlatformNotifier.I.showPluginNotification(
-        ShowPluginNotificationModel(
-            id: DateTime.now().second,
-            title: title,
-            body: body,
-            payload: "test"),
-        context);
+  _showProgressUploadingNotification() async {
+    await NotificationController.dismissNotifications();
+    await NotificationController.createNewProgressNotification();
+  }
+
+  _showCompleteUploadNotification() async {
+    await NotificationController.dismissNotifications();
+    await NotificationController.createNewDoneNotification();
   }
 
   _navigateToRootPage() {
