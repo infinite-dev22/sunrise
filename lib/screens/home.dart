@@ -256,7 +256,6 @@ class _HomePageState extends State<HomePage> {
           .collection("recents")
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('Recents')
-          .where("show", isEqualTo: true)
           .limit(10)
           .orderBy('timestamp', descending: true)
           .snapshots(),
@@ -320,6 +319,7 @@ class _HomePageState extends State<HomePage> {
         stream: db
             .collectionGroup('Listings')
             .orderBy('timestamp', descending: true)
+            .where("show", isEqualTo: true)
             .snapshots(),
         builder: (context, snapshot) {
           try {
