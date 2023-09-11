@@ -68,7 +68,11 @@ class ContactItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userProfile.id == FirebaseAuth.instance.currentUser!.uid ? "${userProfile.name} (You)" : userProfile.name,
+                FirebaseAuth.instance.currentUser != null
+                    ? userProfile.id == FirebaseAuth.instance.currentUser!.uid
+                        ? "${userProfile.name} (You)"
+                        : userProfile.name
+                    : userProfile.name,
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),

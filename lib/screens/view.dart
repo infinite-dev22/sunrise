@@ -7,9 +7,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sunrise/models/property.dart';
-import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/sign_in.dart';
 import 'package:toast/toast.dart';
 
@@ -17,7 +15,6 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
-import '../utilities/custom_firebase_chat_core.dart';
 import '../widgets/contact_item.dart';
 import '../widgets/custom_image.dart';
 import '../widgets/icon_box.dart';
@@ -282,8 +279,7 @@ class _ViewPageState extends State<ViewPage> {
 
     await FirebaseChatCore.instance.createUserInFirestore(user);
 
-    final room =
-        await CustomFirebaseChatCore.instance.createRoom(user, metadata: {
+    final room = await FirebaseChatCore.instance.createRoom(user, metadata: {
       'imageUrl': userProfile.profilePicture,
       'name': userProfile.name,
       'listingId': widget.listing.id,
