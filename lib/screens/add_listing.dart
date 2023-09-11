@@ -1,10 +1,15 @@
+import 'dart:io';
+import 'dart:math' as math;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
@@ -63,36 +68,27 @@ class _AddListingPageState extends State<AddListingPage> {
 
   final _key = GlobalKey();
 
-  final _name = TextEditingController();
-  final _location = TextEditingController();
-  final _price = TextEditingController();
-  final _yearConstructed = TextEditingController();
-  final _description = TextEditingController();
-  final _bedrooms = TextEditingController();
-  final _bathrooms = TextEditingController();
-  final _kitchen = TextEditingController();
-  final _garages = TextEditingController();
-  final _size = TextEditingController();
+  final _nameController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _yearConstructedController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _bedroomsController = TextEditingController();
+  final _bathroomsController = TextEditingController();
+  final _kitchenController = TextEditingController();
+  final _garagesController = TextEditingController();
+  final _sizeController = TextEditingController();
   final _facilitiesController = TextEditingController();
 
-  late String _currency =
-      (widget.listing != null) ? widget.listing!.currency : "";
-
-  late String _status = (widget.listing != null) ? widget.listing!.status : "";
-  late String _propertyType =
-      (widget.listing != null) ? widget.listing!.propertyType : "";
-  late String _propertyUse =
-      (widget.listing != null) ? widget.listing!.propertyUse : "";
-
-  late int _likes = (widget.listing != null) ? widget.listing!.likes : 0;
-  late List _features = (widget.listing != null)
-      ? widget.listing!.features
-      : List.empty(growable: true);
-
-  late String _sizeUnit;
-  late List _images = (widget.listing != null)
-      ? widget.listing!.images
-      : List.empty(growable: true);
+  late String _currency = "";
+  late String _status = "";
+  late String _propertyType = "";
+  late String _propertyUse = "";
+  late int _likes = 0;
+  late List _features = List.empty(growable: true);
+  late final List _features2 = List.empty(growable: true);
+  late String _sizeUnit = "";
+  late List _images = List.empty(growable: true);
   late String _brokerId = FirebaseAuth.instance.currentUser!.uid;
 
   List<String> listingType = [
@@ -184,6 +180,7 @@ class _AddListingPageState extends State<AddListingPage> {
     toast.init(context);
     var screenWidth = MediaQuery.of(context).size.width;
     halfScreen = screenWidth * 0.5;
+    // _fillInData();
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -199,6 +196,49 @@ class _AddListingPageState extends State<AddListingPage> {
         ),
       ],
     );
+  }
+
+  _fillInData() async {
+    if (widget.listing != null) {
+      _nameController.text = widget.listing!.name;
+      _locationController.text = widget.listing!.location;
+      _priceController.text = widget.listing!.priceNormal;
+      _currency = widget.listing!.currency;
+      _yearConstructedController.text = widget.listing!.yearConstructed;
+      _descriptionController.text = widget.listing!.description;
+      _bedroomsController.text = widget.listing!.bedrooms;
+      _bathroomsController.text = widget.listing!.bathrooms;
+      _kitchenController.text = widget.listing!.kitchens;
+      _garagesController.text = widget.listing!.garages;
+      _sizeController.text = widget.listing!.size;
+      _facilitiesController.text = widget.listing!.features2
+          .toString()
+          .replaceAll('[', '')
+          .replaceAll(']', '');
+      _currency = widget.listing!.currency;
+      _status = widget.listing!.status;
+      _propertyType = widget.listing!.propertyType;
+      _propertyUse = widget.listing!.propertyUse;
+      _likes = widget.listing!.likes;
+      _features = widget.listing!.features2;
+      _sizeUnit = widget.listing!.sizeUnit;
+      _brokerId = FirebaseAuth.instance.currentUser!.uid;
+
+      _isOwnerValue =
+          (widget.listing!.isPropertyOwner == "Owner" ? true : false);
+
+      List images = List.empty(growable: true);
+
+      for (String imageUrl in widget.listing!.images) {
+        File? image = await urlToFile(imageUrl);
+        images.add(image);
+      }
+
+      _key.currentState?.setState(() {
+        CustomPhotoGallery.images.addAll(images);
+      });
+      _images.addAll(images);
+    }
   }
 
   _buildHeader() {
@@ -225,25 +265,30 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _buildBody() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomPhotoGallery(key: _key),
-          const SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Form(
-              key: _formKey,
-              child: _buildForm(),
+    return Material(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 15),
+            CustomPhotoGallery(
+              key: _key,
             ),
-          ),
-          const SizedBox(
-            height: 100,
-          ),
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Form(
+                key: _formKey,
+                child: _buildForm(),
+              ),
+            ),
+            const SizedBox(
+              height: 100,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -251,37 +296,38 @@ class _AddListingPageState extends State<AddListingPage> {
   _buildForm() {
     return Column(
       children: [
-        _buildTextField("Name", 30, _name),
-        _textFieldWithUnit("Price", "Currency", currencies, 15, _price,
+        _buildTextField("Name", 30, _nameController),
+        _textFieldWithUnit(
+            "Price", "Currency", currencies, 15, _currency, _priceController,
             (dropDownValue) {
-          setState(() {
-            _currency = dropDownValue!;
-          });
+          _currency = dropDownValue!;
         }),
-        _textFieldWithUnit("Size", "Unit", areaUnit, 6, _size, (dropDownValue) {
-          setState(() {
-            _sizeUnit = dropDownValue!;
-          });
+        _textFieldWithUnit(
+            "Size", "Unit", areaUnit, 6, _sizeUnit, _sizeController,
+            (dropDownValue) {
+          _sizeUnit = dropDownValue!;
         }),
-        _dropdownMenuEntries("Property Type", listingType, (value) {
-          _propertyType = value!;
-          setState(() {});
+        _dropdownMenuEntries("Property Type", listingType, _propertyType,
+            (value) {
+          setState(() {
+            _propertyType = value!;
+          });
         }),
         const SizedBox(height: 20),
         if (_propertyType == "Land & Plots")
-          _dropdownMenuEntries("Property Use", landType, (value) {
+          _dropdownMenuEntries("Property Use", landType, _propertyUse, (value) {
             _propertyUse = value!;
-            setState(() {});
           }),
         if (_propertyType == "Land & Plots") const SizedBox(height: 20),
         _textFieldWithAction(
-            "Location", 20, Icons.location_on, () {}, _location),
+            "Location", 20, Icons.location_on, () {}, _locationController),
         if (_propertyType != "Land & Plots")
-          _numberField("Year Constructed", 4, _yearConstructed),
+          _numberField("Year Constructed", 4, _yearConstructedController),
         if (_propertyType != "Land & Plots") const SizedBox(height: 20),
-        _dropdownMenuEntries("Status", statuses.toList(), (value) {
-          _status = value!;
-          setState(() {});
+        _dropdownMenuEntries("Status", statuses.toList(), _status, (value) {
+          setState(() {
+            _status = value!;
+          });
         }),
         if (_propertyType != "Land & Plots" &&
             _propertyType != "Office" &&
@@ -302,14 +348,12 @@ class _AddListingPageState extends State<AddListingPage> {
           controller: _facilitiesController,
         ),
         const SizedBox(height: 20),
-        _textArea("Description", _description),
+        _textArea("Description", _descriptionController),
         CheckboxListTile(
           controlAffinity: ListTileControlAffinity.leading,
           value: _isOwnerValue,
           onChanged: (value) {
-            setState(() {
-              _isOwnerValue = value!;
-            });
+            _isOwnerValue = value!;
           },
           title: const Text("Property Owner"),
         ),
@@ -319,73 +363,140 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _dropdownMenuEntries(
-      String placeHolder, List list, Function(String?) onChanged) {
-    return DropdownButtonFormField2<String>(
-      isExpanded: true,
-      decoration: InputDecoration(
-        // Add Horizontal padding using menuItemStyleData.padding so it matches
-        // the menu padding when button's width is not specified.
-        contentPadding: const EdgeInsets.symmetric(vertical: 10),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        // Add more decoration..
-      ),
-      hint: Text(
-        placeHolder,
-        style: const TextStyle(fontSize: 14),
-      ),
-      items: (list is List<Map<String, String>>)
-          ? List.generate(
-              currencies.length,
-              (index) => DropdownMenuItem<String>(
-                value: currencies[index]["symbol"],
-                child: Text(
-                  currencies[index]["name"]!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
+  _dropdownMenuEntries(String placeHolder, List list, String value,
+      Function(String?) onChanged) {
+    return (value.isNotEmpty)
+        ? DropdownButtonFormField2<String>(
+            value: value,
+            isExpanded: true,
+            decoration: InputDecoration(
+              // Add Horizontal padding using menuItemStyleData.padding so it matches
+              // the menu padding when button's width is not specified.
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
               ),
-            ).toList()
-          : list
-              .map((item) => DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(
-                      item,
-                      style: const TextStyle(
-                        fontSize: 14,
+              // Add more decoration..
+            ),
+            hint: Text(
+              placeHolder,
+              style: const TextStyle(fontSize: 14),
+            ),
+            items: (list is List<Map<String, String>>)
+                ? List.generate(
+                    currencies.length,
+                    (index) => DropdownMenuItem<String>(
+                      value: currencies[index]["symbol"],
+                      child: Text(
+                        currencies[index]["name"]!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                  ))
-              .toList(),
-      validator: (value) {
-        if (value == null) {
-          return 'Please select $placeHolder.';
-        }
-        return null;
-      },
-      onChanged: onChanged,
-      buttonStyleData: const ButtonStyleData(
-        padding: EdgeInsets.only(right: 8),
-      ),
-      iconStyleData: const IconStyleData(
-        icon: Icon(
-          Icons.arrow_drop_down,
-          color: Colors.black45,
-        ),
-        iconSize: 24,
-      ),
-      dropdownStyleData: DropdownStyleData(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-      ),
-      menuItemStyleData: const MenuItemStyleData(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-      ),
-    );
+                  ).toList()
+                : list
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+            validator: (value) {
+              if (value == null) {
+                return 'Please select $placeHolder.';
+              }
+              return null;
+            },
+            onChanged: onChanged,
+            buttonStyleData: const ButtonStyleData(
+              padding: EdgeInsets.only(right: 8),
+            ),
+            iconStyleData: const IconStyleData(
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: Colors.black45,
+              ),
+              iconSize: 24,
+            ),
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            menuItemStyleData: const MenuItemStyleData(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+            ),
+          )
+        : DropdownButtonFormField2<String>(
+            isExpanded: true,
+            decoration: InputDecoration(
+              // Add Horizontal padding using menuItemStyleData.padding so it matches
+              // the menu padding when button's width is not specified.
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              // Add more decoration..
+            ),
+            hint: Text(
+              placeHolder,
+              style: const TextStyle(fontSize: 14),
+            ),
+            items: (list is List<Map<String, String>>)
+                ? List.generate(
+                    currencies.length,
+                    (index) => DropdownMenuItem<String>(
+                      value: currencies[index]["symbol"],
+                      child: Text(
+                        currencies[index]["name"]!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ).toList()
+                : list
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+            validator: (value) {
+              if (value == null) {
+                return 'Please select $placeHolder.';
+              }
+              return null;
+            },
+            onChanged: onChanged,
+            buttonStyleData: const ButtonStyleData(
+              padding: EdgeInsets.only(right: 8),
+            ),
+            iconStyleData: const IconStyleData(
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: Colors.black45,
+              ),
+              iconSize: 24,
+            ),
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            menuItemStyleData: const MenuItemStyleData(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+            ),
+          );
   }
 
   _buildTextField(String label, maxLength, TextEditingController controller) {
@@ -420,6 +531,7 @@ class _AddListingPageState extends State<AddListingPage> {
       String unitFieldLabel,
       List units,
       maxLength,
+      value,
       TextEditingController controller,
       ValueChanged<String?> onDropdownChanged) {
     return Column(
@@ -435,7 +547,7 @@ class _AddListingPageState extends State<AddListingPage> {
             SizedBox(
               width: 130,
               child: _dropdownMenuEntries(
-                  unitFieldLabel, units, onDropdownChanged),
+                  unitFieldLabel, units, value, onDropdownChanged),
             ),
           ],
         ),
@@ -597,7 +709,9 @@ class _AddListingPageState extends State<AddListingPage> {
                       _status.isNotEmpty &&
                       CustomPhotoGallery.images.isNotEmpty &&
                       CustomPhotoGallery.images.length > 2) {
-                _buildAddFeaturedDialog();
+                (widget.listing != null)
+                    ? _uploadListingAd(widget.listing!.featured)
+                    : _buildAddFeaturedDialog();
               } else if (CustomPhotoGallery.images.isEmpty) {
                 Toast.show("No images selected",
                     duration: Toast.lengthLong, gravity: Toast.bottom);
@@ -607,15 +721,16 @@ class _AddListingPageState extends State<AddListingPage> {
               }
             }
           },
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.check, color: AppColor.appBgColor),
-              SizedBox(
+              const Icon(Icons.check, color: AppColor.appBgColor),
+              const SizedBox(
                 width: 10,
               ),
               Text(
-                "Next",
-                style: TextStyle(fontSize: 13, color: AppColor.appBgColor),
+                (widget.listing != null) ? "Update" : "Next",
+                style:
+                    const TextStyle(fontSize: 13, color: AppColor.appBgColor),
               ),
             ],
           ),
@@ -632,11 +747,11 @@ class _AddListingPageState extends State<AddListingPage> {
         Row(
           children: [
             Expanded(
-              child: _numberField("Bedrooms", 4, _bedrooms),
+              child: _numberField("Bedrooms", 4, _bedroomsController),
             ),
             const SizedBox(width: 20),
             Expanded(
-              child: _numberField("Bathrooms", 4, _bathrooms),
+              child: _numberField("Bathrooms", 4, _bathroomsController),
             ),
           ],
         ),
@@ -644,11 +759,11 @@ class _AddListingPageState extends State<AddListingPage> {
         Row(
           children: [
             Expanded(
-              child: _numberField("Kitchens", 4, _kitchen),
+              child: _numberField("Kitchens", 4, _kitchenController),
             ),
             const SizedBox(width: 20),
             Expanded(
-              child: _numberField("Garages", 4, _garages),
+              child: _numberField("Garages", 4, _garagesController),
             ),
           ],
         ),
@@ -664,21 +779,29 @@ class _AddListingPageState extends State<AddListingPage> {
     listing = Listing(
       id: '',
       userId: _brokerId,
-      name: _name.text.trim(),
-      location: _location.text.trim(),
+      name: _nameController.text.trim(),
+      location: _locationController.text.trim(),
       price: (_status == "Rent" || _status == "To Let")
-          ? "${_numberFormat(_price.text.trim())}/month"
-          : "${_numberFormat(_price.text.trim())}",
+          ? "${_numberFormat(_priceController.text.trim())}/month"
+          : "${_numberFormat(_priceController.text.trim())}",
+      priceNormal: _priceController.text.trim(),
+      bedrooms: _bedroomsController.text,
+      bathrooms: _bathroomsController.text,
+      kitchens: _kitchenController.text,
+      garages: _garagesController.text,
+      sizeUnit: _sizeUnit,
+      size: _sizeController.text,
       currency: _currency,
       status: _status,
       propertyType: _propertyType,
       propertyUse: _propertyUse,
-      yearConstructed: _yearConstructed.text.trim(),
-      description: _description.text.trim(),
+      yearConstructed: _yearConstructedController.text.trim(),
+      description: _descriptionController.text.trim(),
       likes: _likes,
       featured: feature,
       show: true,
       isPropertyOwner: _getPropertyOwner(),
+      features2: _features2,
       features: (_propertyType == "Shop" || _propertyType == "Office")
           ? [
               {"name": "Air conditioning", "value": _acValue},
@@ -688,26 +811,34 @@ class _AddListingPageState extends State<AddListingPage> {
                 "icon": "electricity"
               },
               {
-                "quantity": _size.text,
+                "quantity": _sizeController.text,
                 "name": _sizeUnit,
                 "icon": "rulerCombined"
               },
             ]
           : [
-              {"quantity": _bedrooms.text, "name": "Bedrooms", "icon": "bed"},
               {
-                "quantity": _bathrooms.text,
+                "quantity": _bedroomsController.text,
+                "name": "Bedrooms",
+                "icon": "bed"
+              },
+              {
+                "quantity": _bathroomsController.text,
                 "name": "Bathrooms",
                 "icon": "bathtub_outlined"
               },
               {
-                "quantity": _kitchen.text,
+                "quantity": _kitchenController.text,
                 "name": "Kitchens",
                 "icon": "kitchen"
               },
-              {"quantity": _garages.text, "name": "Garages", "icon": "garage"},
               {
-                "quantity": _size.text,
+                "quantity": _garagesController.text,
+                "name": "Garages",
+                "icon": "garage"
+              },
+              {
+                "quantity": _sizeController.text,
                 "name": _sizeUnit,
                 "icon": "rulerCombined"
               },
@@ -748,7 +879,12 @@ class _AddListingPageState extends State<AddListingPage> {
         DateTime.now(),
       ),
     );
-    DatabaseServices.createListing(listing!);
+    if (widget.listing != null) {
+      listing!.id = widget.listing!.id;
+      DatabaseServices.updateListing(listing!);
+    } else {
+      DatabaseServices.createListing(listing!);
+    }
   }
 
   _resetFeatures() {
@@ -983,6 +1119,7 @@ class _AddListingPageState extends State<AddListingPage> {
           onConfirm: (values) {
             _resetFeatures();
             _features.addAll(values);
+            _features2.addAll(values);
             _features = Set.from(_features).toList();
             setState(() {
               _facilitiesController.text =
@@ -1005,16 +1142,16 @@ class _AddListingPageState extends State<AddListingPage> {
 
   _resetScreen() {
     setState(() {
-      _name.text = "";
-      _location.text = "";
-      _price.text = "";
-      _yearConstructed.text = "";
-      _description.text = "";
-      _bedrooms.text = "";
-      _bathrooms.text = "";
-      _kitchen.text = "";
-      _garages.text = "";
-      _size.text = "";
+      _nameController.text = "";
+      _locationController.text = "";
+      _priceController.text = "";
+      _yearConstructedController.text = "";
+      _descriptionController.text = "";
+      _bedroomsController.text = "";
+      _bathroomsController.text = "";
+      _kitchenController.text = "";
+      _garagesController.text = "";
+      _sizeController.text = "";
       _facilitiesController.text = "";
 
       _currency = '';
@@ -1040,18 +1177,43 @@ class _AddListingPageState extends State<AddListingPage> {
 
   @override
   void dispose() {
-    _name.dispose();
-    _location.dispose();
-    _price.dispose();
-    _yearConstructed.dispose();
-    _description.dispose();
-    _bedrooms.dispose();
-    _bathrooms.dispose();
-    _kitchen.dispose();
-    _garages.dispose();
-    _size.dispose();
+    _nameController.dispose();
+    _locationController.dispose();
+    _priceController.dispose();
+    _yearConstructedController.dispose();
+    _descriptionController.dispose();
+    _bedroomsController.dispose();
+    _bathroomsController.dispose();
+    _kitchenController.dispose();
+    _garagesController.dispose();
+    _sizeController.dispose();
     _facilitiesController.dispose();
 
     super.dispose();
+  }
+
+  Future<File> urlToFile(String imageUrl) async {
+    // generate random number.
+    var rng = math.Random();
+    // get temporary directory of device.
+    Directory tempDir = await getTemporaryDirectory();
+    // get temporary path from temporary directory.
+    String tempPath = tempDir.path;
+    // create a new file in temporary path with random file name.
+    File file = File('$tempPath${rng.nextInt(100)}.png');
+    // call http.get method and pass imageurl into it to get response.
+    http.Response response = await http.get(Uri.parse(imageUrl));
+    // write bodybytes received in response to file.
+    await file.writeAsBytes(response.bodyBytes);
+    // now return the file which is created with random name in
+    // temporary directory and image bytes from response is written to // that file.
+    return file;
+  }
+
+  @override
+  void initState() {
+    _fillInData();
+
+    super.initState();
   }
 }

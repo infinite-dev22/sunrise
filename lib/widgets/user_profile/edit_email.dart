@@ -82,7 +82,8 @@ class _EditEmailFormPageState extends State<EditEmailFormPage> {
                       border: OutlineInputBorder(),
                       labelText: 'Email',
                     ),
-                    controller: emailController,keyboardType: TextInputType.emailAddress,
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                   ),
                 ),
               ),
@@ -99,7 +100,8 @@ class _EditEmailFormPageState extends State<EditEmailFormPage> {
                         if (_formKey.currentState!.validate() &&
                             EmailValidator.validate(emailController.text)) {
                           Toast.show("Email updated successfully",
-                              duration: Toast.lengthLong, gravity: Toast.bottom);
+                              duration: Toast.lengthLong,
+                              gravity: Toast.bottom);
                           updateUserValue(emailController.text);
                           Navigator.pop(context);
                         }

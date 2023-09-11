@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sunrise/utilities/global_values.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/constants.dart';

@@ -14,7 +14,7 @@ class DatabaseServices {
   }
 
   static void updateUserData(UserProfile user) {
-    usersRef.doc(user.id).update({
+    userProfilesRef.doc(user.id).update({
       'name': user.name,
       'phoneNumber': user.phoneNumber,
       'email': user.email,
@@ -24,7 +24,7 @@ class DatabaseServices {
   }
 
   static getUserProfile(String userId) {
-    var userProfileDocument = usersRef.doc(userId);
+    var userProfileDocument = userProfilesRef.doc(userId);
     var userProfile =
         userProfileDocument.get().then((value) => UserProfile.fromDoc(value));
 
@@ -303,6 +303,13 @@ class DatabaseServices {
       'name': listing.name,
       'location': listing.location,
       'price': listing.price,
+      'priceNormal': listing.priceNormal,
+      'bedrooms': listing.bedrooms,
+      'bathrooms': listing.bathrooms,
+      'kitchens': listing.kitchens,
+      'garages': listing.garages,
+      'sizeUnit': listing.sizeUnit,
+      'size': listing.size,
       'currency': listing.currency,
       'status': listing.status,
       'propertyType': listing.propertyType,
@@ -314,6 +321,7 @@ class DatabaseServices {
       'featured': listing.featured,
       'show': listing.show,
       'features': listing.features,
+      'features2': listing.features2,
       'images': listing.images,
       "timestamp": listing.timestamp,
     });
@@ -329,6 +337,13 @@ class DatabaseServices {
       'name': listing.name,
       'location': listing.location,
       'price': listing.price,
+      'priceNormal': listing.priceNormal,
+      'bedrooms': listing.bedrooms,
+      'bathrooms': listing.bathrooms,
+      'kitchens': listing.kitchens,
+      'garages': listing.garages,
+      'sizeUnit': listing.sizeUnit,
+      'size': listing.size,
       'currency': listing.currency,
       'status': listing.status,
       'propertyType': listing.propertyType,
@@ -340,6 +355,7 @@ class DatabaseServices {
       'featured': listing.featured,
       'show': listing.show,
       'features': listing.features,
+      'features2': listing.features2,
       'images': listing.images,
       "timestamp": listing.timestamp,
     });
@@ -356,7 +372,8 @@ class DatabaseServices {
     var docSnapshot = listingsRef
         .doc(listing.userId)
         .collection('Listings')
-        .doc(listing.id).get();
+        .doc(listing.id)
+        .get();
 
     Listing item = await docSnapshot.then((doc) => Listing.fromDoc(doc));
     item.show = false;

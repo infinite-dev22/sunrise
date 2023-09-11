@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/dashboard.dart';
 import 'package:sunrise/theme/color.dart';
@@ -17,7 +16,8 @@ class AdminApp extends StatefulWidget {
 }
 
 class _AdminAppState extends State<AdminApp> {
-  int _activeTab = 0;
+  // int _activeTab = 0;
+  int _activeTab = 1;
 
   _barItems() {
     return [
@@ -36,69 +36,12 @@ class _AdminAppState extends State<AdminApp> {
 
   @override
   Widget build(BuildContext context) {
-    bool showBanner = false;
-    return InternetConnectivityListener(
-      connectivityListener: (BuildContext context, bool hasInternetAccess) {
-        if (hasInternetAccess) {
-          if (showBanner) {
-            showBanner = false;
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.wifi_rounded),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text("You are back Online!"),
-                ],
-              ),
-              backgroundColor: AppColor.green_700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              margin: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).size.height - 140,
-                  right: 20,
-                  left: 20),
-            ));
-          }
-        } else {
-          showBanner = true;
-
-          if (showBanner) {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.wifi_off_rounded),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text("No internet connection"),
-                ],
-              ),
-              backgroundColor: AppColor.red_700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              margin: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).size.height - 140,
-                  right: 20,
-                  left: 20),
-            ));
-          }
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColor.contentColorBlue,
-        body: _buildPage(),
-        floatingActionButton: _buildBottomBar(),
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.miniCenterDocked,
-      ),
+    return Scaffold(
+      backgroundColor: AppColor.appBgColor,
+      body: _buildPage(),
+      // floatingActionButton: _buildBottomBar(),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterDocked,
     );
   }
 

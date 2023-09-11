@@ -9,7 +9,6 @@ import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/verify_email.dart';
 import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
-import 'package:http/http.dart' as http;
 
 import 'firebase_options.dart';
 import 'models/account.dart';
@@ -22,7 +21,7 @@ final actionCodeSettings = ActionCodeSettings(
 );
 
 Future<void> main() async {
-  const GOOGLE_CLIENT_ID =
+  const googleClientId =
       "632689866596-ocq6qpeqmo8chh8e0vdmtmk7u3ov6lco.apps.googleusercontent.com";
 
   // Initialize firebase.
@@ -33,7 +32,7 @@ Future<void> main() async {
   // Firebase Auth Providers.
   FirebaseUIAuth.configureProviders([
     EmailAuthProvider(),
-    GoogleProvider(clientId: GOOGLE_CLIENT_ID),
+    GoogleProvider(clientId: googleClientId),
   ]);
 
   // local notifications.

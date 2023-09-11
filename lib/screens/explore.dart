@@ -87,10 +87,12 @@ class _ExplorePageState extends State<ExplorePage> {
   _showPopulars() {
     Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .where("show", isEqualTo: true)
+      stream: listingsRef
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('Listings')
           .orderBy('likes', descending: true)
+          .where("likes", isGreaterThan: 0)
+          .where("show", isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -100,11 +102,15 @@ class _ExplorePageState extends State<ExplorePage> {
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (!snapshot.hasData) {
-          return const CircularProgressIndicator();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.data!.docs.isEmpty) {
@@ -194,11 +200,12 @@ class _ExplorePageState extends State<ExplorePage> {
   _showFeatured() {
     Favorite? favorite;
     return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
+      stream: listingsRef
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('Listings')
+          .orderBy('timestamp', descending: true)
           .where("featured", isEqualTo: true)
           .where("show", isEqualTo: true)
-          .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -208,11 +215,74 @@ class _ExplorePageState extends State<ExplorePage> {
         }
 
         if (!snapshot.hasData) {
-          return const CircularProgressIndicator();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.data!.docs.isEmpty) {
+          return Container();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: snapshot.data!.docs
+              .map((DocumentSnapshot document) {
+                Listing listing = Listing.fromDoc(document);
+
+                if (_favorites.isNotEmpty) {
+                  for (Favorite fav in _favorites) {
+                    if (fav.listingId == listing.id) {
+                      favorite = fav;
+                    } else {
+                      favorite = null;
+                    }
+                  }
+                } else {
+                  favorite = null;
+                }
+
+                return _buildAllListings(listing, favorite);
+              })
+              .toList()
+              .cast(),
+        );
+      },
+    );
+  }
+
+  _showRecentlyAdded() {
+    Favorite? favorite;
+    return StreamBuilder<QuerySnapshot>(
+      stream: listingsRef
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('Listings')
+          .orderBy('timestamp', descending: true)
+          .where("show", isEqualTo: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Something went wrong'),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.data!.docs.isEmpty) {
@@ -252,6 +322,8 @@ class _ExplorePageState extends State<ExplorePage> {
         return _showPopulars();
       case "Featured":
         return _showFeatured();
+      case "Recently Added":
+        return _showRecentlyAdded();
     }
   }
 

@@ -9,7 +9,7 @@ class AuthServices {
       User? signedInUser = FirebaseAuth.instance.currentUser;
 
       if (signedInUser != null) {
-        usersRef.doc(signedInUser.uid).set({
+        userProfilesRef.doc(signedInUser.uid).set({
           'userId': signedInUser.uid,
           'name': signedInUser.displayName ?? '',
           'email': signedInUser.email ?? '',

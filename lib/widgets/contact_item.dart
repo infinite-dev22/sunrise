@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sunrise/screens/admin.dart';
 import 'package:sunrise/theme/color.dart';
 
 import '../models/account.dart';
@@ -9,12 +12,15 @@ class ContactItem extends StatelessWidget {
       {Key? key,
       required this.onCallTap,
       required this.onMessageTap,
-      required this.user, required this.userType})
+      required this.userProfile,
+      required this.userType,
+      this.contact = true})
       : super(key: key);
 
   final GestureTapCallback? onCallTap, onMessageTap;
-  final UserProfile user;
+  final UserProfile userProfile;
   final String userType;
+  final bool contact;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,7 @@ class ContactItem extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          _buildContactPane(),
+          contact ? _buildContactPane() : _buildListingManage(context),
         ],
       ),
     );
@@ -50,7 +56,7 @@ class ContactItem extends StatelessWidget {
     return Row(
       children: [
         CustomImage(
-          user.profilePicture,
+          userProfile.profilePicture,
           width: 50,
           height: 50,
         ),
@@ -62,7 +68,7 @@ class ContactItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                user.name,
+                userProfile.id == FirebaseAuth.instance.currentUser!.uid ? "${userProfile.name} (You)" : userProfile.name,
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
@@ -100,7 +106,7 @@ class ContactItem extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        if (user.phoneNumber.isNotEmpty)
+        if (userProfile.phoneNumber.isNotEmpty)
           ElevatedButton(
             style:
                 ElevatedButton.styleFrom(backgroundColor: AppColor.green_700),
@@ -119,6 +125,37 @@ class ContactItem extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  _buildListingManage(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: FilledButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateColor.resolveWith(
+                    (states) => AppColor.blue_500)),
+            onPressed: () {
+              Navigator.of(context).push(CupertinoPageRoute(
+                builder: (context) => AdminApp(userProfile: userProfile),
+              ));
+            },
+            child: const Text(
+              "Manage Ad",
+              style: TextStyle(
+                fontSize: 18,
+                color: AppColor.darker,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -41,7 +41,7 @@ class _CustomPhotoGalleryState extends State<CustomPhotoGallery>
                   height: imageHeight,
                   isFile: true,
                   radius: 10,
-                  bgColor: AppColor.appBgColor,
+                  bgColor: AppColor.darker,
                   imageFit: BoxFit.contain,
                 ),
               ),

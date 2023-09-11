@@ -17,6 +17,7 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
+import '../utilities/custom_firebase_chat_core.dart';
 import '../widgets/contact_item.dart';
 import '../widgets/custom_image.dart';
 import '../widgets/icon_box.dart';
@@ -223,10 +224,11 @@ class _ViewPageState extends State<ViewPage> {
     );
   }
 
-  Widget _buildBlockerContact() {
+  Widget _buildBlockerContact({bool contact = true}) {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10),
       child: ContactItem(
+        contact: contact,
         onCallTap: () async {
           if (FirebaseAuth.instance.currentUser == null) {
             Toast.show("Sign in to continue",
@@ -262,7 +264,7 @@ class _ViewPageState extends State<ViewPage> {
             _handlePressed(widget.brokerProfile, context);
           }
         },
-        user: widget.brokerProfile,
+        userProfile: widget.brokerProfile,
         userType: widget.listing.isPropertyOwner,
       ),
     );
@@ -280,7 +282,8 @@ class _ViewPageState extends State<ViewPage> {
 
     await FirebaseChatCore.instance.createUserInFirestore(user);
 
-    final room = await FirebaseChatCore.instance.createRoom(user, metadata: {
+    final room =
+        await CustomFirebaseChatCore.instance.createRoom(user, metadata: {
       'imageUrl': userProfile.profilePicture,
       'name': userProfile.name,
       'listingId': widget.listing.id,
@@ -449,7 +452,7 @@ class _ViewPageState extends State<ViewPage> {
         FirebaseAuth.instance.currentUser != null
             ? widget.brokerProfile.userId ==
                     FirebaseAuth.instance.currentUser!.uid
-                ? _buildListingDelete()
+                ? _buildBlockerContact(contact: false)
                 : _buildBlockerContact()
             : _buildBlockerContact(),
         const SizedBox(
@@ -457,91 +460,6 @@ class _ViewPageState extends State<ViewPage> {
         ),
       ],
     );
-  }
-
-  _buildListingDelete() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: FilledButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateColor.resolveWith(
-                    (states) => AppColor.red_700)),
-            onPressed: () {
-              _buildDeleteConfirmDialog();
-            },
-            child: const Text(
-              "Delete",
-              style: TextStyle(
-                fontSize: 20,
-                color: AppColor.appBgColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _buildDeleteConfirmDialog() {
-    return Alert(
-      closeIcon: Container(),
-      context: context,
-      type: AlertType.error,
-      title: "Delete",
-      desc:
-          "Are you sure you want to delete this property listing?\nThis action can't be undone.",
-      buttons: [
-        DialogButton(
-          onPressed: () => Navigator.pop(context),
-          color: AppColor.red_700,
-          child: const Text(
-            "Cancel",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-        DialogButton(
-          onPressed: () {
-            DatabaseServices.deleteListing(widget.listing);
-            _deleteSuccessDialog();
-          },
-          color: AppColor.green_700,
-          child: const Text(
-            "Yes",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        )
-      ],
-    ).show();
-  }
-
-  _deleteSuccessDialog() {
-    return Alert(
-      closeIcon: Container(),
-      context: context,
-      type: AlertType.success,
-      title: "Success",
-      desc: "Property listing has successfully been deleted.",
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (BuildContext context) => const RootApp()),
-                    (Route<dynamic> route) => false);
-          },
-          color: AppColor.green_700,
-          child: const Text(
-            "Ok",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        )
-      ],
-    ).show();
   }
 
   _buildImagesList() {

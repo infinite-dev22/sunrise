@@ -6,6 +6,13 @@ class Listing {
   String name;
   String location;
   String price;
+  String priceNormal;
+  String bedrooms;
+  String bathrooms;
+  String kitchens;
+  String garages;
+  String sizeUnit;
+  String size;
   String currency;
   String propertyType;
   String propertyUse;
@@ -17,6 +24,7 @@ class Listing {
   bool featured;
   bool show;
   List<dynamic> features;
+  List<dynamic> features2;
   List<dynamic> images;
   Timestamp timestamp;
 
@@ -26,6 +34,13 @@ class Listing {
     required this.name,
     required this.location,
     required this.price,
+    required this.priceNormal,
+    required this.bedrooms,
+    required this.bathrooms,
+    required this.kitchens,
+    required this.garages,
+    required this.sizeUnit,
+    required this.size,
     required this.currency,
     required this.status,
     required this.propertyType,
@@ -37,6 +52,7 @@ class Listing {
     required this.featured,
     required this.show,
     required this.features,
+    required this.features2,
     required this.images,
     required this.timestamp,
   });
@@ -48,6 +64,13 @@ class Listing {
       name: doc['name'],
       location: doc['location'],
       price: doc['price'],
+      priceNormal: doc['priceNormal'],
+      bedrooms: doc['bedrooms'],
+      bathrooms: doc['bathrooms'],
+      kitchens: doc['kitchens'],
+      garages: doc['garages'],
+      sizeUnit: doc['sizeUnit'],
+      size: doc['size'],
       currency: doc['currency'],
       status: doc['status'],
       propertyType: doc['propertyType'],
@@ -59,6 +82,7 @@ class Listing {
       featured: doc['featured'],
       show: doc['show'],
       features: doc['features'],
+      features2: doc['features2'],
       images: doc['images'],
       timestamp: doc['timestamp'],
     );

@@ -4,9 +4,11 @@ import 'package:firebase_database/firebase_database.dart';
 
 final _fireStore = FirebaseFirestore.instance;
 
-final usersRef = _fireStore.collection('user_profiles');
+final userProfilesRef = _fireStore.collection('user_profiles');
 
 final likesRef = _fireStore.collection('likes');
+
+final usersRef = _fireStore.collection('users');
 
 final favoritesRef = _fireStore.collection('favorites');
 final recentsRef = _fireStore.collection('recents');

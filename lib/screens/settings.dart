@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/admin.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/widgets/custom_image.dart';
+import 'package:toast/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/color.dart';
@@ -27,8 +29,12 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  ToastContext toast = ToastContext();
+
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColor.appBgColor,
@@ -296,6 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
         DialogButton(
           onPressed: () {
             _deleteAccount();
+            _signOut();
             _deleteSuccessDialog();
           },
           color: AppColor.green_700,
@@ -366,7 +373,54 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _deleteAccount() async {
-    await FirebaseAuth.instance.currentUser?.delete();
+    try {
+      await usersRef.doc(FirebaseAuth.instance.currentUser!.uid).delete();
+      await userProfilesRef
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .delete();
+      await FirebaseAuth.instance.currentUser?.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == "requires-recent-login") {
+        Toast.show("Requires recent login to continue.",
+            duration: Toast.lengthLong, gravity: Toast.bottom);
+        await _reAuthenticateAndDelete();
+      } else {
+        if (kDebugMode) {
+          print(e.toString());
+        }
+        Toast.show("An error occurred!",
+            duration: Toast.lengthLong, gravity: Toast.bottom);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e.toString());
+      }
+      Toast.show("An error occurred!",
+          duration: Toast.lengthLong, gravity: Toast.bottom);
+    }
+  }
+
+  Future<void> _reAuthenticateAndDelete() async {
+    try {
+      final providerData =
+          FirebaseAuth.instance.currentUser?.providerData.first;
+
+      if (AppleAuthProvider().providerId == providerData!.providerId) {
+        await FirebaseAuth.instance.currentUser!
+            .reauthenticateWithProvider(AppleAuthProvider());
+      } else if (GoogleAuthProvider().providerId == providerData.providerId) {
+        await FirebaseAuth.instance.currentUser!
+            .reauthenticateWithProvider(GoogleAuthProvider());
+      }
+
+      await FirebaseAuth.instance.currentUser?.delete();
+    } catch (e) {
+      if (kDebugMode) {
+        print(e.toString());
+      }
+      Toast.show("An error occurred!",
+          duration: Toast.lengthLong, gravity: Toast.bottom);
+    }
   }
 
   _buildHomePage() {

@@ -29,25 +29,25 @@ class AppColor {
   static const chatBlue = Color(0xFF6F61E8);
   static const chatGray = Color(0xFFF5F5F7);
 
-  static const orange_500 = Color(0xFF30FF9D0B);
+  static const orange_500 = Color(0xff30ff9d0b);
   static const orange_700 = Color(0xFFFF9D0B);
-  static const blue_500 = Color(0xFF302196F3);
-  static const blue_300 = Color(0xFF302196F3);
+  static const blue_500 = Color(0xff302196f3);
+  static const blue_300 = Color(0xff302196f3);
   static const blue_700 = Color(0xFF2196F3);
-  static const green_500 = Color(0xFF4055B359);
+  static const green_500 = Color(0xff4055b359);
   static const green_700 = Color(0xFF55B359);
   static const grey_100 = Color(0xFFececec);
-  static const grey_200 = Color(0xFF309e9e9e);
+  static const grey_200 = Color(0xff309e9e9e);
   static const grey_300 = Color(0xFF9e9e9e);
-  static const grey_500 = Color(0xFF303e4249);
+  static const grey_500 = Color(0xff303e4249);
   static const grey_700 = Color(0xFF3e4249);
-  static const red_500 = Color(0xFF30F44236);
+  static const red_500 = Color(0xff30f44236);
   static const red_700 = Color(0xFFF44236);
-  static const purple_500 = Color(0xFF308E1FA1);
+  static const purple_500 = Color(0xff308e1fa1);
   static const purple_700 = Color(0xFF8E1FA1);
-  static const translucentWhite = Color(0xFF80FFFFFF);
+  static const translucentWhite = Color(0xff80ffffff);
 
-  static const translucent = Color(0xFF80ECECEC);
+  static const translucent = Color(0xff80ececec);
 
 
   static const Color menuBackground = Color(0xFF090912);
