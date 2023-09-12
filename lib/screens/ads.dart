@@ -1,4 +1,3 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -60,7 +59,7 @@ class _AdsPageState extends State<AdsPage> {
               child: CustomTextBox(
                 hint: "Search properties",
                 prefix: const Icon(Icons.search, color: Colors.grey),
-                suffix: const Icon(Icons.mic, color: Colors.grey),
+                suffix: const SizedBox.shrink(),
                 onChanged: (value) {
                   setState(() {
                     if (value.isNotEmpty) {
@@ -410,22 +409,19 @@ class _AdsPageState extends State<AdsPage> {
             const SizedBox(
               height: 20,
             ),
-            CarouselSlider(
-              options: CarouselOptions(
-                  height: 290,
-                  enlargeCenterPage: true,
-                  disableCenter: true,
-                  viewportFraction: .8,
-                  enableInfiniteScroll: false,
-                  initialPage: 0),
-              items: snapshot.data!.docs
-                  .map((DocumentSnapshot document1) {
-                    Listing listing = Listing.fromDoc(document1);
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(bottom: 5, left: 15),
+              child: Row(
+                children: snapshot.data!.docs
+                    .map((DocumentSnapshot document1) {
+                      Listing listing = Listing.fromDoc(document1);
 
-                    return _buildRecentlyAdded(listing);
-                  })
-                  .toList()
-                  .cast(),
+                      return _buildRecentlyAdded(listing);
+                    })
+                    .toList()
+                    .cast(),
+              ),
             ),
             const SizedBox(
               height: 20,

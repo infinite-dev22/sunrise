@@ -110,6 +110,7 @@ class _CustomPhotoGalleryState extends State<CustomPhotoGallery>
           CustomPhotoGallery.images.add(File(imageFile.path));
         });
       }
+      imageFiles = null;
     } catch (e) {
       if (kDebugMode) {
         print(e);

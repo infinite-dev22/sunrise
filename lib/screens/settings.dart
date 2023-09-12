@@ -136,33 +136,32 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ),
-        if (kDebugMode)
-          CustomSettingsSection(
-            child: RaisedSettingsSection(
-              children: [
-                SettingsTile.navigation(
-                  leading: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        color: AppColor.blue_500,
-                        borderRadius: BorderRadius.circular(50)),
-                    child: const Icon(Icons.shield_rounded,
-                        color: AppColor.blue_700),
-                  ),
-                  title: const Text("My Admin"),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                  onPressed: (context) {
-                    Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                          builder: (context) =>
-                              AdminApp(userProfile: widget.userProfile!),
-                        ));
-                  },
+        CustomSettingsSection(
+          child: RaisedSettingsSection(
+            children: [
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.blue_500,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: const Icon(Icons.shield_rounded,
+                      color: AppColor.blue_700),
                 ),
-              ],
-            ),
+                title: const Text("My Admin"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) =>
+                            AdminApp(userProfile: widget.userProfile!),
+                      ));
+                },
+              ),
+            ],
           ),
+        ),
         CustomSettingsSection(
           child: RaisedSettingsSection(
             children: [

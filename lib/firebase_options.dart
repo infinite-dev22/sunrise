@@ -17,24 +17,15 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -52,6 +43,17 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDdNz07sa3aJySi_vRPmRdOpNvKCAn49d8',
+    appId: '1:632689866596:web:67d81c81ac86ba0e966c71',
+    messagingSenderId: '632689866596',
+    projectId: 'homepal-ug',
+    authDomain: 'homepal-ug.firebaseapp.com',
+    databaseURL: 'https://homepal-ug-default-rtdb.firebaseio.com',
+    storageBucket: 'homepal-ug.appspot.com',
+    measurementId: 'G-FSN163GLF6',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAU3bjlv-1D3KNPDowXyQ2ygjUM-yLajXY',
     appId: '1:632689866596:android:dd3d8f4068caef06966c71',
@@ -59,5 +61,29 @@ class DefaultFirebaseOptions {
     projectId: 'homepal-ug',
     databaseURL: 'https://homepal-ug-default-rtdb.firebaseio.com',
     storageBucket: 'homepal-ug.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBhalFToUxymdzdOGTsClHwsil3xX2A_WE',
+    appId: '1:632689866596:ios:ca23d8e9a2e90b06966c71',
+    messagingSenderId: '632689866596',
+    projectId: 'homepal-ug',
+    databaseURL: 'https://homepal-ug-default-rtdb.firebaseio.com',
+    storageBucket: 'homepal-ug.appspot.com',
+    androidClientId: '632689866596-fhnd7i0tesu26n4ekqfcvu46mrr1k2ch.apps.googleusercontent.com',
+    iosClientId: '632689866596-p18f2o0pmg9eoe05n3s0eeb36qe5dvu1.apps.googleusercontent.com',
+    iosBundleId: 'com.example.sunrise',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBhalFToUxymdzdOGTsClHwsil3xX2A_WE',
+    appId: '1:632689866596:ios:af5dfcb719e24fa5966c71',
+    messagingSenderId: '632689866596',
+    projectId: 'homepal-ug',
+    databaseURL: 'https://homepal-ug-default-rtdb.firebaseio.com',
+    storageBucket: 'homepal-ug.appspot.com',
+    androidClientId: '632689866596-fhnd7i0tesu26n4ekqfcvu46mrr1k2ch.apps.googleusercontent.com',
+    iosClientId: '632689866596-29edm3fv91i5d2c57msuhrt3ce7cgif3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.sunrise.RunnerTests',
   );
 }
