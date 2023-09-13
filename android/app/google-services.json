@@ -7,14 +7,22 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1068146192617:android:b66c103330a40f57d64078",
+        "mobilesdk_app_id": "1:1068146192617:android:5a2efb44918a576ad64078",
         "android_client_info": {
-          "package_name": "com.example.sunrise"
+          "package_name": "org.infinite.sunrise"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1068146192617-0gs2effs9kl91j32s7ukpjqehjuhpqss.apps.googleusercontent.com",
+          "client_id": "1068146192617-dgptc96jc2mfdllsffc038ktpd11jnp6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.infinite.sunrise",
+            "certificate_hash": "32f29030c35f186e9842625526803343c78b5392"
+          }
+        },
+        {
+          "client_id": "1068146192617-5hcmgi9e026e5pdkr9gl086ha340mjds.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

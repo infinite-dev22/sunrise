@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCV8IyARfRXbHHnpBLJVpRe-T0Ot_E3_E4',
-    appId: '1:1068146192617:android:b66c103330a40f57d64078',
+    appId: '1:1068146192617:android:5a2efb44918a576ad64078',
     messagingSenderId: '1068146192617',
     projectId: 'homepal-ff7cb',
     storageBucket: 'homepal-ff7cb.appspot.com',

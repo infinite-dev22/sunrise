@@ -16,13 +16,13 @@ import 'models/account.dart';
 final actionCodeSettings = ActionCodeSettings(
   handleCodeInApp: true,
   androidMinimumVersion: '1',
-  androidPackageName: 'com.example.sunrise_broker',
+  androidPackageName: 'org.infinite.sunrise',
   url: 'https://flutterfire-e2e-tests.firebaseapp.com',
 );
 
 Future<void> main() async {
   const googleClientId =
-      "632689866596-ocq6qpeqmo8chh8e0vdmtmk7u3ov6lco.apps.googleusercontent.com";
+      "1068146192617-5hcmgi9e026e5pdkr9gl086ha340mjds.apps.googleusercontent.com";
 
   // Initialize firebase.
   WidgetsFlutterBinding.ensureInitialized();
