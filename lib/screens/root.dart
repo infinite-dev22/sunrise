@@ -4,7 +4,7 @@ import 'package:observe_internet_connectivity/observe_internet_connectivity.dart
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/rooms.dart';
 import 'package:sunrise/screens/settings.dart';
-import 'package:sunrise/screens/sign_in.dart';
+import 'package:sunrise/screens/welcome.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/widgets/bottombar_item.dart';
 import 'package:toast/toast.dart';
@@ -167,7 +167,7 @@ class _RootAppState extends State<RootApp> {
                 onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SignInPage(),
+                      builder: (context) => WelcomePage(),
                     )),
                 child: const Text(
                   "Sign In",

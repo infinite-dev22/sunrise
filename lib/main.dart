@@ -1,12 +1,10 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:firebase_auth/firebase_auth.dart'
-    hide EmailAuthProvider, GoogleAuthProvider, PhoneAuthProvider;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/verify_email.dart';
+import 'package:sunrise/services/auth_services.dart';
 import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
 
@@ -21,23 +19,11 @@ final actionCodeSettings = ActionCodeSettings(
 );
 
 Future<void> main() async {
-  const googleClientId =
-      "1068146192617-5hcmgi9e026e5pdkr9gl086ha340mjds.apps.googleusercontent.com";
-
   // Initialize firebase.
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Firebase Auth Providers.
-  FirebaseUIAuth.configureProviders([
-    EmailAuthProvider(),
-    GoogleProvider(clientId: googleClientId),
-  ]);
-
-  // local notifications.
-  // await PlatformNotifier.I.init(appName: "sunrise");
-  // await PlatformNotifier.I.requestPermissions();
 
   // Always initialize Awesome Notifications
   await NotificationController.initializeLocalNotifications();
@@ -84,7 +70,7 @@ class MyApp extends StatelessWidget {
 
     if (auth.currentUser != null) {
       if (!auth.currentUser!.emailVerified && auth.currentUser!.email != null) {
-        return const VerifyEmailPage();
+        return VerifyEmailPage();
       }
 
       return RootApp(userProfile: userProfile);
@@ -150,8 +136,7 @@ class NotificationController {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                    'Allow HomePal to send you notifications!'),
+                const Text('Allow HomePal to send you notifications!'),
               ],
             ),
             actions: [

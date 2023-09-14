@@ -353,7 +353,9 @@ class _AddListingPageState extends State<AddListingPage> {
           controlAffinity: ListTileControlAffinity.leading,
           value: _isOwnerValue,
           onChanged: (value) {
-            _isOwnerValue = value!;
+            setState(() {
+              _isOwnerValue = value!;
+            });
           },
           title: const Text("Property Owner"),
         ),

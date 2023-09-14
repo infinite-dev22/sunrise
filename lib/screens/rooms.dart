@@ -6,8 +6,10 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sunrise/screens/sign_in.dart';
+import 'package:sunrise/screens/welcome.dart';
 
 import '../theme/color.dart';
+import '../utilities/features/chat/chat_core.dart';
 import 'chat.dart';
 import 'util.dart';
 
@@ -121,7 +123,7 @@ class _RoomsPageState extends State<RoomsPage> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           fullscreenDialog: true,
-                          builder: (context) => const SignInPage(),
+                          builder: (context) => WelcomePage(),
                         ),
                       );
                     },
@@ -131,7 +133,7 @@ class _RoomsPageState extends State<RoomsPage> {
               ),
             )
           : StreamBuilder<List<types.Room>>(
-              stream: FirebaseChatCore.instance.rooms(),
+              stream: CustomFirebaseChatCore.instance.rooms(),
               initialData: const [],
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {

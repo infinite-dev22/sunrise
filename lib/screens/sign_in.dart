@@ -91,7 +91,7 @@ class SignInPage extends StatelessWidget {
         mfaAction,
       ],
       styles: const {
-        EmailFormStyle(signInButtonVariant: ButtonVariant.filled),
+        EmailFormStyle(signInButtonVariant: ButtonVariant.filled, inputDecorationTheme: InputDecorationTheme(border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(15))))),
       },
       subtitleBuilder: (context, action) {
         return Padding(
@@ -131,7 +131,7 @@ class SignInPage extends StatelessWidget {
   _navigateToVerifyEmail(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-            builder: (BuildContext context) => const VerifyEmailPage()),
+            builder: (BuildContext context) => VerifyEmailPage()),
         (Route<dynamic> route) => false);
   }
 
