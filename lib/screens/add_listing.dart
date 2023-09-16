@@ -704,23 +704,26 @@ class _AddListingPageState extends State<AddListingPage> {
                 builder: (BuildContext context) =>
                     ProfilePage(userProfile: widget.userProfile!),
               ));
-            } else {
-              if (_formKey.currentState!.validate() &&
-                      _propertyType.isNotEmpty ||
-                  (_propertyType.isNotEmpty && _propertyUse.isNotEmpty) &&
-                      _status.isNotEmpty &&
-                      CustomPhotoGallery.images.isNotEmpty &&
-                      CustomPhotoGallery.images.length > 2) {
-                (widget.listing != null)
-                    ? _uploadListingAd(widget.listing!.featured)
-                    : _buildAddFeaturedDialog();
-              } else if (CustomPhotoGallery.images.isEmpty) {
-                Toast.show("No images selected",
-                    duration: Toast.lengthLong, gravity: Toast.bottom);
-              } else if (CustomPhotoGallery.images.length < 3) {
-                Toast.show("Please select at least 3 images",
-                    duration: Toast.lengthLong, gravity: Toast.bottom);
-              }
+              return;
+            }
+            if (CustomPhotoGallery.images.isEmpty) {
+              Toast.show("No images selected",
+                  duration: Toast.lengthLong, gravity: Toast.bottom);
+              return;
+            }
+            if (CustomPhotoGallery.images.length < 3) {
+              Toast.show("Please select at least 3 images",
+                  duration: Toast.lengthLong, gravity: Toast.bottom);
+              return;
+            }
+            if (_formKey.currentState!.validate() && _propertyType.isNotEmpty ||
+                (_propertyType.isNotEmpty && _propertyUse.isNotEmpty) &&
+                    _status.isNotEmpty &&
+                    CustomPhotoGallery.images.isNotEmpty &&
+                    CustomPhotoGallery.images.length > 2) {
+              (widget.listing != null)
+                  ? _uploadListingAd(widget.listing!.featured)
+                  : _buildAddFeaturedDialog();
             }
           },
           child: Row(
