@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -24,6 +23,7 @@ import 'package:sunrise/widgets/custom_image.dart';
 import 'package:toast/toast.dart';
 
 import '../models/account.dart';
+import '../utilities/features/chat/chat_core.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({
@@ -111,7 +111,7 @@ class _ChatPageState extends State<ChatPage> {
           uri: uri,
         );
 
-        FirebaseChatCore.instance.sendMessage(message, widget.room.id);
+        CustomFirebaseChatCore.instance.sendMessage(message, widget.room.id);
         _setAttachmentUploading(false);
       } finally {
         _setAttachmentUploading(false);
@@ -147,7 +147,7 @@ class _ChatPageState extends State<ChatPage> {
           width: image.width.toDouble(),
         );
 
-        FirebaseChatCore.instance.sendMessage(
+        CustomFirebaseChatCore.instance.sendMessage(
           message,
           widget.room.id,
         );
@@ -165,7 +165,7 @@ class _ChatPageState extends State<ChatPage> {
       if (message.uri.startsWith('http')) {
         try {
           final updatedMessage = message.copyWith(isLoading: true);
-          FirebaseChatCore.instance.updateMessage(
+          CustomFirebaseChatCore.instance.updateMessage(
             updatedMessage,
             widget.room.id,
           );
@@ -182,7 +182,7 @@ class _ChatPageState extends State<ChatPage> {
           }
         } finally {
           final updatedMessage = message.copyWith(isLoading: false);
-          FirebaseChatCore.instance.updateMessage(
+          CustomFirebaseChatCore.instance.updateMessage(
             updatedMessage,
             widget.room.id,
           );
@@ -199,12 +199,13 @@ class _ChatPageState extends State<ChatPage> {
   ) {
     final updatedMessage = message.copyWith(previewData: previewData);
 
-    FirebaseChatCore.instance.updateMessage(updatedMessage, widget.room.id);
+    CustomFirebaseChatCore.instance
+        .updateMessage(updatedMessage, widget.room.id);
     setState(() {});
   }
 
   void _handleSendPressed(types.PartialText message) {
-    FirebaseChatCore.instance.sendMessage(
+    CustomFirebaseChatCore.instance.sendMessage(
       message,
       widget.room.id,
     );
@@ -260,10 +261,10 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: AppColor.appBgColor,
       body: StreamBuilder<types.Room>(
         initialData: widget.room,
-        stream: FirebaseChatCore.instance.room(widget.room.id),
+        stream: CustomFirebaseChatCore.instance.room(widget.room.id),
         builder: (context, snapshot) => StreamBuilder<List<types.Message>>(
             initialData: const [],
-            stream: FirebaseChatCore.instance.messages(snapshot.data!),
+            stream: CustomFirebaseChatCore.instance.messages(snapshot.data!),
             builder: (context, snapshot) => Chat(
                   typingIndicatorOptions: const TypingIndicatorOptions(),
                   isAttachmentUploading: _isAttachmentUploading,
@@ -281,12 +282,12 @@ class _ChatPageState extends State<ChatPage> {
                       if (p0.author.id !=
                           FirebaseAuth.instance.currentUser!.uid) {
                         final updatedMessage = p0.copyWith(status: Status.seen);
-                        FirebaseChatCore.instance
+                        CustomFirebaseChatCore.instance
                             .updateMessage(updatedMessage, widget.room.id);
                       } else {
                         final updatedMessage =
                             p0.copyWith(status: Status.delivered);
-                        FirebaseChatCore.instance
+                        CustomFirebaseChatCore.instance
                             .updateMessage(updatedMessage, widget.room.id);
                       }
 
@@ -305,7 +306,7 @@ class _ChatPageState extends State<ChatPage> {
                   textMessageOptions:
                       const TextMessageOptions(isTextSelectable: false),
                   user: types.User(
-                    id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
+                    id: CustomFirebaseChatCore.instance.firebaseUser?.uid ?? '',
                   ),
                 )),
       ),

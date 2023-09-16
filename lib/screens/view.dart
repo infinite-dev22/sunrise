@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
 import 'package:sunrise/models/property.dart';
@@ -15,6 +14,7 @@ import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
 import '../theme/color.dart';
+import '../utilities/features/chat/chat_core.dart';
 import '../widgets/contact_item.dart';
 import '../widgets/custom_image.dart';
 import '../widgets/icon_box.dart';
@@ -270,16 +270,27 @@ class _ViewPageState extends State<ViewPage> {
   void _handlePressed(UserProfile userProfile, BuildContext context) async {
     final navigator = Navigator.of(context);
 
-    types.User user = types.User(
+    types.User otherUser = types.User(
       firstName: userProfile.name,
       id: userProfile.userId, // UID from Firebase Authentication
       imageUrl: userProfile.profilePicture,
       lastName: '',
     );
 
-    await FirebaseChatCore.instance.createUserInFirestore(user);
+    UserProfile currentUserProfile =
+    await DatabaseServices.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
 
-    final room = await FirebaseChatCore.instance.createRoom(user, metadata: {
+    types.User currentUser = types.User(
+      firstName: currentUserProfile.name,
+      id: currentUserProfile.userId, // UID from Firebase Authentication
+      imageUrl: currentUserProfile.profilePicture,
+      lastName: '',
+    );
+
+    await CustomFirebaseChatCore.instance.createUserInFirestore(otherUser);
+    await CustomFirebaseChatCore.instance.createUserInFirestore(currentUser);
+
+    final room = await CustomFirebaseChatCore.instance.createRoom(otherUser, metadata: {
       'imageUrl': userProfile.profilePicture,
       'name': userProfile.name,
       'listingId': widget.listing.id,

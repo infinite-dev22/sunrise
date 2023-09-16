@@ -1,50 +1,42 @@
 {
   "project_info": {
-    "project_number": "632689866596",
-    "firebase_url": "https://homepal-ug-default-rtdb.firebaseio.com",
-    "project_id": "homepal-ug",
-    "storage_bucket": "homepal-ug.appspot.com"
+    "project_number": "1068146192617",
+    "project_id": "homepal-ff7cb",
+    "storage_bucket": "homepal-ff7cb.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:632689866596:android:dd3d8f4068caef06966c71",
+        "mobilesdk_app_id": "1:1068146192617:android:5a2efb44918a576ad64078",
         "android_client_info": {
-          "package_name": "com.example.sunrise"
+          "package_name": "org.infinite.sunrise"
         }
       },
       "oauth_client": [
         {
-          "client_id": "632689866596-j55s8rug0n2ft5isbm6id1e1injfldpq.apps.googleusercontent.com",
+          "client_id": "1068146192617-dgptc96jc2mfdllsffc038ktpd11jnp6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.sunrise",
+            "package_name": "org.infinite.sunrise",
             "certificate_hash": "32f29030c35f186e9842625526803343c78b5392"
           }
         },
         {
-          "client_id": "632689866596-ocq6qpeqmo8chh8e0vdmtmk7u3ov6lco.apps.googleusercontent.com",
+          "client_id": "1068146192617-5hcmgi9e026e5pdkr9gl086ha340mjds.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAU3bjlv-1D3KNPDowXyQ2ygjUM-yLajXY"
+          "current_key": "AIzaSyCV8IyARfRXbHHnpBLJVpRe-T0Ot_E3_E4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "632689866596-fgg7jglafmn2pkb3uo2c6ibnueevgvtc.apps.googleusercontent.com",
+              "client_id": "1068146192617-0gs2effs9kl91j32s7ukpjqehjuhpqss.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "632689866596-29edm3fv91i5d2c57msuhrt3ce7cgif3.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.sunrise.RunnerTests"
-              }
             }
           ]
         }

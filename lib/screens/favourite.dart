@@ -138,7 +138,6 @@ class _FavouritePageState extends State<FavouritePage> {
           // .doc(user!.uid)
           .doc(widget.userProfile!.userId)
           .collection('Favorites')
-          .where("show", isEqualTo: true)
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {

@@ -1,5 +1,5 @@
 name: sunrise
-description: A new Flutter project.
+description: A Realtor app.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -56,7 +56,7 @@ dependencies:
   dropdown_button2: ^2.3.7
   flutter_chat_types: ^3.6.1
   flutter_chat_ui: ^1.6.8
-  flutter_firebase_chat_core:
+  flutter_firebase_chat_core: 1.6.4
   image_picker: ^0.8.7+5
   mime: ^1.0.4
   open_filex: ^4.3.2
@@ -82,6 +82,10 @@ dependencies:
   toast: ^0.3.0
   flutter_cache_manager: ^3.3.1
   awesome_notifications: ^0.6.19
+  meta: ^1.9.1
+  google_sign_in: ^6.1.5
+  flutter_facebook_auth: ^6.0.1
+  twitter_login: ^4.4.2
 
 #  awesome_notifications: ^0.7.0-beta.7
 #  awesome_notifications_fcm: ^0.7.4+1

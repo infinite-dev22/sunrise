@@ -15,10 +15,17 @@
                 android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
+    <queries>
+        <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
+    </queries>
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="Home Pal EAP snapshot">
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="6931693450185693"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="e9f27bb9eb5b48ad399448f4c5f80990"/>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

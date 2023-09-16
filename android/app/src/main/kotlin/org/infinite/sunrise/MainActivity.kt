@@ -1,4 +1,4 @@
-package com.example.sunrise
+package org.infinite.sunrise
 
 import io.flutter.embedding.android.FlutterActivity
 

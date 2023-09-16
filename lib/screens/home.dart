@@ -9,6 +9,7 @@ import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/search.dart';
 import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/screens/view.dart';
+import 'package:sunrise/screens/welcome.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/utilities/data.dart';
 import 'package:sunrise/widgets/category_item.dart';
@@ -116,7 +117,7 @@ class _HomePageState extends State<HomePage> {
                           duration: Toast.lengthLong, gravity: Toast.bottom);
 
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) => const SignInPage(),
+                        builder: (BuildContext context) => WelcomePage(),
                       ));
                     },
                   ),
