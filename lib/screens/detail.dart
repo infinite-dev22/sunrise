@@ -25,7 +25,7 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   _buildHeader() {
-    return AppBar(
+    return AppBar(backgroundColor: AppColor.appBgColor,
       title: Row(
         children: [
           Expanded(
