@@ -10,7 +10,7 @@ class AuthServices {
       User? signedInUser = FirebaseAuth.instance.currentUser;
 
       if (signedInUser != null) {
-        userProfilesRef.doc(signedInUser.uid).set({
+        userProfilesRef.insert({
           'userId': signedInUser.uid,
           'name': signedInUser.displayName ?? name,
           'email': signedInUser.email ?? '',
@@ -18,7 +18,7 @@ class AuthServices {
           'accountType': 'broker',
           'phoneNumber': signedInUser.phoneNumber ?? '',
           'profilePicture': signedInUser.photoURL ??
-              'https://firebasestorage.googleapis.com/v0/b/homepal-ff7cb.appspot.com/o/images%2Fusers%2Fplace_holder%2Fuser-placeholder.png?alt=media&token=a946179c-16f0-4794-80dd-ccf0c25471f6',
+              'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/images/users/user-placeholder.png',
         });
         return true;
       }

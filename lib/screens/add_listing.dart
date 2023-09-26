@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/main.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/profile.dart';
@@ -879,10 +879,7 @@ class _AddListingPageState extends State<AddListingPage> {
               {"name": "Access Road", "value": _roadValue},
               {"name": "Refrigerator", "value": _refrigeratorValue},
             ],
-      images: _images,
-      timestamp: Timestamp.fromDate(
-        DateTime.now(),
-      ),
+      images: _images
     );
     if (widget.listing != null) {
       listing!.id = widget.listing!.id;

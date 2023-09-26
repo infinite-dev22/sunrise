@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/welcome.dart';
+import 'package:sunrise/theme/color.dart';
 import 'package:toast/toast.dart';
 
 import '../widgets/auth_button.dart';
@@ -134,7 +135,13 @@ class LoginPage extends StatelessWidget {
                                                 .signInWithEmailAndPassword(
                                                     email: email,
                                                     password: passwordController
-                                                        .text.trim());
+                                                        .text.trim()).catchError((error) {
+                                              Toast.show(
+                                                  error.toString().substring(error.toString().indexOf("T")),
+                                                  duration: Toast.lengthLong,
+                                                  gravity: Toast.bottom, backgroundColor: AppColor.red_700);
+                                              return error;
+                                            });
                                           },
                                         ),
                                         const SizedBox(height: 30),

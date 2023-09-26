@@ -12,10 +12,16 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_textfield.dart';
 import 'detail.dart';
 
-class Signup extends StatelessWidget {
-  Signup({super.key, this.email});
+class Signup extends StatefulWidget {
+  const Signup({super.key, this.email});
 
   final String? email;
+
+  @override
+  State<Signup> createState() => _SignupState();
+}
+
+class _SignupState extends State<Signup> {
   final ToastContext toast = ToastContext();
 
   // text editing controllers
@@ -60,7 +66,6 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     toast.init(context);
-    emailController.text = email ?? '';
 
     return Scaffold(
       backgroundColor: Colors.grey[300],
@@ -88,12 +93,6 @@ class Signup extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                  const Text("Sign Up",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold)),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                   ClipRect(
                     child: BackdropFilter(
                       filter:
@@ -116,31 +115,36 @@ class Signup extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                (email != null)
+                                (widget.email != null)
                                     ? Column(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
-                                        children: [
-                                          const Text(
-                                              "Look like you don't have an account. Let's create a new account for",
-                                              // ignore: prefer_const_constructors
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 20),
-                                              textAlign: TextAlign.start),
-                                          // ignore: prefer_const_constructors
-                                          Text(
-                                            email!,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
-                                            textAlign: TextAlign.start,
+                                        children: [RichText(
+                                          text: TextSpan(
+                                            text: '',
+                                            children: <TextSpan>[
+                                              const TextSpan(
+                                                text:
+                                                "Looks like you don't have an account. Let's create a one for ",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14),
+                                              ),
+                                              TextSpan(
+                                                text: widget.email!,
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration: TextDecoration.underline),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(height: 30),
+                                        ),
+                                          const SizedBox(height: 20),
                                         ],
                                       )
                                     : const Column(
@@ -154,7 +158,7 @@ class Signup extends StatelessWidget {
                                               // ignore: prefer_const_constructors
                                               style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 20),
+                                                  fontSize: 16),
                                               textAlign: TextAlign.start),
                                           SizedBox(height: 30),
                                         ],
@@ -181,7 +185,7 @@ class Signup extends StatelessWidget {
                                   controller: confirmPasswordController,
                                   hintText: 'Confirm password',
                                 ),
-                                const SizedBox(height: 30),
+                                const SizedBox(height: 20),
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -197,7 +201,7 @@ class Signup extends StatelessWidget {
                                                 'By selecting Agree & Continue below, I agree to our ',
                                             style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 16),
+                                                fontSize: 14),
                                           ),
                                           TextSpan(
                                             text:
@@ -216,7 +220,7 @@ class Signup extends StatelessWidget {
                                                 color: Color.fromARGB(
                                                     255, 71, 233, 133),
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16),
+                                                fontSize: 14),
                                           ),
                                         ],
                                       ),
@@ -244,5 +248,12 @@ class Signup extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    emailController.text = widget.email ?? '';
+
+    super.initState();
   }
 }

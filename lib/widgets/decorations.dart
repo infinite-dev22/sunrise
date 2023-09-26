@@ -34,7 +34,7 @@ SideBuilder sideImage(String assetName) {
   };
 }
 
-SideBuilder sideIcon(IconData icon) {
+sideIcon(IconData icon) {
   return (context, constraints) {
     return Padding(
       padding: const EdgeInsets.all(20),

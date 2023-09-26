@@ -28,7 +28,7 @@ class WelcomePage extends StatelessWidget {
   final ToastContext toast = ToastContext();
 
   // text editing controllers
-  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   final double _sigmaX = 5; // from 0-10
@@ -75,7 +75,6 @@ class WelcomePage extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(30))),
                         width: MediaQuery.of(context).size.width * 0.9,
-                        height: MediaQuery.of(context).size.height * 0.72,
                         child: Form(
                           key: _formKey,
                           child: Center(
@@ -93,7 +92,7 @@ class WelcomePage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 10),
                                 AuthTextField(
-                                  controller: usernameController,
+                                  controller: emailController,
                                   hintText: 'Email',
                                   obscureText: false,
                                   isEmail: true,
@@ -104,17 +103,17 @@ class WelcomePage extends StatelessWidget {
                                     var nav = Navigator.of(context);
                                     if (_formKey.currentState!.validate()) {
                                       if (EmailValidator.validate(
-                                          usernameController.text)) {
+                                          emailController.text)) {
                                         List<String> userList =
                                             await FirebaseAuth.instance
                                                 .fetchSignInMethodsForEmail(
-                                                    usernameController.text);
+                                                    emailController.text);
 
                                         if (userList.isEmpty) {
                                           nav.push(
                                             MaterialPageRoute(
                                                 builder: (context) => Signup(
-                                                      email: usernameController
+                                                      email: emailController
                                                           .text,
                                                     )),
                                           );
@@ -122,7 +121,7 @@ class WelcomePage extends StatelessWidget {
                                           nav.push(
                                             MaterialPageRoute(
                                                 builder: (context) => LoginPage(
-                                                      email: usernameController
+                                                      email: emailController
                                                           .text
                                                           .trim(),
                                                     )),

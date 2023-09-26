@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/search.dart';
@@ -132,14 +131,11 @@ class _FavouritePageState extends State<FavouritePage> {
 
   _showFavorites() {
     int index = -1;
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collection("favorites")
-          // .doc(user!.uid)
-          .doc(widget.userProfile!.userId)
-          .collection('Favorites')
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: favoritesRef.stream(primaryKey: ['id'])
+          .eq('user_id', widget.userProfile!.userId)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -156,7 +152,7 @@ class _FavouritePageState extends State<FavouritePage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container(
               alignment: Alignment.center,
               margin: const EdgeInsets.only(
@@ -170,8 +166,8 @@ class _FavouritePageState extends State<FavouritePage> {
         }
 
         return Column(
-          children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
+          children: snapshot.data!
+              .map((var document) {
                 Favorite favorite = Favorite.fromDoc(document);
 
                 index++;
@@ -187,18 +183,17 @@ class _FavouritePageState extends State<FavouritePage> {
 
   _getListings(Favorite favorite, int index) {
     return StreamBuilder(
-        stream: db
-            .collectionGroup('Listings')
-            .where("show", isEqualTo: true)
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
+        stream: listingsRef.stream(primaryKey: ['id'])
+            .eq("show", true)
+            .order('created_at', ascending: false)
+            .execute(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text("Inner error");
           }
 
           try {
-            if (snapshot.data!.docs.isEmpty) {
+            if (snapshot.data!.isEmpty) {
               return Container();
             }
           } catch (e) {
@@ -206,8 +201,8 @@ class _FavouritePageState extends State<FavouritePage> {
           }
 
           return Column(
-            children: snapshot.data!.docs
-                .map((DocumentSnapshot document) {
+            children: snapshot.data!
+                .map((var document) {
                   Listing listing = Listing.fromDoc(document);
 
                   if (listing.id == favorite.listingId) {

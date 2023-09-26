@@ -1,28 +1,22 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final _fireStore = FirebaseFirestore.instance;
+final supabase = Supabase.instance.client;
 
-final userProfilesRef = _fireStore.collection('user_profiles');
+final userProfilesRef = supabase.from('user_profiles');
 
-final likesRef = _fireStore.collection('likes');
+final likesRef = supabase.from('likes');
 
-final usersRef = _fireStore.collection('users');
+final usersRef = supabase.from('users');
 
-final favoritesRef = _fireStore.collection('favorites');
-final recentsRef = _fireStore.collection('recents');
+final favoritesRef = supabase.from('favorites');
+final recentsRef = supabase.from('recents');
 
-final db = _fireStore;
+final db = supabase;
 
-final database = FirebaseDatabase.instance;
+final listingsRef = supabase.from('listings');
 
-final storageRef = FirebaseStorage.instance.ref();
+final featuresRefs = supabase.from('features');
 
-final listingsRef = _fireStore.collection('listings');
+final listingRatingsRef = supabase.from('listing_ratings');
 
-final featuresRefs = _fireStore.collection('features');
-
-final listingRatingsRef = _fireStore.collection('listing_ratings');
-
-final brokerRatingsRef = _fireStore.collection('broker_ratings');
+final brokerRatingsRef = supabase.from('broker_ratings');

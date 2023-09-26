@@ -1,5 +1,4 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -191,14 +190,11 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   _showRecents() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collection("recents")
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Recents')
-          .limit(10)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: recentsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -218,7 +214,7 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -258,8 +254,8 @@ class _DashboardPageState extends State<DashboardPage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       RecentlyViewed recentlyViewed =
                           RecentlyViewed.fromDoc(document);
 
@@ -280,13 +276,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
-        stream: db
-            .collectionGroup('Listings')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
+        stream: listingsRef.stream(primaryKey: ['id'])
+            .eq("show", true)
+            .order('created_at', ascending: false).execute(),
         builder: (context, snapshot) {
           try {
-            if (snapshot.data!.docs.isEmpty) {
+            if (snapshot.data!.isEmpty) {
               if (snapshot.hasError) {
                 return const Text("Inner error");
               }
@@ -296,7 +291,7 @@ class _DashboardPageState extends State<DashboardPage> {
           }
 
           try {
-            if (snapshot.data!.docs.isEmpty) {
+            if (snapshot.data!.isEmpty) {
               return Container();
             }
           } catch (e) {
@@ -304,8 +299,8 @@ class _DashboardPageState extends State<DashboardPage> {
           }
 
           return Row(
-            children: snapshot.data!.docs
-                .map((DocumentSnapshot document) {
+            children: snapshot.data!
+                .map((var document) {
                   Listing listing = Listing.fromDoc(document);
 
                   if (recentlyViewed.listingId == listing.id) {
@@ -371,13 +366,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   _showPopulars() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('likes', descending: true)
-          .where("likes", isGreaterThan: 0)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .gt("likes", 0)
+          .eq("show", true)
+          .order('likes', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -397,7 +391,7 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -443,8 +437,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   viewportFraction: .8,
                   enableInfiniteScroll: false,
                   initialPage: 0),
-              items: snapshot.data!.docs
-                  .map((DocumentSnapshot document1) {
+              items: snapshot.data!
+                  .map((var document1) {
                     Listing listing = Listing.fromDoc(document1);
 
                     return _buildPopulars(listing);
@@ -462,13 +456,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   _showFeatured() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("featured", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("featured", true)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -488,7 +481,7 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -530,8 +523,8 @@ class _DashboardPageState extends State<DashboardPage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
                       return _buildRecommended(listing);
@@ -550,11 +543,11 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   _showListings() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -582,7 +575,7 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             _noData = true;
             return Container(
               alignment: Alignment.center,
@@ -616,8 +609,8 @@ class _DashboardPageState extends State<DashboardPage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);
@@ -632,12 +625,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   _showFilteredListings(String filter) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("propertyType", isEqualTo: filter)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("propertyType", filter)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -665,7 +658,7 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Column(
               children: [
                 const Padding(
@@ -714,8 +707,8 @@ class _DashboardPageState extends State<DashboardPage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);

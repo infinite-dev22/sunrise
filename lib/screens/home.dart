@@ -7,7 +7,6 @@ import 'package:sunrise/models/account.dart';
 import 'package:sunrise/models/activity.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/search.dart';
-import 'package:sunrise/screens/sign_in.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/screens/welcome.dart';
 import 'package:sunrise/theme/color.dart';
@@ -252,21 +251,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showRecents() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collection("recents")
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Recents')
-          .limit(10)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: recentsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -295,8 +291,8 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       RecentlyViewed recentlyViewed =
                           RecentlyViewed.fromDoc(document);
 
@@ -317,14 +313,13 @@ class _HomePageState extends State<HomePage> {
 
   _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
-        stream: db
-            .collectionGroup('Listings')
-            .orderBy('timestamp', descending: true)
-            .where("show", isEqualTo: true)
-            .snapshots(),
+        stream: listingsRef.stream(primaryKey: ['id'])
+            .eq("show", true)
+            .order('created_at', ascending: false)
+            .execute(),
         builder: (context, snapshot) {
           try {
-            if (snapshot.data!.docs.isEmpty) {
+            if (snapshot.data!.isEmpty) {
               if (snapshot.hasError) {
                 return const Text("Inner error");
               }
@@ -334,7 +329,7 @@ class _HomePageState extends State<HomePage> {
           }
 
           try {
-            if (snapshot.data!.docs.isEmpty) {
+            if (snapshot.data!.isEmpty) {
               return Container();
             }
           } catch (e) {
@@ -342,8 +337,8 @@ class _HomePageState extends State<HomePage> {
           }
 
           return Row(
-            children: snapshot.data!.docs
-                .map((DocumentSnapshot document) {
+            children: snapshot.data!
+                .map((var document) {
                   Listing listing = Listing.fromDoc(document);
 
                   if (recentlyViewed.listingId == listing.id) {
@@ -397,21 +392,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showPopulars() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('likes', descending: true)
-          .where("likes", isGreaterThan: 0)
-          .where("show", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .gt("likes", 0)
+          // .eq("show", true)
+          .order('likes', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -457,8 +450,8 @@ class _HomePageState extends State<HomePage> {
                   viewportFraction: .8,
                   enableInfiniteScroll: false,
                   initialPage: 0),
-              items: snapshot.data!.docs
-                  .map((DocumentSnapshot document1) {
+              items: snapshot.data!
+                  .map((var document1) {
                     Listing listing = Listing.fromDoc(document1);
 
                     return _buildPopulars(listing);
@@ -476,21 +469,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showFeatured() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("featured", isEqualTo: true)
-          .where("show", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("featured", true)
+          // .eq("show", true)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -532,8 +523,8 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
                       return _buildRecommended(listing);
@@ -552,15 +543,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showListings() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .where("show", isEqualTo: true)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          print(snapshot.error.toString());
           return const Center(
             child: Text('Something went wrong'),
           );
@@ -575,7 +564,7 @@ class _HomePageState extends State<HomePage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             _noData = true;
             return Container(
               alignment: Alignment.center,
@@ -609,8 +598,8 @@ class _HomePageState extends State<HomePage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);
@@ -625,13 +614,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showFilteredListings(String filter) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .where("propertyType", isEqualTo: filter)
-          .where("show", isEqualTo: true)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("propertyType", filter)
+          // .eq("show", true)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -648,7 +636,7 @@ class _HomePageState extends State<HomePage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Column(
               children: [
                 const Padding(
@@ -697,8 +685,8 @@ class _HomePageState extends State<HomePage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);

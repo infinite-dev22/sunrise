@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Listing {
   String id;
   String userId;
@@ -26,7 +24,6 @@ class Listing {
   List<dynamic> features;
   List<dynamic> features2;
   List<dynamic> images;
-  Timestamp timestamp;
 
   Listing({
     required this.id,
@@ -53,38 +50,36 @@ class Listing {
     required this.show,
     required this.features,
     required this.features2,
-    required this.images,
-    required this.timestamp,
+    required this.images
   });
 
-  factory Listing.fromDoc(DocumentSnapshot doc) {
+  factory Listing.fromDoc(Map doc) {
     return Listing(
-      id: doc.id,
-      userId: doc['brokerId'],
+      id: doc['id'],
+      userId: doc['broker_id'],
       name: doc['name'],
       location: doc['location'],
       price: doc['price'],
-      priceNormal: doc['priceNormal'],
+      priceNormal: doc['price_normal'],
       bedrooms: doc['bedrooms'],
       bathrooms: doc['bathrooms'],
       kitchens: doc['kitchens'],
       garages: doc['garages'],
-      sizeUnit: doc['sizeUnit'],
+      sizeUnit: doc['size_unit'],
       size: doc['size'],
       currency: doc['currency'],
       status: doc['status'],
-      propertyType: doc['propertyType'],
-      propertyUse: doc['propertyUse'],
-      yearConstructed: doc['yearConstructed'],
+      propertyType: doc['property_type'],
+      propertyUse: doc['property_use'],
+      yearConstructed: doc['year_constructed'],
       description: doc['description'],
-      isPropertyOwner: doc['isPropertyOwner'],
+      isPropertyOwner: doc['is_property_owner'],
       likes: doc['likes'],
       featured: doc['featured'],
       show: doc['show'],
       features: doc['features'],
-      features2: doc['features2'],
-      images: doc['images'],
-      timestamp: doc['timestamp'],
+      features2: doc['features_two'],
+      images: doc['images']
     );
   }
 }

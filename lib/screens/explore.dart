@@ -86,14 +86,13 @@ class _ExplorePageState extends State<ExplorePage> {
 
   _showPopulars() {
     Favorite? favorite;
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('likes', descending: true)
-          .where("likes", isGreaterThan: 0)
-          .where("show", isEqualTo: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .gt("likes", 0)
+          .eq("show", true)
+          .order('likes', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -113,14 +112,14 @@ class _ExplorePageState extends State<ExplorePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           return Container();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
+          children: snapshot.data!
+              .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
                 if (_favorites.isNotEmpty) {
@@ -199,14 +198,13 @@ class _ExplorePageState extends State<ExplorePage> {
 
   _showFeatured() {
     Favorite? favorite;
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("featured", isEqualTo: true)
-          .where("show", isEqualTo: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("featured", true)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -226,14 +224,14 @@ class _ExplorePageState extends State<ExplorePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           return Container();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
+          children: snapshot.data!
+              .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
                 if (_favorites.isNotEmpty) {
@@ -259,13 +257,12 @@ class _ExplorePageState extends State<ExplorePage> {
 
   _showRecentlyAdded() {
     Favorite? favorite;
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("show", isEqualTo: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -285,14 +282,14 @@ class _ExplorePageState extends State<ExplorePage> {
           );
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           return Container();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: snapshot.data!.docs
-              .map((DocumentSnapshot document) {
+          children: snapshot.data!
+              .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
                 if (_favorites.isNotEmpty) {

@@ -368,15 +368,15 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await supabase.auth.signOut();
   }
 
   Future<void> _deleteAccount() async {
     try {
-      await usersRef.doc(FirebaseAuth.instance.currentUser!.uid).delete();
+      await usersRef.delete().match({'user_id': FirebaseAuth.instance.currentUser!.uid});
       await userProfilesRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .delete();
+          .delete().match({'user_id': FirebaseAuth.instance.currentUser!.uid});
+
       await FirebaseAuth.instance.currentUser?.delete();
     } on FirebaseAuthException catch (e) {
       if (e.code == "requires-recent-login") {

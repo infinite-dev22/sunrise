@@ -7,164 +7,47 @@ import '../models/activity.dart';
 import '../models/property.dart';
 
 class DatabaseServices {
-  static Future<int> likesNumber(String propertyId) async {
-    QuerySnapshot likesSnapshot =
-        await likesRef.doc(propertyId).collection('PropertyLikes').get();
-    return likesSnapshot.docs.length;
-  }
-
   static void updateUserData(UserProfile user) {
-    userProfilesRef.doc(user.id).update({
+    userProfilesRef.update({
       'name': user.name,
       'phoneNumber': user.phoneNumber,
       'email': user.email,
       'bio': user.bio,
       'profilePicture': user.profilePicture,
-    });
+    }).match({'user_id': user.id});
   }
 
-  static getUserProfile(String userId) {
-    var userProfileDocument = userProfilesRef.doc(userId);
+  static getUserProfile(String userId) async {
+    var userProfileDocument = await userProfilesRef.select().eq('user_id', userId);
     var userProfile =
-        userProfileDocument.get().then((value) => UserProfile.fromDoc(value));
+        userProfileDocument.docs.map((value) => UserProfile.fromDoc(value));
 
     return userProfile;
-  }
-
-  static Future<QuerySnapshot> searchListingsByName(String name) async {
-    Future<QuerySnapshot> listings = listingsRef
-        .where('name', isGreaterThanOrEqualTo: name)
-        .where('name', isLessThan: '${name}z')
-        .get();
-
-    return listings;
-  }
-
-  static Future<QuerySnapshot> searchListingsByPrice(String price) async {
-    Future<QuerySnapshot> listings =
-        listingsRef.where('price', isEqualTo: price).get();
-
-    return listings;
-  }
-
-  static Future<QuerySnapshot> searchListingsByLocation(String location) async {
-    Future<QuerySnapshot> listings = listingsRef
-        .where('location', isEqualTo: location)
-        .where('location', isLessThan: '${location}z')
-        .get();
-
-    return listings;
-  }
-
-  static void favoriteListing(String currentUserId, Listing listing) {
-    likesRef.doc(listing.userId).collection('Likes').doc(listing.id).set({});
-    favoritesRef
-        .doc(listing.id)
-        .collection('Favorites')
-        .doc(currentUserId)
-        .set({});
-
-    addFavorite(currentUserId, listing);
-  }
-
-  static void unFavoriteListing(String currentUserId, String listingId) {
-    likesRef
-        .doc(currentUserId)
-        .collection('Likes')
-        .doc(listingId)
-        .get()
-        .then((doc) {
-      if (doc.exists) {
-        doc.reference.delete();
-      }
-    });
-
-    favoritesRef
-        .doc(listingId)
-        .collection('Favorites')
-        .doc(currentUserId)
-        .get()
-        .then((doc) {
-      if (doc.exists) {
-        doc.reference.delete();
-      }
-    });
-  }
-
-  static Future<bool> isLikingListing(
-      String currentUserId, String listingId) async {
-    DocumentSnapshot likingDoc = await favoritesRef
-        .doc(listingId)
-        .collection('Favorites')
-        .doc(currentUserId)
-        .get();
-    return likingDoc.exists;
-  }
-
-  static getUserListings(String brokerId) async {
-    QuerySnapshot brokerListingsSnap = await listingsRef
-        .doc(brokerId)
-        .collection('Listings')
-        .orderBy('timestamp', descending: true)
-        .get();
-    var brokerListings =
-        brokerListingsSnap.docs.map((doc) => Listing.fromDoc(doc)).toList();
-
-    return brokerListings;
-  }
-
-  static Future<List> getListings() async {
-    QuerySnapshot listingsSnap = await db
-        .collectionGroup('Listings')
-        .orderBy('timestamp', descending: true)
-        .get();
-
-    List<Listing> listings =
-        listingsSnap.docs.map((doc) => Listing.fromDoc(doc)).toList();
-    return listings;
-  }
-
-  static Future<List> getUsers() async {
-    List<Listing> listings = [];
-
-    db
-        .collectionGroup('users')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .listen((event) {
-      listings = event.docs.map((doc) => Listing.fromDoc(doc)).toList();
-    });
-    return listings;
   }
 
   static Future<List> getListingsBySearch(String search) async {
     List<Listing> listings = [];
 
-    QuerySnapshot listingsTypeSnap = await db
-        .collectionGroup('Listings')
-        .where("propertyType", isGreaterThanOrEqualTo: search)
-        .get();
+    var listingsTypeSnap = await listingsRef.select()
+        .textSearch("propertyType", search);
 
-    QuerySnapshot listingsNameSnap = await db
-        .collectionGroup('Listings')
-        .where("name", isGreaterThanOrEqualTo: search)
-        .get();
+    var listingsPriceSnap1 = await listingsRef.select()
+        .textSearch("price_normal", search);
 
-    QuerySnapshot listingsLocationSnap = await db
-        .collectionGroup('Listings')
-        .where("location", isGreaterThanOrEqualTo: search)
-        .get();
+    var listingsPriceSnap2 = await listingsRef.select()
+        .textSearch("price", search);
 
-    QuerySnapshot listingsStatusSnap = await db
-        .collectionGroup('Listings')
-        .where("status", isGreaterThanOrEqualTo: search)
-        .get();
+    var listingsNameSnap = await listingsRef.select()
+        .textSearch("name", search);
 
-    QuerySnapshot brokersSnap = await db
-        .collectionGroup('Users')
-        .where("accountType", isEqualTo: "broker")
-        .where("name", isGreaterThanOrEqualTo: search)
-        .get();
+    var listingsLocationSnap = await listingsRef.select()
+        .textSearch("location", search);
+
+    var listingsStatusSnap = await listingsRef.select()
+        .textSearch("status", search);
+
+    var listingsBrokersSnap = await listingsRef.select()
+        .textSearch("name", search);
 
     listings.addAll(
         listingsTypeSnap.docs.map((doc) => Listing.fromDoc(doc)).toList());
@@ -174,17 +57,19 @@ class DatabaseServices {
         listingsLocationSnap.docs.map((doc) => Listing.fromDoc(doc)).toList());
     listings.addAll(
         listingsStatusSnap.docs.map((doc) => Listing.fromDoc(doc)).toList());
+    listings.addAll(
+        listingsPriceSnap1.docs.map((doc) => Listing.fromDoc(doc)).toList());
+    listings.addAll(
+        listingsPriceSnap2.docs.map((doc) => Listing.fromDoc(doc)).toList());
     listings
-        .addAll(brokersSnap.docs.map((doc) => Listing.fromDoc(doc)).toList());
+        .addAll(listingsBrokersSnap.docs.map((doc) => Listing.fromDoc(doc)).toList());
     return listings;
   }
 
   static Future<List<Favorite>> getLikes(String userId) async {
-    QuerySnapshot userLikesSnapshot = await likesRef
-        .doc(userId)
-        .collection('Likes')
-        .orderBy('timestamp', descending: true)
-        .get();
+    var userLikesSnapshot = await likesRef.select()
+        .eq('user_id', userId)
+        .order('timestamp', ascending: false);
 
     List<Favorite> likes =
         userLikesSnapshot.docs.map((doc) => Favorite.fromDoc(doc)).toList();
@@ -194,74 +79,59 @@ class DatabaseServices {
 
   static void addFavorite(String currentUserId, Listing? listing) {
     favoritesRef
-        .doc(currentUserId)
-        .collection('Favorites')
-        .doc(listing!.id)
-        .set({
+        .insert({
       'userId': currentUserId,
-      'listingId': listing.id,
-      'timestamp': Timestamp.fromDate(DateTime.now()),
+      'listingId': listing!.id,
       "like": true,
     });
-    likesRef.doc(listing.userId).collection('Likes').doc(listing.id).set({
+    likesRef.insert({
       'userId': currentUserId,
       'listingId': listing.id,
-      'timestamp': Timestamp.fromDate(DateTime.now()),
       "like": true,
     });
   }
 
   static void removeFavorite(
       String currentUserId, Listing? listing, String favoriteId) {
-    favoritesRef
-        .doc(currentUserId)
-        .collection('Favorites')
-        .doc(listing!.id)
-        .delete();
-    likesRef.doc(listing.userId).collection('Likes').doc(listing.id).delete();
+    favoritesRef.delete()
+        .match({'user_id': currentUserId, 'listing_id': listing!.id});
+    likesRef.delete().match({'user_id': listing.userId, 'listing_id': listing.id});
   }
 
   static Future<void> likeListing(String currentUserId, Listing listing) async {
-    var listingDocCollection =
-        listingsRef.doc(listing.userId).collection('Listings').doc(listing.id);
-
-    DocumentSnapshot<Map<String, dynamic>> listingDocSnapshot =
-        await listingDocCollection.get();
+    var listingDocSnapshot =
+    await listingsRef.select().eq('listing_id', listing.id);
 
     Map<String, dynamic>? data = listingDocSnapshot.data();
 
     int likes = data?["likes"];
 
-    listingDocCollection.update({'likes': likes + 1});
+    listingDocSnapshot.update({'likes': likes + 1});
 
     addFavorite(currentUserId, listing);
   }
 
   static Future<void> unlikeListing(
       String currentUserId, Listing listing, String favoriteId) async {
-    var listingDocCollection =
-        listingsRef.doc(listing.userId).collection('Listings').doc(listing.id);
-    DocumentSnapshot<Map<String, dynamic>> listingDocSnapshot =
-        await listingDocCollection.get();
+    var listingDocSnapshot =
+    await listingsRef.select().eq('listing_id', listing.id);
 
     Map<String, dynamic>? data = listingDocSnapshot.data();
 
     int likes = data?["likes"];
 
     if (likes == 0) {
-      listingDocCollection.update({'likes': 0});
+      listingDocSnapshot.update({'likes': 0});
     } else {
-      listingDocCollection.update({'likes': likes - 1});
+      listingDocSnapshot.update({'likes': likes - 1});
     }
 
     removeFavorite(currentUserId, listing, favoriteId);
   }
 
   static Future<List> getAllFavorites() async {
-    QuerySnapshot listingsSnap = await db
-        .collectionGroup('Favorites')
-        .orderBy('timestamp', descending: true)
-        .get();
+    var listingsSnap = await favoritesRef.select()
+        .order('timestamp', ascending: false);
 
     List<Favorite> listings =
         listingsSnap.docs.map((doc) => Favorite.fromDoc(doc)).toList();
@@ -271,25 +141,18 @@ class DatabaseServices {
   static Future<List> getFavorites() async {
     List<Favorite> listings = [];
 
-    var snapShots = db
-        .collection("favorites")
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('Favorites')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+    var snapShots = await favoritesRef.select()
+        .eq('id', FirebaseAuth.instance.currentUser!.uid)
+        .order('timestamp', ascending: false);
 
-    snapShots.listen((event) {
-      listings = event.docs.map((doc) => Favorite.fromDoc(doc)).toList();
-    });
+      listings = snapShots.docs.map((doc) => Favorite.fromDoc(doc)).toList();
     return listings;
   }
 
   static getUserFavorites() async {
-    QuerySnapshot favoritesSnap = await favoritesRef
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('Favorites')
-        .orderBy('timestamp', descending: true)
-        .get();
+    var favoritesSnap = await favoritesRef.select()
+        .eq('id', FirebaseAuth.instance.currentUser!.uid)
+        .order('timestamp', ascending: false);
     var favorites =
         favoritesSnap.docs.map((doc) => Favorite.fromDoc(doc)).toList();
 
@@ -297,8 +160,7 @@ class DatabaseServices {
   }
 
   static void createListing(Listing listing) {
-    listingsRef.doc(listing.userId).set({'listingTime': listing.timestamp});
-    listingsRef.doc(listing.userId).collection('Listings').add({
+    listingsRef.insert({
       "brokerId": listing.userId,
       'name': listing.name,
       'location': listing.location,
@@ -322,17 +184,12 @@ class DatabaseServices {
       'show': listing.show,
       'features': listing.features,
       'features2': listing.features2,
-      'images': listing.images,
-      "timestamp": listing.timestamp,
+      'images': listing.images
     });
   }
 
   static updateListing(Listing listing) async {
-    listingsRef
-        .doc(listing.userId)
-        .collection('Listings')
-        .doc(listing.id)
-        .update({
+    listingsRef.update({
       "brokerId": listing.userId,
       'name': listing.name,
       'location': listing.location,
@@ -356,9 +213,8 @@ class DatabaseServices {
       'show': listing.show,
       'features': listing.features,
       'features2': listing.features2,
-      'images': listing.images,
-      "timestamp": listing.timestamp,
-    });
+      'images': listing.images
+    }).match({'id': listing.id});
   }
 
   static deleteListing(Listing listing) async {
@@ -369,39 +225,30 @@ class DatabaseServices {
     //       .delete();
     // }
 
-    var docSnapshot = listingsRef
-        .doc(listing.userId)
-        .collection('Listings')
-        .doc(listing.id)
-        .get();
+    var docSnapshot = await listingsRef.select(listing.id);
 
-    Listing item = await docSnapshot.then((doc) => Listing.fromDoc(doc));
+    Listing item = docSnapshot.then((doc) => Listing.fromDoc(doc));
     item.show = false;
     updateListing(item);
 
-    db
-        .collection('recents')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .delete();
+    recentsRef.delete().match({'id': listing.id});
   }
 
   static void addRecent(String currentUserId, Listing listing) {
-    recentsRef.doc(currentUserId).collection('Recents').doc(listing.id).set({
+    recentsRef.insert({
       'userId': currentUserId,
-      'listingId': listing.id,
-      'timestamp': Timestamp.fromDate(DateTime.now())
+      'listingId': listing.id
     });
   }
 
   static Future<List> getUserRecents() async {
     List<Favorite> listings = [];
 
-    Stream snapShots = db
-        .collection("recents")
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('Recents')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+    Stream snapShots = await recentsRef
+        .select()
+        .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+        .order('timestamp', ascending: false)
+        .asStream();
 
     snapShots.listen((event) {
       listings = event.docs.map((doc) => Favorite.fromDoc(doc)).toList();
@@ -410,15 +257,13 @@ class DatabaseServices {
   }
 
   static deleteUserRecents() {
-    recentsRef.doc(FirebaseAuth.instance.currentUser!.uid).delete();
+    recentsRef.delete().match({'id': supabase.auth.currentUser!.id});
   }
 
   static Future<List> getFavorite(String listingId) async {
-    QuerySnapshot favoritesSnap = await favoritesRef
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('Favorites')
-        .where("listingId", isEqualTo: listingId)
-        .get();
+    var favoritesSnap = await favoritesRef
+        .select()
+        .eq('listing_id', listingId);
 
     List<Favorite> favorites =
         favoritesSnap.docs.map((doc) => Favorite.fromDoc(doc)).toList();
@@ -426,10 +271,8 @@ class DatabaseServices {
   }
 
   static Future<List> getListing() async {
-    QuerySnapshot listingsSnap = await db
-        .collectionGroup('Listings')
-        .orderBy('timestamp', descending: true)
-        .get();
+    var listingsSnap = await listingsRef.select()
+        .order('timestamp', ascending: false);
 
     List<Listing> listings =
         listingsSnap.docs.map((doc) => Listing.fromDoc(doc)).toList();

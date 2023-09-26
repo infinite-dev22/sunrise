@@ -1,5 +1,4 @@
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -114,13 +113,12 @@ class _SearchPageState extends State<SearchPage> {
 
   _showSearchedListings(String filter) {
     Favorite? favorite;
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .where("name", isGreaterThanOrEqualTo: filter)
-          .where("show", isEqualTo: true)
-          .orderBy('name', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq("name", filter)
+          .eq("show", true)
+          .order('name', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -136,7 +134,7 @@ class _SearchPageState extends State<SearchPage> {
           return _loadingWidget();
         }
 
-        if (snapshot.data!.docs.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           return searchController.text.isEmpty
               ? Container()
               : const Center(
@@ -162,8 +160,8 @@ class _SearchPageState extends State<SearchPage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     if (_favorites.isNotEmpty) {

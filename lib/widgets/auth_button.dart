@@ -46,7 +46,7 @@ class AuthButtonAgree extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
       ),

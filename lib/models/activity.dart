@@ -1,27 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Favorite {
   String id;
   String userId;
   String listingId;
-  bool like;
-  Timestamp timestamp;
 
   Favorite({
     required this.id,
     required this.userId,
-    required this.listingId,
-    required this.like,
-    required this.timestamp,
+    required this.listingId
   });
 
-  factory Favorite.fromDoc(DocumentSnapshot doc) {
+  factory Favorite.fromDoc(Map doc) {
     return Favorite(
-      id: doc.id,
+      id: doc['id'],
       userId: doc['userId'],
-      listingId: doc['listingId'],
-      like: doc['like'],
-      timestamp: doc['timestamp'],
+      listingId: doc['listing_id']
     );
   }
 }
@@ -30,21 +22,18 @@ class RecentlyViewed {
   String id;
   String userId;
   String listingId;
-  Timestamp timestamp;
 
   RecentlyViewed({
     required this.id,
     required this.userId,
-    required this.listingId,
-    required this.timestamp,
+    required this.listingId
   });
 
-  factory RecentlyViewed.fromDoc(DocumentSnapshot doc) {
+  factory RecentlyViewed.fromDoc(Map doc) {
     return RecentlyViewed(
-      id: doc.id,
+      id: doc['id'],
       userId: doc['userId'],
-      listingId: doc['listingId'],
-      timestamp: doc['timestamp'],
+      listingId: doc['listing_id']
     );
   }
 }

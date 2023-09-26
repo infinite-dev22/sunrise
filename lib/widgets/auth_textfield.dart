@@ -31,7 +31,7 @@ class AuthTextField extends StatelessWidget {
             fillColor: Colors.grey.shade200,
             filled: true,
             hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[500])),
+            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16)),
         keyboardType:
             isEmail ? TextInputType.emailAddress : TextInputType.text);
   }
@@ -79,7 +79,7 @@ class _AuthPasswordTextField extends State<AuthPasswordTextField> {
           fillColor: Colors.grey.shade200,
           filled: true,
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: Colors.grey[500])),
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16)),
       keyboardType: TextInputType.visiblePassword,
     );
   }

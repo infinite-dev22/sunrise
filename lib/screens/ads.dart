@@ -170,21 +170,19 @@ class _AdsPageState extends State<AdsPage> {
   }
 
   _showRecentlyAdded() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("show", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -226,8 +224,8 @@ class _AdsPageState extends State<AdsPage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
                       return _buildRecentlyAdded(listing);
@@ -356,22 +354,20 @@ class _AdsPageState extends State<AdsPage> {
   }
 
   _showPopulars() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('likes', descending: true)
-          .where("likes", isGreaterThan: 0)
-          .where("show", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .gt("likes", 0)
+          .eq('show', true)
+          .order('likes', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -413,8 +409,8 @@ class _AdsPageState extends State<AdsPage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document1) {
+                children: snapshot.data!
+                    .map((var document1) {
                       Listing listing = Listing.fromDoc(document1);
 
                       return _buildRecentlyAdded(listing);
@@ -433,22 +429,20 @@ class _AdsPageState extends State<AdsPage> {
   }
 
   _showFeatured() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .orderBy('timestamp', descending: true)
-          .where("featured", isEqualTo: true)
-          .where("show", isEqualTo: true)
-          .limit(10)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("featured", true)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .limit(10).execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container();
           }
         } catch (e) {
@@ -490,8 +484,8 @@ class _AdsPageState extends State<AdsPage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot document) {
+                children: snapshot.data!
+                    .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
                       return _buildRecentlyAdded(listing);
@@ -510,13 +504,12 @@ class _AdsPageState extends State<AdsPage> {
   }
 
   _showListings() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: listingsRef
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('Listings')
-          .where("show", isEqualTo: true)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -533,7 +526,7 @@ class _AdsPageState extends State<AdsPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Container(
               alignment: Alignment.center,
               margin: const EdgeInsets.only(
@@ -564,8 +557,8 @@ class _AdsPageState extends State<AdsPage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);
@@ -580,13 +573,13 @@ class _AdsPageState extends State<AdsPage> {
   }
 
   _showFilteredListings(String filter) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: db
-          .collectionGroup('Listings')
-          .where("propertyType", isEqualTo: filter)
-          .where("show", isEqualTo: true)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: listingsRef.stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .eq("propertyType", filter)
+          .eq("show", true)
+          .order('created_at', ascending: false)
+          .execute(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -603,7 +596,7 @@ class _AdsPageState extends State<AdsPage> {
         }
 
         try {
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Column(
               children: [
                 const Padding(
@@ -652,8 +645,8 @@ class _AdsPageState extends State<AdsPage> {
               height: 20,
             ),
             Column(
-              children: snapshot.data!.docs
-                  .map((DocumentSnapshot document) {
+              children: snapshot.data!
+                  .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
                     return _buildAllListings(listing);

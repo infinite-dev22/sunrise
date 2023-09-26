@@ -26,12 +26,12 @@ class AuthSquareTile extends StatelessWidget {
           children: [
             Image.asset(
               imagePath,
-              height: 40,
+              height: 35,
             ),
             const SizedBox(width: 20),
             Text(title,
                 style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
           ],
         ),
       ),

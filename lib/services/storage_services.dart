@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/constants.dart';
@@ -17,28 +17,28 @@ class StorageServices {
       RegExp exp = RegExp(r'userProfile_(.*).jpg');
       uniquePhotoId = exp.firstMatch(url)?[1];
     }
-    UploadTask uploadTask = storageRef
-        .child('images/users/${FirebaseAuth.instance.currentUser!.uid}/userProfile_$uniquePhotoId.jpg')
-        .putFile(image);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-    return downloadUrl;
+    final String path = await supabase.storage.from('images').upload(
+      'users/${FirebaseAuth.instance.currentUser!.uid}/userProfile_$uniquePhotoId.jpg',
+      image,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+    return 'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/$path';
   }
 
   static deleteProfilePicture() {
-    storageRef.child("images/users/${FirebaseAuth.instance.currentUser!.uid}").delete();
+    supabase.storage.from('images').remove([(supabase.auth.currentUser!.id)]);
   }
 
   static Future<String> uploadListingImage(File imageFile) async {
     String uniquePhotoId = const Uuid().v4();
     File image = await compressImage(uniquePhotoId, imageFile);
 
-    UploadTask uploadTask = storageRef
-        .child('images/listings/${FirebaseAuth.instance.currentUser!.uid}/listing_$uniquePhotoId.jpg')
-        .putFile(image);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-    return downloadUrl;
+    final String path = await supabase.storage.from('images').upload(
+      'listings/${FirebaseAuth.instance.currentUser!.uid}/listing_$uniquePhotoId.jpg',
+      image,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+    return 'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/$path';
   }
 
   static Future<List<String>> uploadListingImages(List images) async {

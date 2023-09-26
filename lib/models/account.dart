@@ -1,12 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserProfile {
   String id;
   String userId;
   String name;
   String email;
   String bio;
-  String accountType;
   String phoneNumber;
   String profilePicture;
 
@@ -16,20 +13,18 @@ class UserProfile {
     required this.name,
     required this.email,
     required this.bio,
-    required this.accountType,
     required this.phoneNumber,
     required this.profilePicture,
   });
 
-  factory UserProfile.fromDoc(DocumentSnapshot doc) {
+  factory UserProfile.fromDoc(Map doc) {
     return UserProfile(
-      id: doc.id,
-      userId: doc['userId'],
+      id: doc['id'],
+      userId: doc['user_id'],
       name: doc['name'],
       email: doc['email'],
       bio: doc['bio'],
-      accountType: doc['accountType'],
-      phoneNumber: doc['phoneNumber'],
+      phoneNumber: doc['phone_number'],
       profilePicture: doc['profilePicture'],
     );
   }

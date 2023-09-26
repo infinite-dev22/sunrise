@@ -7,9 +7,10 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
 import 'package:sunrise/models/property.dart';
-import 'package:sunrise/screens/sign_in.dart';
+import 'package:sunrise/screens/welcome.dart';
 import 'package:toast/toast.dart';
 
+import '../constants/constants.dart';
 import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
@@ -141,20 +142,20 @@ class _ViewPageState extends State<ViewPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SignInPage(),
+                  builder: (context) => WelcomePage(),
                 ));
           } else {
             setState(() {
               (widget.favorite != null)
                   ? {
-                      DatabaseServices.unlikeListing(
-                          user.uid, widget.listing, widget.favorite!.id),
-                      _favoriteIcon = Icons.favorite_border
-                    }
+                DatabaseServices.unlikeListing(
+                    user.uid, widget.listing, widget.favorite!.id),
+                _favoriteIcon = Icons.favorite_border
+              }
                   : {
-                      DatabaseServices.likeListing(user.uid, widget.listing),
-                      _favoriteIcon = Icons.favorite
-                    };
+                DatabaseServices.likeListing(user.uid, widget.listing),
+                _favoriteIcon = Icons.favorite
+              };
             });
           }
         });
@@ -234,7 +235,7 @@ class _ViewPageState extends State<ViewPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SignInPage(),
+                  builder: (context) => WelcomePage(),
                 ));
           } else {
             try {
@@ -255,7 +256,7 @@ class _ViewPageState extends State<ViewPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SignInPage(),
+                  builder: (context) => WelcomePage(),
                 ));
           } else {
             _handlePressed(widget.brokerProfile, context);
