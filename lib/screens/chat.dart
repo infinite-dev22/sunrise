@@ -1,20 +1,9 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
+import 'package:chatview/chatview.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_types/flutter_chat_types.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:mime/mime.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/services/database_services.dart';
@@ -22,8 +11,9 @@ import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/widgets/custom_image.dart';
 import 'package:toast/toast.dart';
 
+import '../constants/constants.dart';
 import '../models/account.dart';
-import '../utilities/features/chat/chat_core.dart';
+import '../utilities/features/chat/supabase_chat_types.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({
@@ -32,7 +22,7 @@ class ChatPage extends StatefulWidget {
     this.userProfile,
   });
 
-  final types.Room room;
+  final Room room;
   final UserProfile? userProfile;
 
   @override
@@ -41,186 +31,29 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   ToastContext toast = ToastContext();
-  bool _isAttachmentUploading = false;
   late Listing? _listing;
   late UserProfile? _brokerProfile;
-
-  void _handleAttachmentPressed() {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) => SafeArea(
-        child: SizedBox(
-          height: 144,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleImageSelection();
-                },
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Photo'),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleFileSelection();
-                },
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('File'),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Cancel'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleFileSelection() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
-
-    if (result != null && result.files.single.path != null) {
-      _setAttachmentUploading(true);
-      final name = result.files.single.name;
-      final filePath = result.files.single.path!;
-      final file = File(filePath);
-
-      try {
-        final reference = FirebaseStorage.instance.ref(name);
-        await reference.putFile(file);
-        final uri = await reference.getDownloadURL();
-
-        final message = types.PartialFile(
-          mimeType: lookupMimeType(filePath),
-          name: name,
-          size: result.files.single.size,
-          uri: uri,
-        );
-
-        CustomFirebaseChatCore.instance.sendMessage(message, widget.room.id);
-        _setAttachmentUploading(false);
-      } finally {
-        _setAttachmentUploading(false);
-      }
-    }
-  }
-
-  void _handleImageSelection() async {
-    final result = await ImagePicker().pickImage(
-      imageQuality: 70,
-      maxWidth: 1440,
-      source: ImageSource.gallery,
-    );
-
-    if (result != null) {
-      _setAttachmentUploading(true);
-      final file = File(result.path);
-      final size = file.lengthSync();
-      final bytes = await result.readAsBytes();
-      final image = await decodeImageFromList(bytes);
-      final name = result.name;
-
-      try {
-        final reference = FirebaseStorage.instance.ref(name);
-        await reference.putFile(file);
-        final uri = await reference.getDownloadURL();
-
-        final message = types.PartialImage(
-          height: image.height.toDouble(),
-          name: name,
-          size: size,
-          uri: uri,
-          width: image.width.toDouble(),
-        );
-
-        CustomFirebaseChatCore.instance.sendMessage(
-          message,
-          widget.room.id,
-        );
-        _setAttachmentUploading(false);
-      } finally {
-        _setAttachmentUploading(false);
-      }
-    }
-  }
-
-  void _handleMessageTap(BuildContext _, types.Message message) async {
-    if (message is types.FileMessage) {
-      var localPath = message.uri;
-
-      if (message.uri.startsWith('http')) {
-        try {
-          final updatedMessage = message.copyWith(isLoading: true);
-          CustomFirebaseChatCore.instance.updateMessage(
-            updatedMessage,
-            widget.room.id,
-          );
-
-          final client = http.Client();
-          final request = await client.get(Uri.parse(message.uri));
-          final bytes = request.bodyBytes;
-          final documentsDir = (await getApplicationDocumentsDirectory()).path;
-          localPath = '$documentsDir/${message.name}';
-
-          if (!File(localPath).existsSync()) {
-            final file = File(localPath);
-            await file.writeAsBytes(bytes);
-          }
-        } finally {
-          final updatedMessage = message.copyWith(isLoading: false);
-          CustomFirebaseChatCore.instance.updateMessage(
-            updatedMessage,
-            widget.room.id,
-          );
-        }
-      }
-
-      await OpenFilex.open(localPath);
-    }
-  }
-
-  void _handlePreviewDataFetched(
-    types.TextMessage message,
-    types.PreviewData previewData,
-  ) {
-    final updatedMessage = message.copyWith(previewData: previewData);
-
-    CustomFirebaseChatCore.instance
-        .updateMessage(updatedMessage, widget.room.id);
-    setState(() {});
-  }
-
-  void _handleSendPressed(types.PartialText message) {
-    CustomFirebaseChatCore.instance.sendMessage(
-      message,
-      widget.room.id,
-    );
-  }
-
-  void _setAttachmentUploading(bool uploading) {
-    setState(() {
-      _isAttachmentUploading = uploading;
-    });
-  }
+  late UserProfile _currentUserProfile;
+  late ChatViewState _chatViewState;
+  late ChatUser _currentUser;
+  late ChatUser _otherUser;
+  late ChatController _chatController;
 
   @override
   Widget build(BuildContext context) {
     toast.init(context);
     _getListing();
+    UserProfile currentUserProfile = _currentUserProfile;
+
+    _currentUser = ChatUser(
+        id: currentUserProfile.userId,
+        name: currentUserProfile.name,
+        profilePhoto: currentUserProfile.profilePicture);
+
+    _otherUser = ChatUser(
+        id: widget.userProfile!.userId,
+        name: widget.userProfile!.name,
+        profilePhoto: widget.userProfile!.profilePicture);
 
     return Scaffold(
       appBar: AppBar(
@@ -229,11 +62,17 @@ class _ChatPageState extends State<ChatPage> {
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Row(
           children: [
-            _buildProfilePicture(widget.room.imageUrl ?? ''),
+            _buildProfilePicture(
+                widget.room.userId == FirebaseAuth.instance.currentUser!.uid
+                    ? widget.room.userImage
+                    : widget.room.guestUserImage),
             const SizedBox(
               width: 5,
             ),
-            Text(widget.room.name ?? 'Chat',
+            Text(
+                widget.room.userId == FirebaseAuth.instance.currentUser!.uid
+                    ? widget.room.userName
+                    : widget.room.guestUserName,
                 style: const TextStyle(color: AppColor.darker)),
           ],
         ),
@@ -259,57 +98,66 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
       backgroundColor: AppColor.appBgColor,
-      body: StreamBuilder<types.Room>(
-        initialData: widget.room,
-        stream: CustomFirebaseChatCore.instance.room(widget.room.id),
-        builder: (context, snapshot) => StreamBuilder<List<types.Message>>(
-            initialData: const [],
-            stream: CustomFirebaseChatCore.instance.messages(snapshot.data!),
-            builder: (context, snapshot) => Chat(
-                  typingIndicatorOptions: const TypingIndicatorOptions(),
-                  isAttachmentUploading: _isAttachmentUploading,
-                  messages: snapshot.data ?? [],
-                  onAttachmentPressed: _handleAttachmentPressed,
-                  onMessageTap: _handleMessageTap,
-                  onPreviewDataFetched: _handlePreviewDataFetched,
-                  onSendPressed: _handleSendPressed,
-                  scrollToUnreadOptions: const ScrollToUnreadOptions(
-                    lastReadMessageId: 'lastReadMessageId',
-                    scrollOnOpen: true,
-                  ),
-                  onMessageVisibilityChanged: (p0, visible) {
-                    if (visible) {
-                      if (p0.author.id !=
-                          FirebaseAuth.instance.currentUser!.uid) {
-                        final updatedMessage = p0.copyWith(status: Status.seen);
-                        CustomFirebaseChatCore.instance
-                            .updateMessage(updatedMessage, widget.room.id);
-                      } else {
-                        final updatedMessage =
-                            p0.copyWith(status: Status.delivered);
-                        CustomFirebaseChatCore.instance
-                            .updateMessage(updatedMessage, widget.room.id);
-                      }
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: messagesRef
+              .stream(primaryKey: ['id'])
+              .eq('room_id', widget.room.id)
+              .order('created_at'),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              _chatViewState = ChatViewState.error;
+            }
 
-                      setState(() {});
-                    }
-                  },
-                  theme: const DefaultChatTheme(
-                      primaryColor: AppColor.chatBlue,
-                      secondaryColor: AppColor.chatGray,
-                      inputBorderRadius: BorderRadius.all(Radius.circular(50)),
-                      inputMargin:
-                          EdgeInsets.only(bottom: 5, left: 5, right: 5),
-                      inputPadding: EdgeInsets.all(12),
-                      inputBackgroundColor: AppColor.primary),
-                  usePreviewData: true,
-                  textMessageOptions:
-                      const TextMessageOptions(isTextSelectable: false),
-                  user: types.User(
-                    id: CustomFirebaseChatCore.instance.firebaseUser?.uid ?? '',
-                  ),
-                )),
-      ),
+            if (snapshot.hasData) {
+              _chatViewState = ChatViewState.loading;
+            }
+
+            if (snapshot.data!.isEmpty) {
+              _chatViewState = ChatViewState.noData;
+            }
+
+            if (snapshot.data!.isNotEmpty) {
+              _chatViewState = ChatViewState.hasMessages;
+            }
+
+            List<Message> messageList = snapshot.data!
+                .map((e) => mapToMessage(e))
+                .toList() as List<Message>;
+
+            _chatController = ChatController(
+              initialMessageList: messageList,
+              scrollController: ScrollController(),
+              chatUsers: [_otherUser],
+            );
+
+            return ChatView(
+              chatController: _chatController,
+              currentUser: _currentUser,
+              chatViewState: _chatViewState,
+              onSendTap: onSendTap,
+            );
+          }),
+    );
+  }
+
+  void onSendTap(
+      String message, ReplyMessage replyMessage, MessageType messageType) {
+    final message = Message(
+      id: '3',
+      message: "How are you",
+      createdAt: DateTime.now(),
+      sendBy: _currentUser.id,
+      replyMessage: replyMessage,
+      messageType: messageType,
+    );
+    _chatController.addMessage(message);
+  }
+
+  mapToMessage(Map<String, dynamic> doc) {
+    return Message(
+      message: doc['message'],
+      createdAt: doc['created_at'],
+      sendBy: doc['sent_by'],
     );
   }
 
@@ -325,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
     List listings = await DatabaseServices.getListing();
 
     for (Listing listing in listings) {
-      if (listing.id == widget.room.metadata!["listingId"]) {
+      if (listing.id == widget.room.listingId) {
         if (widget.userProfile == null) {
           _brokerProfile =
               await DatabaseServices.getUserProfile(listing.userId);
@@ -337,21 +185,13 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  _buildNavigateToViewPage(Listing listing) async {
+  _buildNavigateToViewPage(Listing listing) {
     if (_listing!.show) {
       var nav = Navigator.of(context);
-
-      // These variables below affect performance significantly, try putting them
-      // into their respective screen(ViewPage).
-      UserProfile brokerProfile =
-          await DatabaseServices.getUserProfile(listing.userId);
-      List favorite = await DatabaseServices.getFavorite(listing.id);
 
       return nav.push(MaterialPageRoute(
           builder: (BuildContext context) => ViewPage(
                 listing: listing,
-                brokerProfile: brokerProfile,
-                favorite: favorite.isEmpty ? null : favorite[0],
               )));
     } else {
       Toast.show("Listing no longer Available",
@@ -413,6 +253,14 @@ class _ChatPageState extends State<ChatPage> {
         onTap: () => _buildNavigateToViewPage(_listing!),
       ),
     );
+  }
+
+  @override
+  Future<void> initState() async {
+    _currentUserProfile = await DatabaseServices.getUserProfile(
+        FirebaseAuth.instance.currentUser!.uid);
+
+    super.initState();
   }
 
   @override

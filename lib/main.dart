@@ -2,10 +2,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/verify_email.dart';
-import 'package:sunrise/services/auth_services.dart';
 import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,11 +19,14 @@ final actionCodeSettings = ActionCodeSettings(
 );
 
 Future<void> main() async {
+  var supabaseUrl = "https://tunzmvqqhrkcdlicefmi.supabase.co";
+  var supabaseKey =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1bnptdnFxaHJrY2RsaWNlZm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU1NzkyMjAsImV4cCI6MjAxMTE1NTIyMH0.3IF3LnGSD38zWRW7vQElmRFJFQNOI4l82uAxoPUoqmM";
+
   // Initialize firebase.
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-      url: "https://tunzmvqqhrkcdlicefmi.supabase.co",
-      anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1bnptdnFxaHJrY2RsaWNlZm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU1NzkyMjAsImV4cCI6MjAxMTE1NTIyMH0.3IF3LnGSD38zWRW7vQElmRFJFQNOI4l82uAxoPUoqmM");
+
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
 
     if (auth.currentUser != null) {
       if (!auth.currentUser!.emailVerified && auth.currentUser!.email != null) {
-        return VerifyEmailPage();
+        return const VerifyEmailPage();
       }
 
       return RootApp(userProfile: userProfile);

@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "1068146192617-dgptc96jc2mfdllsffc038ktpd11jnp6.apps.googleusercontent.com",
+          "client_id": "1068146192617-g391qiee6gde4bi4i3ofratk9q97n53o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "org.infinite.sunrise",
-            "certificate_hash": "32f29030c35f186e9842625526803343c78b5392"
+            "certificate_hash": "622b5a1e2bf6162f07072ceb4f679487c780685f"
           }
         },
         {

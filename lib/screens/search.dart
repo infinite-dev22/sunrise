@@ -8,9 +8,6 @@ import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/theme/color.dart';
 import 'package:sunrise/widgets/custom_textbox.dart';
 
-import '../constants/constants.dart';
-import '../models/account.dart';
-import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
 import '../widgets/listing_item.dart';
@@ -23,7 +20,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  List _favorites = [];
+  List _searched = [];
   final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   TextEditingController searchController = TextEditingController();
@@ -82,11 +79,7 @@ class _SearchPageState extends State<SearchPage> {
                 child: const Icon(Icons.mic, color: Colors.grey),
               ),
               autoFocus: true,
-              onChanged: (value) {
-                setState(() {
-                  searchController.text = value;
-                });
-              },
+              onChanged: _onListingsSearched,
             ),
           ),
         ],
@@ -95,99 +88,28 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   _buildBody() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          _showSearchedListings(searchController.text.trim()),
-          const SizedBox(
-            height: 100,
-          ),
-        ],
-      ),
-    );
+    return _searched.isEmpty && searchController.text.isNotEmpty
+        ? Center(
+            child: Text('No result found for "${searchController.text}"'),
+          )
+        : _showSearchedListings(searchController.text.trim());
+  }
+
+  _onListingsSearched(String filter) async {
+    _searched = await DatabaseServices.getListingsBySearch(filter);
+    setState(() {});
   }
 
   _showSearchedListings(String filter) {
-    Favorite? favorite;
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
-          .eq("name", filter)
-          .eq("show", true)
-          .order('name', ascending: false)
-          .execute(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something went wrong'),
-          );
-        }
-
-        if (!snapshot.hasData) {
-          return _loadingWidget();
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _loadingWidget();
-        }
-
-        if (snapshot.data!.isEmpty) {
-          return searchController.text.isEmpty
-              ? Container()
-              : const Center(
-                  child: Text("No matched properties"),
-                );
-        }
-
-        return Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Matched Properties",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Column(
-              children: snapshot.data!
-                  .map((var document) {
-                    Listing listing = Listing.fromDoc(document);
-
-                    if (_favorites.isNotEmpty) {
-                      for (Favorite fav in _favorites) {
-                        if (fav.listingId == listing.id) {
-                          favorite = fav;
-                        } else {
-                          favorite = null;
-                        }
-                      }
-                    } else {
-                      favorite = null;
-                    }
-
-                    return _buildAllListings(listing, favorite);
-                  })
-                  .toList()
-                  .cast(),
-            ),
-          ],
-        );
+    return ListView.builder(
+      itemCount: _searched.length,
+      itemBuilder: (context, index) {
+        return _buildAllListings(_searched[index]);
       },
     );
   }
 
-  _buildAllListings(Listing listing, favorite) {
+  _buildAllListings(Listing listing) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -195,18 +117,15 @@ class _SearchPageState extends State<SearchPage> {
         child: ListingItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
         ),
       ),
     );
   }
 
-  _buildNavigateToViewPage(Listing listing, favorite) async {
+  _buildNavigateToViewPage(Listing listing) async {
     var nav = Navigator.of(context);
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-
     if (FirebaseAuth.instance.currentUser != null) {
       DatabaseServices.addRecent(
           FirebaseAuth.instance.currentUser!.uid, listing);
@@ -216,32 +135,9 @@ class _SearchPageState extends State<SearchPage> {
       CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
           listing: listing,
-          brokerProfile: brokerProfile,
-          favorite: favorite,
         ),
       ),
     );
-  }
-
-  _loadingWidget() {
-    return Container(
-      margin: const EdgeInsets.only(top: 200),
-      child: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  _setupData() async {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-      if (user != null) {
-        List favorites = await DatabaseServices.getFavorites();
-
-        if (mounted) {
-          setState(() {
-            _favorites = favorites;
-          });
-        }
-      }
-    });
   }
 
   _showListenDialog() {
@@ -284,9 +180,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
+                const Spacer(),
                 Text(
                   isListen ? "Say something" : "Tap the mic to listen",
                   style: const TextStyle(fontSize: 18),
@@ -295,6 +189,7 @@ class _SearchPageState extends State<SearchPage> {
                   "English",
                   style: TextStyle(fontSize: 13),
                 ),
+                const Spacer(),
               ],
             ),
           ),
@@ -309,7 +204,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _setupData();
     _initSpeech();
   }
 }

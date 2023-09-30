@@ -63,12 +63,12 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 10, left: 20),
+                padding: const EdgeInsets.only(top: 10, left: 5),
                 child: CustomImage(widget.userProfile!.profilePicture),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 5),
               Padding(
-                padding: const EdgeInsets.only(top: 10, right: 10),
+                padding: const EdgeInsets.only(top: 10, right: 5),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -373,7 +373,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _deleteAccount() async {
     try {
-      await usersRef.delete().match({'user_id': FirebaseAuth.instance.currentUser!.uid});
       await userProfilesRef
           .delete().match({'user_id': FirebaseAuth.instance.currentUser!.uid});
 

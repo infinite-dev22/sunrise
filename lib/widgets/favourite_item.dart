@@ -44,7 +44,7 @@ class _FavouriteItemState extends State<FavouriteItem> {
                     padding: const EdgeInsets.only(left: 5.0),
                     child: CustomImage(
                       widget.data.images[0],
-                      width: 120,
+                      width: 100,
                       height: 100,
                       radius: 15,
                     ),
@@ -67,14 +67,12 @@ class _FavouriteItemState extends State<FavouriteItem> {
                     child: Row(
                       children: <Widget>[
                         Padding(
-                          padding: const EdgeInsets.only(left: 5),
+                          padding: const EdgeInsets.only(left: 2),
                           child: _buildInfo(),
                         ),
-                        // const SizedBox(
-                        //   width: 23,
-                        // ),
                         const Spacer(),
                         _buildFavorite(),
+                        const Spacer(),
                       ],
                     ),
                   ),

@@ -12,7 +12,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
-import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/main.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/profile.dart';
@@ -782,105 +781,103 @@ class _AddListingPageState extends State<AddListingPage> {
     }
 
     listing = Listing(
-      id: '',
-      userId: _brokerId,
-      name: _nameController.text.trim(),
-      location: _locationController.text.trim(),
-      price: (_status == "Rent" || _status == "To Let")
-          ? "${_numberFormat(_priceController.text.trim())}/month"
-          : "${_numberFormat(_priceController.text.trim())}",
-      priceNormal: _priceController.text.trim(),
-      bedrooms: _bedroomsController.text,
-      bathrooms: _bathroomsController.text,
-      kitchens: _kitchenController.text,
-      garages: _garagesController.text,
-      sizeUnit: _sizeUnit,
-      size: _sizeController.text,
-      currency: _currency,
-      status: _status,
-      propertyType: _propertyType,
-      propertyUse: _propertyUse,
-      yearConstructed: _yearConstructedController.text.trim(),
-      description: _descriptionController.text.trim(),
-      likes: _likes,
-      featured: feature,
-      show: true,
-      isPropertyOwner: _getPropertyOwner(),
-      features2: _features2,
-      features: (_propertyType == "Shop" || _propertyType == "Office")
-          ? [
-              {"name": "Air conditioning", "value": _acValue},
-              {
-                "name": "Electricity",
-                "value": _powerValue,
-                "icon": "electricity"
-              },
-              {
-                "quantity": _sizeController.text,
-                "name": _sizeUnit,
-                "icon": "rulerCombined"
-              },
-            ]
-          : [
-              {
-                "quantity": _bedroomsController.text,
-                "name": "Bedrooms",
-                "icon": "bed"
-              },
-              {
-                "quantity": _bathroomsController.text,
-                "name": "Bathrooms",
-                "icon": "bathtub_outlined"
-              },
-              {
-                "quantity": _kitchenController.text,
-                "name": "Kitchens",
-                "icon": "kitchen"
-              },
-              {
-                "quantity": _garagesController.text,
-                "name": "Garages",
-                "icon": "garage"
-              },
-              {
-                "quantity": _sizeController.text,
-                "name": _sizeUnit,
-                "icon": "rulerCombined"
-              },
-              {"name": "Wifi", "value": _wifiValue, "icon": "wifi"},
-              {
-                "name": "Hot Water",
-                "value": _heaterValue,
-                "icon": "hotTubPerson"
-              },
-              {"name": "TV Cable", "value": _tvCableValue, "icon": "tv"},
-              {"name": "Gym", "value": _gymValue, "icon": "dumbbell"},
-              {
-                "name": "Swimming Pool",
-                "value": _poolValue,
-                "icon": "swimmingPool"
-              },
-              {
-                "name": "Electricity",
-                "value": _powerValue,
-                "icon": "electricity"
-              },
-              {"name": "Pets", "value": _petsValue, "icon": "dog"},
-              {"name": "Outdoor Shower", "value": _outdoorShowerValue},
-              {"name": "Spa & Massage", "value": _spaValue},
-              {"name": "Lawn", "value": _lawnValue},
-              {"name": "Dryer", "value": _dryerValue},
-              {"name": "Cooker", "value": _cookerValue},
-              {"name": "Air conditioning", "value": _acValue},
-              {"name": "Sewage", "value": _sewageValue},
-              {"name": "Piped Water", "value": _waterValue},
-              {"name": "Gas Supply", "value": _gasValue},
-              {"name": "Water Drainage", "value": _drainageValue},
-              {"name": "Access Road", "value": _roadValue},
-              {"name": "Refrigerator", "value": _refrigeratorValue},
-            ],
-      images: _images
-    );
+        userId: _brokerId,
+        name: _nameController.text.trim(),
+        location: _locationController.text.trim(),
+        price: (_status == "Rent" || _status == "To Let")
+            ? "${_numberFormat(_priceController.text.trim())}/month"
+            : "${_numberFormat(_priceController.text.trim())}",
+        priceNormal: _priceController.text.trim(),
+        bedrooms: _bedroomsController.text,
+        bathrooms: _bathroomsController.text,
+        kitchens: _kitchenController.text,
+        garages: _garagesController.text,
+        sizeUnit: _sizeUnit,
+        size: _sizeController.text,
+        currency: _currency,
+        status: _status,
+        propertyType: _propertyType,
+        propertyUse: _propertyUse,
+        yearConstructed: _yearConstructedController.text.trim(),
+        description: _descriptionController.text.trim(),
+        likes: _likes,
+        featured: feature,
+        show: true,
+        isPropertyOwner: _getPropertyOwner(),
+        features2: _features2,
+        features: (_propertyType == "Shop" || _propertyType == "Office")
+            ? [
+                {"name": "Air conditioning", "value": _acValue},
+                {
+                  "name": "Electricity",
+                  "value": _powerValue,
+                  "icon": "electricity"
+                },
+                {
+                  "quantity": _sizeController.text,
+                  "name": _sizeUnit,
+                  "icon": "rulerCombined"
+                },
+              ]
+            : [
+                {
+                  "quantity": _bedroomsController.text,
+                  "name": "Bedrooms",
+                  "icon": "bed"
+                },
+                {
+                  "quantity": _bathroomsController.text,
+                  "name": "Bathrooms",
+                  "icon": "bathtub_outlined"
+                },
+                {
+                  "quantity": _kitchenController.text,
+                  "name": "Kitchens",
+                  "icon": "kitchen"
+                },
+                {
+                  "quantity": _garagesController.text,
+                  "name": "Garages",
+                  "icon": "garage"
+                },
+                {
+                  "quantity": _sizeController.text,
+                  "name": _sizeUnit,
+                  "icon": "rulerCombined"
+                },
+                {"name": "Wifi", "value": _wifiValue, "icon": "wifi"},
+                {
+                  "name": "Hot Water",
+                  "value": _heaterValue,
+                  "icon": "hotTubPerson"
+                },
+                {"name": "TV Cable", "value": _tvCableValue, "icon": "tv"},
+                {"name": "Gym", "value": _gymValue, "icon": "dumbbell"},
+                {
+                  "name": "Swimming Pool",
+                  "value": _poolValue,
+                  "icon": "swimmingPool"
+                },
+                {
+                  "name": "Electricity",
+                  "value": _powerValue,
+                  "icon": "electricity"
+                },
+                {"name": "Pets", "value": _petsValue, "icon": "dog"},
+                {"name": "Outdoor Shower", "value": _outdoorShowerValue},
+                {"name": "Spa & Massage", "value": _spaValue},
+                {"name": "Lawn", "value": _lawnValue},
+                {"name": "Dryer", "value": _dryerValue},
+                {"name": "Cooker", "value": _cookerValue},
+                {"name": "Air conditioning", "value": _acValue},
+                {"name": "Sewage", "value": _sewageValue},
+                {"name": "Piped Water", "value": _waterValue},
+                {"name": "Gas Supply", "value": _gasValue},
+                {"name": "Water Drainage", "value": _drainageValue},
+                {"name": "Access Road", "value": _roadValue},
+                {"name": "Refrigerator", "value": _refrigeratorValue},
+              ],
+        images: _images);
     if (widget.listing != null) {
       listing!.id = widget.listing!.id;
       DatabaseServices.updateListing(listing!);
@@ -1022,8 +1019,7 @@ class _AddListingPageState extends State<AddListingPage> {
         : const SizedBox.shrink();
 
     _images =
-        (await StorageServices.uploadListingImages(CustomPhotoGallery.images));
-
+        await StorageServices.uploadListingImages(CustomPhotoGallery.images);
     _uploadListing(feature);
 
     nav.pushAndRemoveUntil(

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -116,25 +115,15 @@ class _AdsPageState extends State<AdsPage> {
     );
   }
 
-  _buildNavigateToViewPage(Listing listing) async {
-    List favorite = [];
-
+  _buildNavigateToViewPage(Listing listing) {
     var nav = Navigator.of(context);
 
     // These variables below affect performance significantly, try putting them
     // into their respective screen(ViewPage).
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-
-    if (FirebaseAuth.instance.currentUser != null) {
-      favorite = await DatabaseServices.getFavorite(listing.id);
-    }
 
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              brokerProfile: brokerProfile,
-              favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
 
@@ -171,11 +160,12 @@ class _AdsPageState extends State<AdsPage> {
 
   _showRecentlyAdded() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("show", true)
+          // .eq("show", true)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -225,6 +215,7 @@ class _AdsPageState extends State<AdsPage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['show'] == true)
                     .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
@@ -355,12 +346,13 @@ class _AdsPageState extends State<AdsPage> {
 
   _showPopulars() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .gt("likes", 0)
-          .eq('show', true)
+          // .gt("likes", 0)
+          // .eq('show', true)
           .order('likes', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -410,6 +402,8 @@ class _AdsPageState extends State<AdsPage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['show'] == true)
+                    .where((item) => item['likes'] > 0)
                     .map((var document1) {
                       Listing listing = Listing.fromDoc(document1);
 
@@ -430,12 +424,13 @@ class _AdsPageState extends State<AdsPage> {
 
   _showFeatured() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("featured", true)
-          .eq("show", true)
+          // .eq("featured", true)
+          // .eq("show", true)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -485,6 +480,8 @@ class _AdsPageState extends State<AdsPage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['show'] == true)
+                    .where((item) => item['featured'] == true)
                     .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
@@ -505,11 +502,11 @@ class _AdsPageState extends State<AdsPage> {
 
   _showListings() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          // .eq("show", true)
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -558,6 +555,7 @@ class _AdsPageState extends State<AdsPage> {
             ),
             Column(
               children: snapshot.data!
+                  .where((item) => item['show'] == true)
                   .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
@@ -574,12 +572,12 @@ class _AdsPageState extends State<AdsPage> {
 
   _showFilteredListings(String filter) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("propertyType", filter)
-          .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          // .eq("propertyType", filter)
+          // .eq("show", true)
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -646,6 +644,8 @@ class _AdsPageState extends State<AdsPage> {
             ),
             Column(
               children: snapshot.data!
+                  .where((item) => item['show'] == true)
+                  .where((item) => item['propertyType'] == filter)
                   .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 

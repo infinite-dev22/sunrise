@@ -217,14 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.13"
-  diffutil_dart:
+  dio:
     dependency: transitive
     description:
-      name: diffutil_dart
-      sha256: e0297e4600b9797edff228ed60f4169a778ea357691ec98408fa3b72994c7d06
+      name: dio
+      sha256: "417e2a6f9d83ab396ec38ff4ea5da6c254da71e4db765ad737a42af6930140b7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "5.3.3"
   dropdown_button2:
     dependency: "direct main"
     description:
@@ -511,21 +511,13 @@ packages:
     source: hosted
     version: "3.3.1"
   flutter_chat_types:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_chat_types
       sha256: e285b588f6d19d907feb1f6d912deaf22e223656769c34093b64e1c59b094fb9
       url: "https://pub.dev"
     source: hosted
     version: "3.6.2"
-  flutter_chat_ui:
-    dependency: "direct main"
-    description:
-      name: flutter_chat_ui
-      sha256: d2b7d99fae88d17fdab13f4be3e6ae15c4ceaa5d3e199b61c254a67222d42611
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.9"
   flutter_facebook_auth:
     dependency: "direct main"
     description:
@@ -550,14 +542,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_firebase_chat_core:
-    dependency: "direct main"
-    description:
-      name: flutter_firebase_chat_core
-      sha256: f77589b321b973133d387e6b903a6049ac7e2c1e1dc1b19e5916d0ed0542a012
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.4"
   flutter_image_compress:
     dependency: "direct main"
     description:
@@ -627,14 +611,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  flutter_parsed_text:
-    dependency: transitive
-    description:
-      name: flutter_parsed_text
-      sha256: "529cf5793b7acdf16ee0f97b158d0d4ba0bf06e7121ef180abe1a5b59e32c1e2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.1"
   flutter_phone_direct_caller:
     dependency: "direct main"
     description:
@@ -973,6 +949,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: "7ad7215c15420a102ec687bb320a7312afd449bac63bfb1c60d9787c27b9767f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   matcher:
     dependency: transitive
     description:
@@ -1133,14 +1117,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.0"
-  photo_view:
-    dependency: transitive
-    description:
-      name: photo_view
-      sha256: "8036802a00bae2a78fc197af8a158e3e2f7b500561ed23b4c458107685e645bb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.0"
   platform:
     dependency: transitive
     description:
@@ -1229,14 +1205,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.27.7"
-  scroll_to_index:
-    dependency: transitive
-    description:
-      name: scroll_to_index
-      sha256: b707546e7500d9f070d63e5acf74fd437ec7eeeb68d3412ef7b0afada0b4f176
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   settings_ui:
     dependency: "direct main"
     description:
@@ -1506,6 +1474,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  uganda_mobile_money:
+    dependency: "direct main"
+    description:
+      name: uganda_mobile_money
+      sha256: "75831971e1310512ba6d2dcb0b11554c2252b9942f36ec84a2eabbf2721979d4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.5"
   universal_io:
     dependency: transitive
     description:
@@ -1618,14 +1594,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  visibility_detector:
-    dependency: transitive
-    description:
-      name: visibility_detector
-      sha256: dd5cc11e13494f432d15939c3aa8ae76844c42b723398643ce9addb88a5ed420
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0+2"
   web:
     dependency: transitive
     description:

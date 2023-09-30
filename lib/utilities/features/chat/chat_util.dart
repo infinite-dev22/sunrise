@@ -21,11 +21,6 @@ Future<Map<String, dynamic>> customFetchUser(
     String usersCollectionName, {
       String? role,
     }) async {
-  print(instance);
-  print(userId);
-  print(usersCollectionName);
-  print(role);
-
   final doc = await instance.collection(usersCollectionName).doc(userId).get();
 
   final data = doc.data()!;

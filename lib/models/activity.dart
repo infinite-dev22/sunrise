@@ -1,7 +1,7 @@
 class Favorite {
-  String id;
+  int id;
   String userId;
-  String listingId;
+  int listingId;
 
   Favorite({
     required this.id,
@@ -12,16 +12,16 @@ class Favorite {
   factory Favorite.fromDoc(Map doc) {
     return Favorite(
       id: doc['id'],
-      userId: doc['userId'],
+      userId: doc['user_id'],
       listingId: doc['listing_id']
     );
   }
 }
 
 class RecentlyViewed {
-  String id;
+  int id;
   String userId;
-  String listingId;
+  int listingId;
 
   RecentlyViewed({
     required this.id,
@@ -32,7 +32,7 @@ class RecentlyViewed {
   factory RecentlyViewed.fromDoc(Map doc) {
     return RecentlyViewed(
       id: doc['id'],
-      userId: doc['userId'],
+      userId: doc['user_id'],
       listingId: doc['listing_id']
     );
   }

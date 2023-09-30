@@ -2,14 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/screens/welcome.dart';
 
 import '../theme/color.dart';
-import '../utilities/features/chat/chat_core.dart';
+import '../utilities/features/chat/supabase_chat_types.dart';
 import 'chat.dart';
-import 'util.dart';
 
 class RoomsPage extends StatefulWidget {
   const RoomsPage({super.key});
@@ -46,31 +45,17 @@ class _RoomsPageState extends State<RoomsPage> {
     }
   }
 
-  Widget _buildAvatar(types.Room room) {
+  Widget _buildAvatar(Room room) {
     var color = Colors.transparent;
 
-    if (room.type == types.RoomType.direct) {
-      try {
-        final otherUser = room.users.firstWhere(
-          (u) => u.id != _user!.uid,
-        );
-
-        color = getUserAvatarNameColor(otherUser);
-      } catch (e) {
-        // Do nothing if other user is not found.
-      }
-    }
-
-    final hasImage = room.imageUrl != null;
-    final name = room.name ?? '';
-
-    print(room.lastMessages);
+    final hasImage = room.guestUserImage.isNotEmpty;
+    final name = room.guestUserName;
 
     return Container(
       margin: const EdgeInsets.only(right: 16),
       child: CircleAvatar(
         backgroundColor: hasImage ? Colors.transparent : color,
-        backgroundImage: hasImage ? NetworkImage(room.imageUrl!) : null,
+        backgroundImage: hasImage ? NetworkImage(room.guestUserImage) : null,
         radius: 30,
         child: !hasImage
             ? Text(
@@ -130,8 +115,9 @@ class _RoomsPageState extends State<RoomsPage> {
                 ],
               ),
             )
-          : StreamBuilder<List<types.Room>>(
-              stream: CustomFirebaseChatCore.instance.rooms(),
+          : StreamBuilder<List<Map<String, dynamic>>>(
+              stream:
+                  chatRoomsRef.stream(primaryKey: ['id']).order('updated_at'),
               initialData: const [],
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -148,7 +134,7 @@ class _RoomsPageState extends State<RoomsPage> {
                   padding: const EdgeInsets.all(10),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    final room = snapshot.data![index];
+                    final room = Room.fromDoc(snapshot.data![index]);
 
                     return GestureDetector(
                       onTap: () {
@@ -189,17 +175,15 @@ class _RoomsPageState extends State<RoomsPage> {
                                   Row(
                                     children: [
                                       Text(
-                                        room.name ?? '',
+                                        room.guestUserName,
                                         style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600),
                                       ),
                                       const Spacer(),
-                                      Text(
-                                        room.lastMessages?.last.createdAt
-                                                .toString() ??
-                                            '',
-                                        style: const TextStyle(
+                                      const Text(
+                                        '',
+                                        style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w500,
                                             color: Colors.grey),
@@ -210,7 +194,7 @@ class _RoomsPageState extends State<RoomsPage> {
                                     height: 1,
                                   ),
                                   Text(
-                                    room.metadata!["listingName"],
+                                    room.listingName,
                                     style: const TextStyle(
                                         fontSize: 16, color: AppColor.grey_300),
                                     overflow: TextOverflow.ellipsis,
@@ -220,9 +204,9 @@ class _RoomsPageState extends State<RoomsPage> {
                                   const SizedBox(
                                     height: 1,
                                   ),
-                                  Text(
-                                    room.lastMessages?.last.toString() ?? '',
-                                    style: const TextStyle(
+                                  const Text(
+                                    '',
+                                    style: TextStyle(
                                         fontSize: 16, color: AppColor.darker),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
@@ -230,16 +214,6 @@ class _RoomsPageState extends State<RoomsPage> {
                                   ),
                                 ],
                               ),
-                            ),
-                            Text(
-                              room.lastMessages != null
-                                  ? room.lastMessages!
-                                      .where((message) =>
-                                          message.status == "delivered")
-                                      .toList(growable: true)
-                                      .length
-                                      .toString()
-                                  : "",
                             ),
                           ],
                         ),

@@ -16,7 +16,6 @@ import 'package:sunrise/widgets/recommend_item.dart';
 
 import '../constants/constants.dart';
 import '../models/property.dart';
-import '../services/database_services.dart';
 import '../widgets/line_chart1.dart';
 import '../widgets/line_chart2.dart';
 import '../widgets/listing_item.dart';
@@ -120,20 +119,12 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  _buildNavigateToViewPage(Listing listing) async {
+  _buildNavigateToViewPage(Listing listing) {
     var nav = Navigator.of(context);
-
-    // These variables below affect performance significantly, try putting them
-    // into their respective screen(ViewPage).
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-    List favorite = await DatabaseServices.getFavorite(listing.id);
 
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              brokerProfile: brokerProfile,
-              favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
 
@@ -191,10 +182,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _showRecents() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: recentsRef.stream(primaryKey: ['id'])
+      stream: recentsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -276,9 +268,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
-        stream: listingsRef.stream(primaryKey: ['id'])
-            .eq("show", true)
-            .order('created_at', ascending: false).execute(),
+        stream: listingsRef
+            .stream(primaryKey: ['id'])
+            .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+            // .eq("show", true)
+            .order('created_at', ascending: false),
         builder: (context, snapshot) {
           try {
             if (snapshot.data!.isEmpty) {
@@ -300,6 +294,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
           return Row(
             children: snapshot.data!
+                .where((item) => item['show'] == true)
                 .map((var document) {
                   Listing listing = Listing.fromDoc(document);
 
@@ -367,11 +362,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _showPopulars() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
-          .gt("likes", 0)
-          .eq("show", true)
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          // .gt("likes", 0)
+          // .eq("show", true)
           .order('likes', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -438,6 +435,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   enableInfiniteScroll: false,
                   initialPage: 0),
               items: snapshot.data!
+                  .where((item) => item['show'] == true)
+                  .where((item) => item['likes'] > 0)
                   .map((var document1) {
                     Listing listing = Listing.fromDoc(document1);
 
@@ -457,11 +456,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _showFeatured() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
-          .eq("featured", true)
-          .eq("show", true)
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          // .eq("featured", true)
+          // .eq("show", true)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -524,6 +525,8 @@ class _DashboardPageState extends State<DashboardPage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['show'] == true)
+                    .where((item) => item['featured'] == true)
                     .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
@@ -544,10 +547,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _showListings() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -626,11 +629,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _showFilteredListings(String filter) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq("propertyType", filter)
           .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(

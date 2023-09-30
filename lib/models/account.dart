@@ -1,5 +1,5 @@
 class UserProfile {
-  String id;
+  int id;
   String userId;
   String name;
   String email;
@@ -25,7 +25,7 @@ class UserProfile {
       email: doc['email'],
       bio: doc['bio'],
       phoneNumber: doc['phone_number'],
-      profilePicture: doc['profilePicture'],
+      profilePicture: doc['profile_picture'],
     );
   }
 }

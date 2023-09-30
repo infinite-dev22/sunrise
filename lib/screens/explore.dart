@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,6 @@ import 'package:sunrise/screens/view.dart';
 import 'package:sunrise/theme/color.dart';
 
 import '../constants/constants.dart';
-import '../models/account.dart';
-import '../models/activity.dart';
 import '../models/property.dart';
 import '../services/database_services.dart';
 import '../widgets/listing_item.dart';
@@ -23,8 +20,6 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-  List _favorites = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,14 +80,13 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   _showPopulars() {
-    Favorite? favorite;
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .gt("likes", 0)
-          .eq("show", true)
-          .order('likes', ascending: false)
-          .limit(10).execute(),
+          // .gt("likes", 0)
+          // .eq("show", true)
+          .order('likes', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -119,22 +113,12 @@ class _ExplorePageState extends State<ExplorePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: snapshot.data!
+              .where((item) => item['show'] == true)
+              .where((item) => item['likes'] > 0)
               .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
-                if (_favorites.isNotEmpty) {
-                  for (Favorite fav in _favorites) {
-                    if (fav.listingId == listing.id) {
-                      favorite = fav;
-                    } else {
-                      favorite = null;
-                    }
-                  }
-                } else {
-                  favorite = null;
-                }
-
-                return _buildAllListings(listing, favorite);
+                return _buildAllListings(listing);
               })
               .toList()
               .cast(),
@@ -143,7 +127,7 @@ class _ExplorePageState extends State<ExplorePage> {
     );
   }
 
-  _buildAllListings(Listing listing, favorite) {
+  _buildAllListings(Listing listing) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -151,18 +135,15 @@ class _ExplorePageState extends State<ExplorePage> {
         child: ListingItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
         ),
       ),
     );
   }
 
-  _buildNavigateToViewPage(Listing listing, favorite) async {
+  _buildNavigateToViewPage(Listing listing) {
     var nav = Navigator.of(context);
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-
     if (FirebaseAuth.instance.currentUser != null) {
       DatabaseServices.addRecent(
           FirebaseAuth.instance.currentUser!.uid, listing);
@@ -171,8 +152,6 @@ class _ExplorePageState extends State<ExplorePage> {
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              brokerProfile: brokerProfile,
-              favorite: favorite,
             )));
   }
 
@@ -182,29 +161,14 @@ class _ExplorePageState extends State<ExplorePage> {
     ));
   }
 
-  _setupData() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-      if (user != null) {
-        List favorites = await DatabaseServices.getFavorites();
-
-        if (mounted) {
-          setState(() {
-            _favorites = favorites;
-          });
-        }
-      }
-    });
-  }
-
   _showFeatured() {
-    Favorite? favorite;
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("featured", true)
-          .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          // .eq("featured", true)
+          // .eq("show", true)
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -231,22 +195,12 @@ class _ExplorePageState extends State<ExplorePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: snapshot.data!
+              .where((item) => item['show'] == true)
+              .where((item) => item['featured'] == true)
               .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
-                if (_favorites.isNotEmpty) {
-                  for (Favorite fav in _favorites) {
-                    if (fav.listingId == listing.id) {
-                      favorite = fav;
-                    } else {
-                      favorite = null;
-                    }
-                  }
-                } else {
-                  favorite = null;
-                }
-
-                return _buildAllListings(listing, favorite);
+                return _buildAllListings(listing);
               })
               .toList()
               .cast(),
@@ -256,13 +210,12 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   _showRecentlyAdded() {
-    Favorite? favorite;
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          // .eq("show", true)
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -289,22 +242,11 @@ class _ExplorePageState extends State<ExplorePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: snapshot.data!
+              .where((item) => item['show'] == true)
               .map((var document) {
                 Listing listing = Listing.fromDoc(document);
 
-                if (_favorites.isNotEmpty) {
-                  for (Favorite fav in _favorites) {
-                    if (fav.listingId == listing.id) {
-                      favorite = fav;
-                    } else {
-                      favorite = null;
-                    }
-                  }
-                } else {
-                  favorite = null;
-                }
-
-                return _buildAllListings(listing, favorite);
+                return _buildAllListings(listing);
               })
               .toList()
               .cast(),
@@ -327,6 +269,5 @@ class _ExplorePageState extends State<ExplorePage> {
   @override
   void initState() {
     super.initState();
-    _setupData();
   }
 }

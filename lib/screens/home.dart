@@ -1,5 +1,4 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ import 'package:toast/toast.dart';
 
 import '../constants/constants.dart';
 import '../models/property.dart';
-import '../services/database_services.dart';
 import '../widgets/listing_item.dart';
 import 'explore.dart';
 
@@ -177,24 +175,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildNavigateToViewPage(Listing listing) async {
-    List favorite = [];
-
     var nav = Navigator.of(context);
 
     // These variables below affect performance significantly, try putting them
     // into their respective screen(ViewPage).
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(listing.userId);
-
-    if (FirebaseAuth.instance.currentUser != null) {
-      favorite = await DatabaseServices.getFavorite(listing.id);
-    }
 
     return nav.push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
-              brokerProfile: brokerProfile,
-              favorite: favorite.isEmpty ? null : favorite[0],
             )));
   }
 
@@ -252,10 +240,11 @@ class _HomePageState extends State<HomePage> {
 
   _showRecents() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: recentsRef.stream(primaryKey: ['id'])
+      stream: recentsRef
+          .stream(primaryKey: ['id'])
           .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -292,6 +281,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['show'] == true)
                     .map((var document) {
                       RecentlyViewed recentlyViewed =
                           RecentlyViewed.fromDoc(document);
@@ -313,10 +303,10 @@ class _HomePageState extends State<HomePage> {
 
   _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
-        stream: listingsRef.stream(primaryKey: ['id'])
+        stream: listingsRef
+            .stream(primaryKey: ['id'])
             .eq("show", true)
-            .order('created_at', ascending: false)
-            .execute(),
+            .order('created_at', ascending: false),
         builder: (context, snapshot) {
           try {
             if (snapshot.data!.isEmpty) {
@@ -393,11 +383,11 @@ class _HomePageState extends State<HomePage> {
 
   _showPopulars() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
-          .gt("likes", 0)
-          // .eq("show", true)
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
+          .gt("show", true)
           .order('likes', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -451,6 +441,7 @@ class _HomePageState extends State<HomePage> {
                   enableInfiniteScroll: false,
                   initialPage: 0),
               items: snapshot.data!
+                  .where((item) => item['likes'] > 0)
                   .map((var document1) {
                     Listing listing = Listing.fromDoc(document1);
 
@@ -470,11 +461,12 @@ class _HomePageState extends State<HomePage> {
 
   _showFeatured() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
-          .eq("featured", true)
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
+          .eq("show", true)
           // .eq("show", true)
           .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .limit(10),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -524,6 +516,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
+                    .where((item) => item['featured'] == true)
                     .map((var document) {
                       Listing listing = Listing.fromDoc(document);
 
@@ -544,10 +537,10 @@ class _HomePageState extends State<HomePage> {
 
   _showListings() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq("show", true)
-          .order('created_at', ascending: false)
-          .execute(),
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -599,6 +592,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Column(
               children: snapshot.data!
+                  .where((item) => item['show'] == true)
                   .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 
@@ -615,11 +609,11 @@ class _HomePageState extends State<HomePage> {
 
   _showFilteredListings(String filter) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef.stream(primaryKey: ['id'])
+      stream: listingsRef
+          .stream(primaryKey: ['id'])
           .eq("propertyType", filter)
           // .eq("show", true)
-          .order('created_at', ascending: false)
-          .limit(10).execute(),
+          .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -686,6 +680,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Column(
               children: snapshot.data!
+                  .where((item) => item['show'] == true)
                   .map((var document) {
                     Listing listing = Listing.fromDoc(document);
 

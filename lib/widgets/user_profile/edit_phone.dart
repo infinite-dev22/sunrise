@@ -108,9 +108,9 @@ class _EditPhoneFormPageState extends State<EditPhoneFormPage> {
                       onPressed: () {
                         if (_formKey.currentState!.validate() &&
                             isNumeric(phoneController.text)) {
+                          updateUserValue(phoneController.text);
                           Toast.show("Phone number updated successfully",
                               duration: Toast.lengthLong, gravity: Toast.bottom);
-                          updateUserValue(phoneController.text);
                           Navigator.pop(context);
                         }
                       },

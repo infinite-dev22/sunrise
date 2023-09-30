@@ -7,7 +7,6 @@ import '../constants/constants.dart';
 import '../models/account.dart';
 import '../models/activity.dart';
 import '../models/property.dart';
-import '../services/database_services.dart';
 import '../theme/color.dart';
 import '../widgets/favourite_item.dart';
 
@@ -21,6 +20,9 @@ class FavouritePage extends StatefulWidget {
 }
 
 class _FavouritePageState extends State<FavouritePage> {
+  late final Stream<List<Map<String, dynamic>>> _favoritesStream;
+  late final Stream<List<Map<String, dynamic>>> _listingsStream;
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -88,16 +90,10 @@ class _FavouritePageState extends State<FavouritePage> {
     );
   }
 
-  _buildNavigateToViewPage(var data, favorite) async {
-    var nav = Navigator.of(context);
-    UserProfile brokerProfile =
-        await DatabaseServices.getUserProfile(data.userId);
-
-    return nav.push(CupertinoPageRoute(
+  _buildNavigateToViewPage(var data) async {
+    return Navigator.of(context).push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: data,
-              brokerProfile: brokerProfile,
-              favorite: favorite,
             )));
   }
 
@@ -109,7 +105,7 @@ class _FavouritePageState extends State<FavouritePage> {
         child: FavouriteItem(
           data: listing,
           onTap: () {
-            _buildNavigateToViewPage(listing, favorite);
+            _buildNavigateToViewPage(listing);
           },
           index: index,
           favorite: favorite,
@@ -132,10 +128,7 @@ class _FavouritePageState extends State<FavouritePage> {
   _showFavorites() {
     int index = -1;
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: favoritesRef.stream(primaryKey: ['id'])
-          .eq('user_id', widget.userProfile!.userId)
-          .order('created_at', ascending: false)
-          .execute(),
+      stream: _favoritesStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -183,10 +176,7 @@ class _FavouritePageState extends State<FavouritePage> {
 
   _getListings(Favorite favorite, int index) {
     return StreamBuilder(
-        stream: listingsRef.stream(primaryKey: ['id'])
-            .eq("show", true)
-            .order('created_at', ascending: false)
-            .execute(),
+        stream: _listingsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text("Inner error");
@@ -215,5 +205,25 @@ class _FavouritePageState extends State<FavouritePage> {
                 .cast(),
           );
         });
+  }
+
+  initStream() {
+    _favoritesStream = favoritesRef.stream(primaryKey: ['id'])
+        .eq('user_id', widget.userProfile!.userId)
+        .order('created_at', ascending: false)
+        .execute();
+
+    _listingsStream = listingsRef.stream(primaryKey: ['id'])
+        .eq("show", true)
+        .order('created_at', ascending: false)
+        .execute();
+  }
+
+  @override
+  void initState() {
+    initStream();
+
+    // TODO: implement initState
+    super.initState();
   }
 }

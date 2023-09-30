@@ -1,16 +1,16 @@
+import 'dart:convert';
+
 import 'package:card_swiper/card_swiper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:popup_banner/popup_banner.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/welcome.dart';
 import 'package:toast/toast.dart';
 
-import '../constants/constants.dart';
 import '../models/account.dart';
 import '../models/activity.dart';
 import '../services/database_services.dart';
@@ -23,15 +23,9 @@ import '../widgets/utility_item.dart';
 import 'chat.dart';
 
 class ViewPage extends StatefulWidget {
-  const ViewPage(
-      {super.key,
-      required this.listing,
-      required this.brokerProfile,
-      this.favorite});
+  const ViewPage({super.key, required this.listing});
 
   final Listing listing;
-  final UserProfile brokerProfile;
-  final Favorite? favorite;
 
   @override
   State<ViewPage> createState() => _ViewPageState();
@@ -40,8 +34,13 @@ class ViewPage extends StatefulWidget {
 class _ViewPageState extends State<ViewPage> {
   ToastContext toast = ToastContext();
 
-  late IconData _favoriteIcon =
-      widget.favorite != null ? Icons.favorite : Icons.favorite_border;
+  late List _favorites;
+  Favorite? _favorite;
+  bool isFavorite = false;
+
+  // IconData _favoriteIcon = Icons.favorite_border;
+  IconData _favoriteIcon = Icons.favorite_border;
+  late UserProfile? _brokerProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +52,12 @@ class _ViewPageState extends State<ViewPage> {
     if (FirebaseAuth.instance.currentUser != null) {
       DatabaseServices.addRecent(
           FirebaseAuth.instance.currentUser!.uid, widget.listing);
+      _getFavorite();
     }
 
     return Scaffold(
       backgroundColor: AppColor.appBgColor,
-      body: Stack(
+      body: _brokerProfile != null ? Stack(
         children: [
           Swiper(
             itemBuilder: (BuildContext context, int index) {
@@ -86,7 +86,7 @@ class _ViewPageState extends State<ViewPage> {
             loop: false,
           ),
           Positioned(
-            top: 20,
+            top: 25,
             left: 5,
             child: IconBox(
               onTap: () => Navigator.pop(context),
@@ -104,7 +104,7 @@ class _ViewPageState extends State<ViewPage> {
             child: _buildInfo(),
           ),
         ],
-      ),
+      ) : const Center(child: CircularProgressIndicator(),),
     );
   }
 
@@ -132,7 +132,8 @@ class _ViewPageState extends State<ViewPage> {
 
   Widget _buildFavorite() {
     return IconBox(
-      bgColor: AppColor.red,
+      radius: 10,
+      bgColor: AppColor.primary,
       onTap: () {
         FirebaseAuth.instance.authStateChanges().listen((User? user) {
           if (user == null) {
@@ -146,16 +147,18 @@ class _ViewPageState extends State<ViewPage> {
                 ));
           } else {
             setState(() {
-              (widget.favorite != null)
-                  ? {
-                DatabaseServices.unlikeListing(
-                    user.uid, widget.listing, widget.favorite!.id),
-                _favoriteIcon = Icons.favorite_border
+              if (isFavorite) {
+                if (_favorite != null) {
+                  DatabaseServices.unlikeListing(
+                      user.uid, widget.listing, _favorite!.id);
+                  _favoriteIcon = Icons.favorite_border;
+                  isFavorite = false;
+                }
+              } else {
+                DatabaseServices.likeListing(user.uid, widget.listing);
+                _favoriteIcon = Icons.favorite;
+                isFavorite = true;
               }
-                  : {
-                DatabaseServices.likeListing(user.uid, widget.listing),
-                _favoriteIcon = Icons.favorite
-              };
             });
           }
         });
@@ -163,7 +166,7 @@ class _ViewPageState extends State<ViewPage> {
       child: Icon(
         _favoriteIcon,
         color: Colors.white,
-        size: 20,
+        size: 25,
       ),
     );
   }
@@ -172,7 +175,7 @@ class _ViewPageState extends State<ViewPage> {
     List<Widget> lists = List.generate(
       widget.listing.features.length,
       (index) => UtilityItem(
-        data: widget.listing.features[index],
+        data: jsonDecode(widget.listing.features[index]),
       ),
     );
     return SingleChildScrollView(
@@ -240,7 +243,7 @@ class _ViewPageState extends State<ViewPage> {
           } else {
             try {
               await FlutterPhoneDirectCaller.callNumber(
-                  widget.brokerProfile.phoneNumber);
+                  _brokerProfile!.phoneNumber);
             } catch (e) {
               if (kDebugMode) {
                 print(e);
@@ -259,10 +262,10 @@ class _ViewPageState extends State<ViewPage> {
                   builder: (context) => WelcomePage(),
                 ));
           } else {
-            _handlePressed(widget.brokerProfile, context);
+            _handlePressed(_brokerProfile!, context);
           }
         },
-        userProfile: widget.brokerProfile,
+        userProfile: _brokerProfile!,
         userType: widget.listing.isPropertyOwner,
       ),
     );
@@ -271,38 +274,14 @@ class _ViewPageState extends State<ViewPage> {
   void _handlePressed(UserProfile userProfile, BuildContext context) async {
     final navigator = Navigator.of(context);
 
-    types.User otherUser = types.User(
-      firstName: userProfile.name,
-      id: userProfile.userId, // UID from Firebase Authentication
-      imageUrl: userProfile.profilePicture,
-      lastName: '',
-    );
-
-    UserProfile currentUserProfile =
-    await DatabaseServices.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
-
-    types.User currentUser = types.User(
-      firstName: currentUserProfile.name,
-      id: currentUserProfile.userId, // UID from Firebase Authentication
-      imageUrl: currentUserProfile.profilePicture,
-      lastName: '',
-    );
-
-    await CustomFirebaseChatCore.instance.createUserInFirestore(otherUser);
-    await CustomFirebaseChatCore.instance.createUserInFirestore(currentUser);
-
-    final room = await CustomFirebaseChatCore.instance.createRoom(otherUser, metadata: {
-      'imageUrl': userProfile.profilePicture,
-      'name': userProfile.name,
-      'listingId': widget.listing.id,
-      'listingName': widget.listing.name,
-    });
+    final room = await SupabaseChatCore.instance
+        .createRoom(userProfile, widget.listing.id!, widget.listing.name);
 
     await navigator.push(
       CupertinoPageRoute(
         builder: (context) => ChatPage(
           room: room,
-          userProfile: widget.brokerProfile,
+          userProfile: _brokerProfile,
         ),
       ),
     );
@@ -458,8 +437,7 @@ class _ViewPageState extends State<ViewPage> {
           height: 20,
         ),
         FirebaseAuth.instance.currentUser != null
-            ? widget.brokerProfile.userId ==
-                    FirebaseAuth.instance.currentUser!.uid
+            ? _brokerProfile!.userId == FirebaseAuth.instance.currentUser!.uid
                 ? _buildBlockerContact(contact: false)
                 : _buildBlockerContact()
             : _buildBlockerContact(),
@@ -480,7 +458,8 @@ class _ViewPageState extends State<ViewPage> {
   _featuresWithoutIcons() {
     List<Widget> lists = List.generate(
       widget.listing.features.length,
-      (index) => _buildFeaturesWithoutIcons(widget.listing.features[index]),
+      (index) => _buildFeaturesWithoutIcons(
+          jsonDecode(widget.listing.features[index])),
     );
 
     return Padding(
@@ -513,5 +492,36 @@ class _ViewPageState extends State<ViewPage> {
               )
             : const SizedBox.shrink()
         : const SizedBox.shrink();
+  }
+
+  _getFavorite() async {
+    try {
+      _favorites = await DatabaseServices.getFavorite(widget.listing.id!);
+    } catch(e){
+      Toast.show("Error setting favorite",
+          duration: Toast.lengthLong, gravity: Toast.bottom, backgroundColor: AppColor.red_500);
+      return;
+    }
+
+    if (_favorites.isNotEmpty) {
+      _favorite = _favorites[0];
+      _favoriteIcon = Icons.favorite;
+    }
+  }
+
+  _setUpData() async {
+    UserProfile brokerProfile =
+        await DatabaseServices.getUserProfile(widget.listing.userId);
+
+    setState(() {
+      _brokerProfile = brokerProfile;
+    });
+  }
+
+  @override
+  void initState() {
+    _setUpData();
+
+    super.initState();
   }
 }

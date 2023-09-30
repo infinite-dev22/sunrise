@@ -18,26 +18,27 @@ class StorageServices {
       uniquePhotoId = exp.firstMatch(url)?[1];
     }
     final String path = await supabase.storage.from('images').upload(
-      'users/${FirebaseAuth.instance.currentUser!.uid}/userProfile_$uniquePhotoId.jpg',
-      image,
-      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-    );
+          'users/${FirebaseAuth.instance.currentUser!.uid}/userProfile.jpg',
+          image,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
     return 'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/$path';
   }
 
   static deleteProfilePicture() {
-    supabase.storage.from('images').remove([(supabase.auth.currentUser!.id)]);
+    supabase.storage.from('images').remove(["users/${FirebaseAuth.instance.currentUser!.uid}/userProfile.jpg"]);
   }
 
   static Future<String> uploadListingImage(File imageFile) async {
     String uniquePhotoId = const Uuid().v4();
     File image = await compressImage(uniquePhotoId, imageFile);
 
-    final String path = await supabase.storage.from('images').upload(
-      'listings/${FirebaseAuth.instance.currentUser!.uid}/listing_$uniquePhotoId.jpg',
-      image,
-      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-    );
+    final String path = await supabase.storage
+        .from('images')
+        .upload('listings/${FirebaseAuth.instance.currentUser!.uid}/listing_$uniquePhotoId.jpg',
+          image,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
     return 'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/$path';
   }
 

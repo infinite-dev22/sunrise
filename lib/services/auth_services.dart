@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 import '../constants/constants.dart';
 
@@ -11,18 +10,16 @@ class AuthServices {
 
       if (signedInUser != null) {
         userProfilesRef.insert({
-          'userId': signedInUser.uid,
+          'user_id': signedInUser.uid,
           'name': signedInUser.displayName ?? name,
           'email': signedInUser.email ?? '',
           'bio': '',
-          'accountType': 'broker',
-          'phoneNumber': signedInUser.phoneNumber ?? '',
-          'profilePicture': signedInUser.photoURL ??
+          'phone_number': signedInUser.phoneNumber ?? '',
+          'profile_picture': signedInUser.photoURL ??
               'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/images/users/user-placeholder.png',
         });
         return true;
       }
-
       return false;
     } catch (e) {
       if (kDebugMode) {
