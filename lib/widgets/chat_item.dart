@@ -15,7 +15,7 @@ class ChatItem extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColor.appBgColor,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(

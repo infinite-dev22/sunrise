@@ -11,6 +11,7 @@ import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/admin.dart';
 import 'package:sunrise/screens/profile.dart';
 import 'package:sunrise/screens/root.dart';
+import 'package:sunrise/screens/wallet.dart';
 import 'package:sunrise/widgets/custom_image.dart';
 import 'package:toast/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -156,6 +157,26 @@ class _SettingsPageState extends State<SettingsPage> {
                       CupertinoPageRoute(
                         builder: (context) =>
                             AdminApp(userProfile: widget.userProfile!),
+                      ));
+                },
+              ),
+              SettingsTile.navigation(
+                leading: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: AppColor.green_500,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: const Icon(Icons.account_balance_wallet_rounded,
+                      color: AppColor.green_700),
+                ),
+                title: const Text("My Wallet"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: (context) {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) =>
+                            WalletPage(userProfile: widget.userProfile!),
                       ));
                 },
               ),
@@ -368,7 +389,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _signOut() async {
-    await supabase.auth.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   Future<void> _deleteAccount() async {

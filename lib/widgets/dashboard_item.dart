@@ -33,7 +33,7 @@ class DashboardItem extends StatelessWidget {
         width: width,
         margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColor.appBgColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

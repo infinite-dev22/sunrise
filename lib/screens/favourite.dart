@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/search.dart';
@@ -25,45 +26,41 @@ class _FavouritePageState extends State<FavouritePage> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          backgroundColor: AppColor.appBgColor,
-          pinned: true,
-          snap: true,
-          floating: true,
-          title: _buildHeader(),
-        ),
-        SliverToBoxAdapter(child: _buildBody())
-      ],
+    return Scaffold(
+      backgroundColor: AppColor.appBgColor,
+      appBar: _buildAppBar(),
+      body: _buildBody(),
     );
   }
 
-  _buildHeader() {
-    return Row(
-      children: [
-        const Expanded(
-          child: Text(
-            "Favorite properties",
-            style: TextStyle(
-              fontSize: 18,
-              color: AppColor.darker,
+  _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColor.appBgColor,
+      title: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              "Favorite properties",
+              style: TextStyle(
+                fontSize: 18,
+                color: AppColor.darker,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: GestureDetector(
-            child: const Icon(
-              Icons.search,
-              color: Colors.grey,
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              child: const Icon(
+                Icons.search,
+                color: Colors.grey,
+              ),
+              onTap: () {
+                _buildNavigateToSearchPage();
+              },
             ),
-            onTap: () {
-              _buildNavigateToSearchPage();
-            },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -131,8 +128,20 @@ class _FavouritePageState extends State<FavouritePage> {
       stream: _favoritesStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something went wrong'),
+          return Center(
+            child: Column(
+              children: [
+                const Text('Something went wrong'),
+                IconButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => super.widget));
+                    },
+                    icon: const Icon(Icons.refresh_rounded))
+              ],
+            ),
           );
         }
 
@@ -146,12 +155,13 @@ class _FavouritePageState extends State<FavouritePage> {
 
         try {
           if (snapshot.data!.isEmpty) {
-            return Container(
-              alignment: Alignment.center,
-              margin: const EdgeInsets.only(
-                bottom: 200,
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Your favorites appear here'),
+                ],
               ),
-              child: const Text('Your favorites appear here'),
             );
           }
         } catch (e) {
@@ -199,7 +209,7 @@ class _FavouritePageState extends State<FavouritePage> {
                     return _buildFavourites(listing, index, favorite);
                   }
 
-                  return const SizedBox.shrink();
+                  return Container();
                 })
                 .toList()
                 .cast(),
@@ -208,12 +218,16 @@ class _FavouritePageState extends State<FavouritePage> {
   }
 
   initStream() {
-    _favoritesStream = favoritesRef.stream(primaryKey: ['id'])
-        .eq('user_id', widget.userProfile!.userId)
-        .order('created_at', ascending: false)
-        .execute();
+    if (FirebaseAuth.instance.currentUser != null) {
+      _favoritesStream = favoritesRef
+          .stream(primaryKey: ['id'])
+          .eq('user_id', widget.userProfile!.userId)
+          .order('created_at', ascending: false)
+          .execute();
+    }
 
-    _listingsStream = listingsRef.stream(primaryKey: ['id'])
+    _listingsStream = listingsRef
+        .stream(primaryKey: ['id'])
         .eq("show", true)
         .order('created_at', ascending: false)
         .execute();

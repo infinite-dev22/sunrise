@@ -19,6 +19,7 @@ class Listing {
   String description;
   String isPropertyOwner;
   int likes;
+  int featureTime;
   bool featured;
   bool show;
   List<dynamic> features;
@@ -46,6 +47,7 @@ class Listing {
       required this.description,
       required this.isPropertyOwner,
       required this.likes,
+      required this.featureTime,
       required this.featured,
       required this.show,
       required this.features,
@@ -74,6 +76,7 @@ class Listing {
         description: doc['description'],
         isPropertyOwner: doc['is_property_owner'],
         likes: doc['likes'],
+        featureTime: doc['feature_time'],
         featured: doc['featured'],
         show: doc['show'],
         features: doc['features'],

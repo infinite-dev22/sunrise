@@ -53,7 +53,7 @@ class _FavouriteItemState extends State<FavouriteItem> {
                   child: Container(
                     height: 75,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColor.appBgColor,
                       boxShadow: [
                         BoxShadow(
                           color: AppColor.shadowColor.withOpacity(0.1),
@@ -125,7 +125,7 @@ class _FavouriteItemState extends State<FavouriteItem> {
               bgColor: AppColor.primary,
               child: Icon(
                 _favoriteIcon,
-                color: Colors.white,
+                color: AppColor.appBgColor,
                 size: 18,
               ),
             ),

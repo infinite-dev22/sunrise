@@ -71,6 +71,13 @@ class AppColor {
   static const Color contentColorRed = Color(0xFFE80054);
   static const Color contentColorCyan = Color(0xFF50E4FF);
 
+  static const Color cardBgColor = Color(0xff363636);
+  static const Color cardBgLightColor = Color(0xff999999);
+  static const Color colorB58D67 = Color(0xffB58D67);
+  static const Color colorE5D1B2 = Color(0xffE5D1B2);
+  static const Color colorF9EED2 = Color(0xffF9EED2);
+  static const Color colorEFEFED = Color(0xffEFEFED);
+
   static const listColors = [
     green,
     purple,

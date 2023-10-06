@@ -24,7 +24,7 @@ class _PropertyItemState extends State<PropertyItem> {
         height: 240,
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColor.appBgColor,
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(

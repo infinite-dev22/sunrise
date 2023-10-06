@@ -1,4 +1,4 @@
-import 'package:chatview/chatview.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,138 +34,130 @@ class _ChatPageState extends State<ChatPage> {
   late Listing? _listing;
   late UserProfile? _brokerProfile;
   late UserProfile _currentUserProfile;
-  late ChatViewState _chatViewState;
   late ChatUser _currentUser;
-  late ChatUser _otherUser;
-  late ChatController _chatController;
+
+  TextEditingController textController = TextEditingController();
+
+  List<ChatMessage> messageList = List.empty(growable: true);
 
   @override
   Widget build(BuildContext context) {
     toast.init(context);
     _getListing();
-    UserProfile currentUserProfile = _currentUserProfile;
 
-    _currentUser = ChatUser(
-        id: currentUserProfile.userId,
-        name: currentUserProfile.name,
-        profilePhoto: currentUserProfile.profilePicture);
+    try {
+      UserProfile currentUserProfile = _currentUserProfile;
 
-    _otherUser = ChatUser(
-        id: widget.userProfile!.userId,
-        name: widget.userProfile!.name,
-        profilePhoto: widget.userProfile!.profilePicture);
+      _currentUser = ChatUser(
+          id: currentUserProfile.userId,
+          firstName: currentUserProfile.name,
+          profileImage: currentUserProfile.profilePicture);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColor.appBgColor,
-        bottom: _buildListing(),
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        title: Row(
-          children: [
-            _buildProfilePicture(
-                widget.room.userId == FirebaseAuth.instance.currentUser!.uid
-                    ? widget.room.userImage
-                    : widget.room.guestUserImage),
-            const SizedBox(
-              width: 5,
-            ),
-            Text(
-                widget.room.userId == FirebaseAuth.instance.currentUser!.uid
-                    ? widget.room.userName
-                    : widget.room.guestUserName,
-                style: const TextStyle(color: AppColor.darker)),
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColor.appBgColor,
+          bottom: _buildListing(),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          title: Row(
+            children: [
+              _buildProfilePicture(widget.room.userId == _currentUserProfile.id
+                  ? widget.room.guestUserImage
+                  : widget.room.userImage),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                  widget.room.userId == _currentUserProfile.id
+                      ? widget.room.guestUserName
+                      : widget.room.userName,
+                  style: const TextStyle(color: AppColor.darker)),
+            ],
+          ),
+          leadingWidth: 20,
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  try {
+                    await FlutterPhoneDirectCaller.callNumber(
+                        (widget.userProfile != null)
+                            ? widget.userProfile!.phoneNumber
+                            : _brokerProfile!.phoneNumber);
+                  } catch (e) {
+                    if (kDebugMode) {
+                      print(e);
+                    }
+                  }
+                },
+                icon: const Icon(
+                  Icons.phone,
+                  color: AppColor.primary,
+                ))
           ],
         ),
-        leadingWidth: 20,
-        actions: [
-          IconButton(
-              onPressed: () async {
-                try {
-                  await FlutterPhoneDirectCaller.callNumber(
-                      (widget.userProfile != null)
-                          ? widget.userProfile!.phoneNumber
-                          : _brokerProfile!.phoneNumber);
-                } catch (e) {
-                  if (kDebugMode) {
-                    print(e);
-                  }
-                }
-              },
-              icon: const Icon(
-                Icons.phone,
-                color: AppColor.primary,
-              ))
-        ],
-      ),
-      backgroundColor: AppColor.appBgColor,
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-          stream: messagesRef
-              .stream(primaryKey: ['id'])
-              .eq('room_id', widget.room.id)
-              .order('created_at'),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              _chatViewState = ChatViewState.error;
-            }
+        backgroundColor: AppColor.appBgColor,
+        body: _buildBody(),
+      );
+    } catch (e) {
+      return _buildProgress();
+    }
+  }
 
-            if (snapshot.hasData) {
-              _chatViewState = ChatViewState.loading;
-            }
+  _buildMessages(List messages) {
+    messageList.clear();
+    for (var message in messages) {
+      messageList.add(mapToMessage(message));
+    }
+  }
 
-            if (snapshot.data!.isEmpty) {
-              _chatViewState = ChatViewState.noData;
-            }
-
-            if (snapshot.data!.isNotEmpty) {
-              _chatViewState = ChatViewState.hasMessages;
-            }
-
-            List<Message> messageList = snapshot.data!
-                .map((e) => mapToMessage(e))
-                .toList() as List<Message>;
-
-            _chatController = ChatController(
-              initialMessageList: messageList,
-              scrollController: ScrollController(),
-              chatUsers: [_otherUser],
-            );
-
-            return ChatView(
-              chatController: _chatController,
-              currentUser: _currentUser,
-              chatViewState: _chatViewState,
-              onSendTap: onSendTap,
-            );
-          }),
+  _buildBody() {
+    return DashChat(
+      messageOptions: const MessageOptions(
+          showTime: true,
+          containerColor: AppColor.chatGray,
+          currentUserContainerColor: AppColor.chatBlue),
+      currentUser: _currentUser,
+      onSend: _onSendTap,
+      messages: messageList,
     );
   }
 
-  void onSendTap(
-      String message, ReplyMessage replyMessage, MessageType messageType) {
-    final message = Message(
-      id: '3',
-      message: "How are you",
-      createdAt: DateTime.now(),
-      sendBy: _currentUser.id,
-      replyMessage: replyMessage,
-      messageType: messageType,
+  _buildProgress() {
+    return Container(
+      color: AppColor.appBgColor,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * .5,
+            ),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        ),
+      ),
     );
-    _chatController.addMessage(message);
+  }
+
+  void _onSendTap(ChatMessage msg) {
+    Map<String, dynamic> message = msg.toJson();
+    message.addAll({'chat_room_id': widget.room.id});
+    messagesRef.insert(message).execute();
   }
 
   mapToMessage(Map<String, dynamic> doc) {
-    return Message(
-      message: doc['message'],
-      createdAt: doc['created_at'],
-      sendBy: doc['sent_by'],
-    );
+    return ChatMessage.fromJson(doc);
   }
 
   _buildProfilePicture(String url) {
     return CustomImage(
       url,
-      width: 45,
-      height: 45,
+      width: 35,
+      height: 35,
     );
   }
 
@@ -255,12 +247,21 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  @override
-  Future<void> initState() async {
+  _initData() async {
     _currentUserProfile = await DatabaseServices.getUserProfile(
         FirebaseAuth.instance.currentUser!.uid);
 
+    messagesRef
+        .stream(primaryKey: ['id'])
+        .eq('chat_room_id', widget.room.id)
+        .order('created_at')
+        .listen(_buildMessages);
+  }
+
+  @override
+  void initState() {
     super.initState();
+    _initData();
   }
 
   @override

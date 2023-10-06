@@ -21,7 +21,7 @@ class RaisedSettingsSection extends StatelessWidget {
               offset: const Offset(0, 1), // changes position of shadow
             ),
           ],
-          color: Colors.white,
+          color: AppColor.appBgColor,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Column(children: children),

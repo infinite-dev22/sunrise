@@ -99,10 +99,10 @@ class _EditEmailFormPageState extends State<EditEmailFormPage> {
                         // Validate returns true if the form is valid, or false otherwise.
                         if (_formKey.currentState!.validate() &&
                             EmailValidator.validate(emailController.text)) {
+                          updateUserValue(emailController.text);
                           Toast.show("Email updated successfully",
                               duration: Toast.lengthLong,
                               gravity: Toast.bottom);
-                          updateUserValue(emailController.text);
                           Navigator.pop(context);
                         }
                       },

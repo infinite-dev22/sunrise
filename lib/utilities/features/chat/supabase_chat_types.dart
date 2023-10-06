@@ -1,7 +1,7 @@
 class Room {
   int id;
-  String userId;
-  String guestUserId;
+  int userId;
+  int guestUserId;
   String userName;
   String guestUserName;
   int listingId;

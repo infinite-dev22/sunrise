@@ -18,7 +18,7 @@ class ListingItem extends StatelessWidget {
         width: double.infinity,
         margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColor.appBgColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

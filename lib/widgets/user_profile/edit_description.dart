@@ -94,9 +94,9 @@ class _EditDescriptionFormPageState extends State<EditDescriptionFormPage> {
                       onPressed: () {
                         // Validate returns true if the form is valid, or false otherwise.
                         if (_formKey.currentState!.validate()) {
+                          updateUserValue(descriptionController.text);
                           Toast.show("Description updated successfully",
                               duration: Toast.lengthLong, gravity: Toast.bottom);
-                          updateUserValue(descriptionController.text);
                           Navigator.pop(context);
                         }
                       },

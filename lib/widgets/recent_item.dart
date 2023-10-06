@@ -18,7 +18,7 @@ class RecentItem extends StatelessWidget {
         width: 280,
         margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColor.appBgColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

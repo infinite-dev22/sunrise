@@ -62,8 +62,10 @@ class _ProfilePageState extends State<ProfilePage> {
             String newImageUrl = await StorageServices.uploadProfilePicture(
                 widget.userProfile.profilePicture, newImage);
 
-            setState(() => widget.userProfile.profilePicture = newImageUrl);
             DatabaseServices.updateUserData(widget.userProfile);
+
+            setState(() => widget.userProfile.profilePicture = newImageUrl);
+
             Toast.show("Profile picture updated successfully",
                 duration: Toast.lengthLong, gravity: Toast.bottom);
           },

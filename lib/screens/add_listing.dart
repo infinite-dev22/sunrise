@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:sunrise/constants/constants.dart';
 import 'package:sunrise/main.dart';
 import 'package:sunrise/models/property.dart';
 import 'package:sunrise/screens/profile.dart';
@@ -89,6 +90,8 @@ class _AddListingPageState extends State<AddListingPage> {
   late String _sizeUnit = "";
   late List _images = List.empty(growable: true);
   late String _brokerId = FirebaseAuth.instance.currentUser!.uid;
+
+  List images = List.empty(growable: true);
 
   List<String> listingType = [
     "Apartment",
@@ -179,7 +182,6 @@ class _AddListingPageState extends State<AddListingPage> {
     toast.init(context);
     var screenWidth = MediaQuery.of(context).size.width;
     halfScreen = screenWidth * 0.5;
-    // _fillInData();
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -226,8 +228,6 @@ class _AddListingPageState extends State<AddListingPage> {
       _isOwnerValue =
           (widget.listing!.isPropertyOwner == "Owner" ? true : false);
 
-      List images = List.empty(growable: true);
-
       for (String imageUrl in widget.listing!.images) {
         File? image = await urlToFile(imageUrl);
         images.add(image);
@@ -264,7 +264,7 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _buildBody() {
-    return Material(
+    return Material(color: AppColor.appBgColor,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,7 +721,8 @@ class _AddListingPageState extends State<AddListingPage> {
                     CustomPhotoGallery.images.isNotEmpty &&
                     CustomPhotoGallery.images.length > 2) {
               (widget.listing != null)
-                  ? _uploadListingAd(widget.listing!.featured)
+                  ? _uploadListingAd(
+                      widget.listing!.featured, widget.listing!.featureTime, 0)
                   : _buildAddFeaturedDialog();
             }
           },
@@ -775,7 +776,7 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _uploadListing(bool feature) {
+  _uploadListing(bool feature, int time) {
     for (var feature in _features) {
       _setFeature(feature);
     }
@@ -801,6 +802,7 @@ class _AddListingPageState extends State<AddListingPage> {
         yearConstructed: _yearConstructedController.text.trim(),
         description: _descriptionController.text.trim(),
         likes: _likes,
+        featureTime: time,
         featured: feature,
         show: true,
         isPropertyOwner: _getPropertyOwner(),
@@ -959,6 +961,7 @@ class _AddListingPageState extends State<AddListingPage> {
   _buildAddFeaturedDialog() {
     return showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       builder: (context) => Column(
         children: [
           const SizedBox(
@@ -969,7 +972,7 @@ class _AddListingPageState extends State<AddListingPage> {
             color: Colors.white,
             bgColor: AppColor.green_700,
             onPressed: () {
-              _promoteAdConfirmDialog(30);
+              _promoteAdConfirmDialog(30, 30);
             },
           ),
           const SizedBox(height: 20),
@@ -978,7 +981,7 @@ class _AddListingPageState extends State<AddListingPage> {
             color: Colors.white,
             bgColor: AppColor.green_500,
             onPressed: () {
-              _promoteAdConfirmDialog(10);
+              _promoteAdConfirmDialog(10, 7);
             },
           ),
           const SizedBox(
@@ -989,7 +992,7 @@ class _AddListingPageState extends State<AddListingPage> {
             color: AppColor.darker,
             bgColor: Colors.white,
             onPressed: () {
-              _uploadListingAd(false);
+              _uploadListingAd(false, 0, 0);
             },
           ),
           const SizedBox(height: 50),
@@ -998,7 +1001,7 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  _uploadListingAd(bool feature) async {
+  _uploadListingAd(bool feature, int time, int amount) async {
     var nav = Navigator.of(context);
 
     setState(() {
@@ -1009,9 +1012,7 @@ class _AddListingPageState extends State<AddListingPage> {
             showDialog(
                 barrierDismissible: false,
                 builder: (ctx) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return _buildProgress();
                 },
                 context: context),
             _showProgressUploadingNotification()
@@ -1020,7 +1021,12 @@ class _AddListingPageState extends State<AddListingPage> {
 
     _images =
         await StorageServices.uploadListingImages(CustomPhotoGallery.images);
-    _uploadListing(feature);
+    _uploadListing(feature, time);
+
+    if (amount < 1) {
+      DatabaseServices.createAccountTransaction(
+          widget.userProfile!.id, amount, "withdraw", "promote listing ad", "");
+    }
 
     nav.pushAndRemoveUntil(
         MaterialPageRoute(
@@ -1035,7 +1041,29 @@ class _AddListingPageState extends State<AddListingPage> {
     _showCompleteUploadNotification();
   }
 
-  _promoteAdConfirmDialog(int amount) {
+  _buildProgress() {
+    return Container(
+      color: AppColor.appBgColor,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColor.appBgColor,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * .5,
+            ),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _promoteAdConfirmDialog(int amount, int time) {
     return Alert(
       closeIcon: Container(),
       context: context,
@@ -1052,25 +1080,16 @@ class _AddListingPageState extends State<AddListingPage> {
           ),
         ),
         DialogButton(
-          onPressed: () {
-            setState(() {
-              _loading = true;
-            });
-            _loading
-                ? {
-                    showDialog(
-                        barrierDismissible: false,
-                        builder: (ctx) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        },
-                        context: context),
-                    _showProgressUploadingNotification(),
-                  }
-                : const SizedBox.shrink();
-
-            _uploadListingAd(true);
+          onPressed: () async {
+            int balance = await walletsRef
+                .select<int>('balance')
+                .eq('user_id', widget.userProfile!.id);
+            if (balance >= amount) {
+              _billUpload(time, amount);
+            } else {
+              Toast.show("Insufficient funds, top up and try again",
+                  duration: Toast.lengthLong, gravity: Toast.bottom);
+            }
           },
           color: AppColor.green_700,
           child: const Text(
@@ -1080,6 +1099,25 @@ class _AddListingPageState extends State<AddListingPage> {
         )
       ],
     ).show();
+  }
+
+  _billUpload(int time, int amount) {
+    setState(() {
+      _loading = true;
+    });
+    _loading
+        ? {
+            showDialog(
+                barrierDismissible: false,
+                builder: (ctx) {
+                  return _buildProgress();
+                },
+                context: context),
+            _showProgressUploadingNotification(),
+          }
+        : const SizedBox.shrink();
+
+    _uploadListingAd(true, time, amount);
   }
 
   _getSelection() {

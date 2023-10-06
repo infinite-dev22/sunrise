@@ -55,56 +55,81 @@ class _ViewPageState extends State<ViewPage> {
       _getFavorite();
     }
 
-    return Scaffold(
-      backgroundColor: AppColor.appBgColor,
-      body: _brokerProfile != null ? Stack(
-        children: [
-          Swiper(
-            itemBuilder: (BuildContext context, int index) {
-              return CustomImage(
-                widget.listing.images[index],
-                radius: 0,
-                width: double.infinity,
-                height: imageHeight,
-                bgColor: AppColor.darker,
-                onTap: () {
-                  PopupBanner(
-                    context: context,
-                    images: _buildImagesList(),
-                    onClick: (index) {
-                      debugPrint("CLICKED $index");
+    try {
+      return Scaffold(
+          backgroundColor: AppColor.appBgColor,
+          body: Stack(
+            children: [
+              Swiper(
+                itemBuilder: (BuildContext context, int index) {
+                  return CustomImage(
+                    widget.listing.images[index],
+                    radius: 0,
+                    width: double.infinity,
+                    height: imageHeight,
+                    bgColor: AppColor.darker,
+                    onTap: () {
+                      PopupBanner(
+                        context: context,
+                        images: _buildImagesList(),
+                        onClick: (index) {
+                          debugPrint("CLICKED $index");
+                        },
+                        autoSlide: false,
+                        fromNetwork: true,
+                        fit: BoxFit.contain,
+                        dotsAlignment: Alignment.bottomCenter,
+                      ).show();
                     },
-                    autoSlide: false,
-                    fromNetwork: true,
-                    fit: BoxFit.contain,
-                    dotsAlignment: Alignment.bottomCenter,
-                  ).show();
+                  );
                 },
-              );
-            },
-            itemCount: widget.listing.images.length,
-            loop: false,
-          ),
-          Positioned(
-            top: 25,
-            left: 5,
-            child: IconBox(
-              onTap: () => Navigator.pop(context),
-              bgColor: AppColor.translucent,
-              child: const Icon(Icons.arrow_back_ios_new_rounded),
+                itemCount: widget.listing.images.length,
+                loop: false,
+              ),
+              Positioned(
+                top: 25,
+                left: 5,
+                child: IconBox(
+                  onTap: () => Navigator.pop(context),
+                  bgColor: AppColor.translucent,
+                  child: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+              ),
+              Positioned(
+                right: 10,
+                top: imageHeight * .82,
+                child: _buildFavorite(),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: screenHeight * .48),
+                child: _buildInfo(),
+              ),
+            ],
+          ));
+    } catch (e) {
+      return _buildProgress();
+    }
+  }
+
+  _buildProgress() {
+    return Container(
+      color: AppColor.appBgColor,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColor.appBgColor,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * .5,
             ),
-          ),
-          Positioned(
-            right: 10,
-            top: imageHeight * .82,
-            child: _buildFavorite(),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: screenHeight * .48),
-            child: _buildInfo(),
-          ),
-        ],
-      ) : const Center(child: CircularProgressIndicator(),),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -280,7 +305,7 @@ class _ViewPageState extends State<ViewPage> {
     await navigator.push(
       CupertinoPageRoute(
         builder: (context) => ChatPage(
-          room: room,
+          room: room!,
           userProfile: _brokerProfile,
         ),
       ),
@@ -436,11 +461,36 @@ class _ViewPageState extends State<ViewPage> {
         const SizedBox(
           height: 20,
         ),
-        FirebaseAuth.instance.currentUser != null
-            ? _brokerProfile!.userId == FirebaseAuth.instance.currentUser!.uid
-                ? _buildBlockerContact(contact: false)
-                : _buildBlockerContact()
-            : _buildBlockerContact(),
+        if (FirebaseAuth.instance.currentUser != null)
+          if (_brokerProfile != null)
+            if (_brokerProfile!.userId ==
+                FirebaseAuth.instance.currentUser!.uid)
+              _buildBlockerContact(contact: false)
+            else
+              _buildBlockerContact()
+          else
+            const Column(
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: AppColor.grey_300),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'Ad owner no longer exists on this platform.',
+                      style: TextStyle(color: AppColor.grey_300),
+                    ),
+                  ],
+                )
+              ],
+            )
+        else
+          _buildBlockerContact(),
         const SizedBox(
           height: 100,
         ),
@@ -497,9 +547,15 @@ class _ViewPageState extends State<ViewPage> {
   _getFavorite() async {
     try {
       _favorites = await DatabaseServices.getFavorite(widget.listing.id!);
-    } catch(e){
-      Toast.show("Error setting favorite",
-          duration: Toast.lengthLong, gravity: Toast.bottom, backgroundColor: AppColor.red_500);
+    } catch (e) {
+      if (e
+          .toString()
+          .contains('Connection closed before full header was received')) {
+        Toast.show("Your connection is unstable",
+            duration: Toast.lengthLong,
+            gravity: Toast.top,
+            backgroundColor: AppColor.darker);
+      }
       return;
     }
 
@@ -510,8 +566,10 @@ class _ViewPageState extends State<ViewPage> {
   }
 
   _setUpData() async {
-    UserProfile brokerProfile =
+    UserProfile? brokerProfile =
         await DatabaseServices.getUserProfile(widget.listing.userId);
+    // UserProfile currentUserProfile =
+    //     await DatabaseServices.getUserProfile(widget.listing.userId);
 
     setState(() {
       _brokerProfile = brokerProfile;

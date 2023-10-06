@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/rooms.dart';
 import 'package:sunrise/screens/settings.dart';
@@ -25,6 +30,9 @@ class RootApp extends StatefulWidget {
 class _RootAppState extends State<RootApp> {
   ToastContext toast = ToastContext();
   int _activeTab = 0;
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
 
   _barItems() {
     return [
@@ -46,7 +54,7 @@ class _RootAppState extends State<RootApp> {
       {
         "icon": Icons.forum_outlined,
         "active_icon": Icons.forum_rounded,
-        "page": const RoomsPage(),
+        "page": RoomsPage(userProfile: widget.userProfile),
       },
       {
         "icon": Icons.settings_outlined,
@@ -59,29 +67,35 @@ class _RootAppState extends State<RootApp> {
   @override
   Widget build(BuildContext context) {
     toast.init(context);
+    _checkNetwork();
 
-    return InternetConnectivityListener(
-      connectivityListener: (BuildContext context, bool hasInternetAccess) {
-        if (hasInternetAccess) {
-          Toast.show("You are back Online",
-              duration: Toast.lengthLong,
-              gravity: Toast.top,
-              backgroundColor: AppColor.green_700);
-        } else {
-          Toast.show("No internet connection",
-              duration: 10,
-              gravity: Toast.top,
-              backgroundColor: AppColor.red_700);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColor.appBgColor,
-        body: _buildPage(),
-        floatingActionButton: _buildBottomBar(),
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.miniCenterDocked,
+    return Scaffold(
+      backgroundColor: AppColor.appBgColor,
+      body: RefreshIndicator(
+        onRefresh: () => Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (BuildContext context) => super.widget)),
+        child: DoubleBack(
+          message: 'Tap back again to exit',
+          child: _buildPage(),
+        ),
       ),
+      floatingActionButton: _buildBottomBar(),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterDocked,
     );
+  }
+
+  _checkNetwork() async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.none) {
+      Toast.show("You are back Online",
+          duration: Toast.lengthLong,
+          gravity: Toast.top,
+          backgroundColor: AppColor.green_700);
+    } else {
+      Toast.show("No internet connection",
+          duration: 10, gravity: Toast.top, backgroundColor: AppColor.red_700);
+    }
   }
 
   Widget _buildPage() {
@@ -100,7 +114,7 @@ class _RootAppState extends State<RootApp> {
       width: double.infinity,
       margin: const EdgeInsets.only(left: 15, right: 15, bottom: 5),
       decoration: BoxDecoration(
-        color: AppColor.bottomBarColor,
+        color: AppColor.appBgColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -198,5 +212,45 @@ class _RootAppState extends State<RootApp> {
   @override
   void initState() {
     super.initState();
+
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) async {
+      isDeviceConnected = await InternetConnectionChecker().hasConnection;
+      if (!isDeviceConnected && isAlertSet == false) {
+        showDialogBox();
+        setState(() => isAlertSet = true);
+      }
+    });
+  }
+
+  showDialogBox() => showCupertinoDialog<String>(
+        context: context,
+        builder: (BuildContext context) => CupertinoAlertDialog(
+          title: const Text('No Connection'),
+          content: const Text('Please check your internet connectivity'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context, 'Cancel');
+                setState(() => isAlertSet = false);
+                isDeviceConnected =
+                    await InternetConnectionChecker().hasConnection;
+                if (!isDeviceConnected && isAlertSet == false) {
+                  showDialogBox();
+                  setState(() => isAlertSet = true);
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+
+  @override
+  void dispose() {
+    subscription.cancel();
+
+    super.dispose();
   }
 }

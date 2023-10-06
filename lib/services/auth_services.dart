@@ -4,12 +4,12 @@ import 'package:flutter/foundation.dart';
 import '../constants/constants.dart';
 
 class AuthServices {
-  static Future<bool> createUserProfile({name}) async {
+  static createUserProfile({name}) async {
     try {
       User? signedInUser = FirebaseAuth.instance.currentUser;
 
       if (signedInUser != null) {
-        userProfilesRef.insert({
+        var userProfile = await userProfilesRef.insert({
           'user_id': signedInUser.uid,
           'name': signedInUser.displayName ?? name,
           'email': signedInUser.email ?? '',
@@ -17,15 +17,14 @@ class AuthServices {
           'phone_number': signedInUser.phoneNumber ?? '',
           'profile_picture': signedInUser.photoURL ??
               'https://tunzmvqqhrkcdlicefmi.supabase.co/storage/v1/object/public/images/users/user-placeholder.png',
-        });
-        return true;
+        }).select();
+        return userProfile;
       }
-      return false;
     } catch (e) {
       if (kDebugMode) {
         print(e);
       }
-      return false;
+      return;
     }
   }
 }

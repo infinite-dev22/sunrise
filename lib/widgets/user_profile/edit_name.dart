@@ -91,9 +91,9 @@ class _EditNameFormPageState extends State<EditNameFormPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          updateUserValue(nameController.text.trim());
                           Toast.show("Username updated successfully",
                               duration: Toast.lengthLong, gravity: Toast.bottom);
-                          updateUserValue(nameController.text.trim());
                           Navigator.pop(context);
                         }
                       },

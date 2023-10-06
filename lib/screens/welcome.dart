@@ -1,19 +1,15 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:async';
 import 'dart:ui';
 
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sunrise/screens/login.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/sign_up.dart';
 import 'package:sunrise/screens/verify_email.dart';
 import 'package:toast/toast.dart';
-import 'package:twitter_login/twitter_login.dart';
 
 import '../models/account.dart';
 import '../services/auth_services.dart';
@@ -70,10 +66,10 @@ class WelcomePage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 20),
                         decoration: BoxDecoration(
-                            color: Color.fromRGBO(0, 0, 0, 1)
+                            color: const Color.fromRGBO(0, 0, 0, 1)
                                 .withOpacity(_opacity),
                             borderRadius:
-                                BorderRadius.all(Radius.circular(30))),
+                                const BorderRadius.all(Radius.circular(30))),
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: Form(
                           key: _formKey,
@@ -81,7 +77,7 @@ class WelcomePage extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
+                                const Text(
                                   "Sign in",
                                   style: TextStyle(
                                     color: Colors.white,
@@ -113,8 +109,8 @@ class WelcomePage extends StatelessWidget {
                                           nav.push(
                                             MaterialPageRoute(
                                                 builder: (context) => Signup(
-                                                      email: emailController
-                                                          .text,
+                                                      email:
+                                                          emailController.text,
                                                     )),
                                           );
                                         } else {
@@ -174,33 +170,12 @@ class WelcomePage extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      // facebook button
-                                      AuthSquareTile(
-                                        imagePath: 'assets/images/facebook.png',
-                                        title: "Continue with Facebook",
-                                        onTap: () {
-                                          signInWithFacebook();
-                                        },
-                                      ),
-                                      SizedBox(height: 10),
-
                                       // google button
                                       AuthSquareTile(
                                         imagePath: 'assets/images/google.png',
                                         title: "Continue with Google",
                                         onTap: () {
                                           signInWithGoogle();
-                                        },
-                                      ),
-
-                                      SizedBox(height: 10),
-
-                                      // apple button
-                                      AuthSquareTile(
-                                        imagePath: 'assets/images/x.png',
-                                        title: "Continue with X",
-                                        onTap: () {
-                                          signInWithTwitter();
                                         },
                                       ),
                                     ],
@@ -223,7 +198,7 @@ class WelcomePage extends StatelessWidget {
                                             MainAxisAlignment.start,
                                         // ignore: prefer_const_literals_to_create_immutables
                                         children: [
-                                          Text(
+                                          const Text(
                                             'Don\'t have an account?',
                                             style: TextStyle(
                                                 color: Colors.white,
@@ -236,7 +211,7 @@ class WelcomePage extends StatelessWidget {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            Signup()));
+                                                            const Signup()));
                                               },
                                               child: const Text('Sign Up',
                                                   style: TextStyle(
@@ -285,40 +260,6 @@ class WelcomePage extends StatelessWidget {
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
-  Future<UserCredential> signInWithFacebook() async {
-    // Trigger the sign-in flow
-    final LoginResult loginResult =
-        await FacebookAuth.instance.login(permissions: ['email']);
-
-    // Create a credential from the access token
-    final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.token);
-
-    // Once signed in, return the UserCredential
-    return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-  }
-
-  Future<UserCredential> signInWithTwitter() async {
-    // Create a TwitterLogin instance
-    final twitterLogin = TwitterLogin(
-        apiKey: 'YhQMA2T9Y3gntRQpzOoUMaW32',
-        apiSecretKey: 'PE9hkQyH7lUk2RwsL9sukp5tZRYNaGnIhwtYJeIwU18pukBzHP',
-        redirectURI: 'https://homepal-ff7cb.firebaseapp.com/__/auth/handler');
-
-    // Trigger the sign-in flow
-    final authResult = await twitterLogin.login();
-
-    // Create a credential from the access token
-    final twitterAuthCredential = TwitterAuthProvider.credential(
-      accessToken: authResult.authToken!,
-      secret: authResult.authTokenSecret!,
-    );
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance
-        .signInWithCredential(twitterAuthCredential);
-  }
-
   checkAuthStatus(BuildContext context) {
     final nav = Navigator.of(context);
 
@@ -328,14 +269,16 @@ class WelcomePage extends StatelessWidget {
           _navigateToVerifyEmail(context);
         } else {
           try {
-            UserProfile userProfile = await DatabaseServices.getUserProfile(
-                FirebaseAuth.instance.currentUser!.uid);
+            UserProfile userProfile =
+                await DatabaseServices.emailExists(user.email!);
+            userProfile.userId = user.uid;
+            DatabaseServices.updateUserData(userProfile);
+
             _navigateToRootApp(nav, userProfile);
           } catch (e) {
-            AuthServices.createUserProfile();
+            var userProfile = await AuthServices.createUserProfile();
 
-            UserProfile userProfile = await DatabaseServices.getUserProfile(
-                FirebaseAuth.instance.currentUser!.uid);
+            DatabaseServices.upsertUserWallet(userProfile, 0);
             _navigateToRootApp(nav, userProfile);
           }
         }
@@ -354,7 +297,7 @@ class WelcomePage extends StatelessWidget {
 
   _navigateToVerifyEmail(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (BuildContext context) => VerifyEmailPage()),
+        MaterialPageRoute(builder: (BuildContext context) => const VerifyEmailPage()),
         (Route<dynamic> route) => false);
   }
 }

@@ -13,3 +13,5 @@ final recentsRef = supabase.from('recently_viewed');
 final listingsRef = supabase.from('listings');
 final chatRoomsRef = supabase.from('chat_rooms');
 final messagesRef = supabase.from('messages');
+final transactionsRef = supabase.from('transactions');
+final walletsRef = supabase.from('wallets');

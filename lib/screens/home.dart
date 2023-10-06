@@ -39,88 +39,92 @@ class _HomePageState extends State<HomePage> {
   bool _noData = false;
   int _selectedCategory = 0;
 
+  late Stream<List<Map<String, dynamic>>> _popularLimitStream;
+
+  late Stream<List<Map<String, dynamic>>> _featuredLimitStream;
+
+  late Stream<List<Map<String, dynamic>>> _recentsLimitStream;
+
+  late Stream<List<Map<String, dynamic>>> _listingStream;
+
   @override
   Widget build(BuildContext context) {
     toast.init(context);
 
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          backgroundColor: AppColor.appBgColor,
-          pinned: true,
-          snap: true,
-          floating: true,
-          title: _buildHeader(),
-        ),
-        SliverToBoxAdapter(child: _buildBody())
-      ],
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+      backgroundColor: AppColor.appBgColor,
     );
   }
 
-  _buildHeader() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: CustomTextBox(
-                hint: "Search properties",
-                prefix: const Icon(Icons.search, color: Colors.grey),
-                suffix: const Icon(Icons.mic, color: Colors.grey),
-                onChanged: (value) {
-                  setState(() {
-                    if (value.isNotEmpty) {
-                      _setListings(value);
-                    } else {
-                      _setListings("All");
-                    }
-                  });
-                },
-                autoFocus: false,
-                readOnly: true,
-                onTap: () {
-                  _buildNavigateToSearchPage();
-                },
+  _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColor.appBgColor,
+      title: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextBox(
+                  hint: "Search properties",
+                  prefix: const Icon(Icons.search, color: Colors.grey),
+                  suffix: const Icon(Icons.mic, color: Colors.grey),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value.isNotEmpty) {
+                        _setListings(value);
+                      } else {
+                        _setListings("All");
+                      }
+                    });
+                  },
+                  autoFocus: false,
+                  readOnly: true,
+                  onTap: () {
+                    _buildNavigateToSearchPage();
+                  },
+                ),
               ),
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            widget.userProfile != null
-                ? CustomImage(
-                    widget.userProfile!.profilePicture,
-                    width: 35,
-                    height: 35,
-                    trBackground: true,
-                    borderColor: AppColor.primary,
-                    radius: 10,
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            ProfilePage(userProfile: widget.userProfile!),
-                      ));
-                    },
-                  )
-                : CustomImage(
-                    "assets/images/user-placeholder.png",
-                    width: 35,
-                    height: 35,
-                    trBackground: true,
-                    borderColor: AppColor.primary,
-                    isNetwork: false,
-                    radius: 10,
-                    onTap: () {
-                      Toast.show("Sign in to continue",
-                          duration: Toast.lengthLong, gravity: Toast.bottom);
+              const SizedBox(
+                width: 20,
+              ),
+              widget.userProfile != null
+                  ? CustomImage(
+                      widget.userProfile!.profilePicture,
+                      width: 35,
+                      height: 35,
+                      trBackground: true,
+                      borderColor: AppColor.primary,
+                      radius: 10,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              ProfilePage(userProfile: widget.userProfile!),
+                        ));
+                      },
+                    )
+                  : CustomImage(
+                      "assets/images/user-placeholder.png",
+                      width: 35,
+                      height: 35,
+                      trBackground: true,
+                      borderColor: AppColor.primary,
+                      isNetwork: false,
+                      radius: 10,
+                      onTap: () {
+                        Toast.show("Sign in to continue",
+                            duration: Toast.lengthLong, gravity: Toast.bottom);
 
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) => WelcomePage(),
-                      ));
-                    },
-                  ),
-          ],
-        ),
-      ],
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => WelcomePage(),
+                        ));
+                      },
+                    ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -175,12 +179,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildNavigateToViewPage(Listing listing) async {
-    var nav = Navigator.of(context);
-
-    // These variables below affect performance significantly, try putting them
-    // into their respective screen(ViewPage).
-
-    return nav.push(CupertinoPageRoute(
+    return Navigator.of(context).push(CupertinoPageRoute(
         builder: (BuildContext context) => ViewPage(
               listing: listing,
             )));
@@ -240,14 +239,15 @@ class _HomePageState extends State<HomePage> {
 
   _showRecents() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: recentsRef
-          .stream(primaryKey: ['id'])
-          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
-          .order('created_at', ascending: false)
-          .limit(10),
+      stream: _recentsLimitStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const SizedBox.shrink();
+          if (!snapshot.error
+              .toString()
+              .contains('OS Error: No address associated with hostname,')) {
+            Toast.show("An Error occurred",
+                duration: Toast.lengthLong, gravity: Toast.bottom);
+          }
         }
 
         try {
@@ -281,10 +281,9 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
                 children: snapshot.data!
-                    .where((item) => item['show'] == true)
-                    .map((var document) {
+                    .map((doc) {
                       RecentlyViewed recentlyViewed =
-                          RecentlyViewed.fromDoc(document);
+                          RecentlyViewed.fromDoc(doc);
 
                       return _getListings(recentlyViewed);
                     })
@@ -303,10 +302,7 @@ class _HomePageState extends State<HomePage> {
 
   _getListings(RecentlyViewed recentlyViewed) {
     return StreamBuilder(
-        stream: listingsRef
-            .stream(primaryKey: ['id'])
-            .eq("show", true)
-            .order('created_at', ascending: false),
+        stream: _listingStream,
         builder: (context, snapshot) {
           try {
             if (snapshot.data!.isEmpty) {
@@ -383,11 +379,7 @@ class _HomePageState extends State<HomePage> {
 
   _showPopulars() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef
-          .stream(primaryKey: ['id'])
-          .gt("show", true)
-          .order('likes', ascending: false)
-          .limit(10),
+      stream: _popularLimitStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -442,8 +434,8 @@ class _HomePageState extends State<HomePage> {
                   initialPage: 0),
               items: snapshot.data!
                   .where((item) => item['likes'] > 0)
-                  .map((var document1) {
-                    Listing listing = Listing.fromDoc(document1);
+                  .map((doc) {
+                    Listing listing = Listing.fromDoc(doc);
 
                     return _buildPopulars(listing);
                   })
@@ -461,12 +453,7 @@ class _HomePageState extends State<HomePage> {
 
   _showFeatured() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef
-          .stream(primaryKey: ['id'])
-          .eq("show", true)
-          // .eq("show", true)
-          .order('created_at', ascending: false)
-          .limit(10),
+      stream: _featuredLimitStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const SizedBox.shrink();
@@ -477,6 +464,18 @@ class _HomePageState extends State<HomePage> {
             return Container();
           }
         } catch (e) {
+          return Container();
+        }
+
+        List items = snapshot.data!
+            .where((item) => item['featured'] == true)
+            .map((var document) {
+          Listing listing = Listing.fromDoc(document);
+
+          return _buildRecommended(listing);
+        }).toList();
+
+        if (items.isEmpty) {
           return Container();
         }
 
@@ -515,15 +514,7 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 5, left: 15),
               child: Row(
-                children: snapshot.data!
-                    .where((item) => item['featured'] == true)
-                    .map((var document) {
-                      Listing listing = Listing.fromDoc(document);
-
-                      return _buildRecommended(listing);
-                    })
-                    .toList()
-                    .cast(),
+                children: items.cast(),
               ),
             ),
             const SizedBox(
@@ -537,14 +528,23 @@ class _HomePageState extends State<HomePage> {
 
   _showListings() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef
-          .stream(primaryKey: ['id'])
-          .eq("show", true)
-          .order('created_at', ascending: false),
+      stream: _listingStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something went wrong'),
+          return Center(
+            child: Column(
+              children: [
+                const Text('Something went wrong'),
+                IconButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => super.widget));
+                    },
+                    icon: const Icon(Icons.refresh_rounded))
+              ],
+            ),
           );
         }
 
@@ -609,11 +609,7 @@ class _HomePageState extends State<HomePage> {
 
   _showFilteredListings(String filter) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: listingsRef
-          .stream(primaryKey: ['id'])
-          .eq("propertyType", filter)
-          // .eq("show", true)
-          .order('created_at', ascending: false),
+      stream: _listingTypeFilteredStream(filter),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(
@@ -706,14 +702,52 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _setupData() async {
+  _initStreams() {
+    _popularLimitStream = listingsRef
+        .stream(primaryKey: ['id'])
+        .eq("show", true)
+        .order('likes', ascending: false)
+        .limit(10);
+
+    _featuredLimitStream = listingsRef
+        .stream(primaryKey: ['id'])
+        .eq("show", true)
+        .order('created_at', ascending: false)
+        .limit(10);
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      _recentsLimitStream = recentsRef
+          .stream(primaryKey: ['id'])
+          .eq('user_id', FirebaseAuth.instance.currentUser!.uid)
+          .order('created_at', ascending: false)
+          .limit(10);
+    }
+
+    _listingStream = listingsRef
+        .stream(primaryKey: ['id'])
+        .eq("show", true)
+        .order('created_at', ascending: false);
+
+    setState(() {});
+  }
+
+  _listingTypeFilteredStream(String filter) {
+    return listingsRef
+        .stream(primaryKey: ['id'])
+        .eq("propertyType", filter)
+        .order('created_at', ascending: false);
+  }
+
+  _setupData() {
     _setListings("All");
     setState(() {});
   }
 
   @override
   void initState() {
-    super.initState();
+    _initStreams();
     _setupData();
+
+    super.initState();
   }
 }

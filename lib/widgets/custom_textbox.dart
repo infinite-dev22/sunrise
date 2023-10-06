@@ -34,7 +34,7 @@ class CustomTextBox extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 3),
       height: 40,
       decoration: BoxDecoration(
-        color: AppColor.textBoxColor,
+        color: AppColor.appBgColor,
         border: Border.all(color: AppColor.textBoxColor),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
@@ -78,7 +78,7 @@ class CustomTextBox extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 3),
         height: 40,
         decoration: BoxDecoration(
-          color: AppColor.textBoxColor,
+          color: AppColor.appBgColor,
           border: Border.all(color: AppColor.textBoxColor),
           borderRadius: BorderRadius.circular(10),
           boxShadow: [

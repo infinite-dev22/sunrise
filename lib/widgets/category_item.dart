@@ -25,7 +25,7 @@ class CategoryItem extends StatelessWidget {
         width: 90,
         height: 90,
         decoration: BoxDecoration(
-          color: selected ? AppColor.primary : AppColor.cardColor,
+          color: selected ? AppColor.primary : AppColor.appBgColor,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sunrise/models/account.dart';
+import 'package:sunrise/services/database_services.dart';
 import 'package:sunrise/utilities/features/chat/supabase_chat_types.dart';
 
 import '../../../constants/constants.dart';
@@ -23,9 +24,11 @@ class SupabaseChatCore {
 
   /// Creates a direct chat for 2 people. Add [metadata] for any additional
   /// custom data.
-  Future<Room> createRoom(
+  Future<Room?> createRoom(
       UserProfile guestUser, int listingId, String listingName) async {
     final fu = firebaseUser;
+    UserProfile userProfile =
+        await DatabaseServices.getUserProfile(firebaseUser!.uid);
 
     if (fu == null) return Future.error('User does not exist');
 
@@ -34,29 +37,36 @@ class SupabaseChatCore {
 
     final roomQuery = await chatRoomsRef
         .select()
-        .eq('user_id', fu.uid)
-        .eq('guest_user_id', guestUser)
+        .eq('user_id', userProfile.id)
+        .eq('guest_user_id', guestUser.id)
         .eq('listing_id', listingId)
-        .limit(1);
+        .limit(1)
+        .execute();
 
     // Check if room already exist.
     if (roomQuery.data.isNotEmpty) {
-      final room = roomQuery.data;
-      return room;
+      var rooms = roomQuery.data.map((doc) => Room.fromDoc(doc)).toList();
+      return rooms[0];
     }
 
     // Create new room with sorted user ids array.
-    final room = await chatRoomsRef.insert({
-      'user_id': fu.uid,
-      'guest_user_id': guestUser.userId,
-      'user_name': fu.displayName,
-      'guest_user_name': guestUser.name,
-      'listing_id': listingId,
-      'listing_name': listingName,
-      'has_new_messages': false,
-    });
+    final roomsQuery = await chatRoomsRef
+        .insert({
+          'user_id': userProfile.id,
+          'guest_user_id': guestUser.id,
+          'listing_id': listingId,
+          'listing_name': listingName,
+          'has_new_messages': false,
+          'user_name': userProfile.name,
+          'guest_user_name': guestUser.name,
+          'user_image': userProfile.profilePicture,
+          'guest_user_image': guestUser.profilePicture,
+        })
+        .select()
+        .execute();
 
-    return room;
+    var rooms = roomsQuery.data.map((doc) => Room.fromDoc(doc)).toList();
+    return rooms[0];
   }
 
   /// Returns a stream of rooms from Firebase. Only rooms where current
@@ -82,36 +92,4 @@ class SupabaseChatCore {
 
     return roomsStream;
   }
-
-  /// Updates a message in the Firestore. Accepts any message and a
-  /// room ID. Message will probably be taken from the [messages] stream.
-  // void updateMessage(Message message, String roomId) async {
-  //   if (firebaseUser == null) return;
-  //   if (message.receiverId == firebaseUser!.uid) return;
-  //
-  //   await messagesRef.update(message.toJson(message)).match({'id': message.id});
-  // }
-
-  /// Sends a message to the Firestore. Accepts any partial message and a
-  /// room ID. If arbitraty data is provided in the [partialMessage]
-  /// does nothing.
-  // void sendMessage(Message message, String roomId) async {
-  //   if (firebaseUser == null) return;
-  //
-  //   await messagesRef.insert(message.toJson(message));
-  //
-  //   await chatRoomsRef
-  //       .update({'updated_at': DateTime.timestamp()}).match({'id': message.id});
-  // }
-
-  /// Returns a stream of messages from Firebase for a given room.
-  // Stream<List<Message>> messages(Room room) {
-  //   Stream<List<Message>> chatsStream = messagesRef
-  //       .stream(primaryKey: ['id'])
-  //       .eq('room_id', room.id)
-  //       .order('created_at')
-  //       .map((chats) => chats.map((chat) => Message.fromDoc(chat)).toList());
-  //
-  //   return chatsStream;
-  // }
 }

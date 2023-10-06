@@ -70,11 +70,4 @@ class DisplayImage extends StatelessWidget {
           child: child,
         ),
       );
-// ClipOval(
-//   child: Container(
-//     padding: EdgeInsets.all(all),
-//     color: Colors.white,
-//     child: child,
-//   ),
-// );
 }

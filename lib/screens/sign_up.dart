@@ -5,8 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:sunrise/services/database_services.dart';
 import 'package:toast/toast.dart';
 
+import '../models/account.dart';
 import '../services/auth_services.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_textfield.dart';
@@ -45,13 +47,28 @@ class _SignupState extends State<Signup> {
         return;
       }
 
+      if (usernameController.text.trim().isEmpty) {
+        Toast.show("User name is required",
+            duration: Toast.lengthLong, gravity: Toast.bottom);
+        return;
+      }
+
       if (EmailValidator.validate(emailController.text.trim())) {
         FirebaseAuth.instance
             .createUserWithEmailAndPassword(
                 email: emailController.text.trim(),
                 password: passwordController.text.trim())
             .then((userCredential) async {
-          AuthServices.createUserProfile(name: usernameController.text.trim());
+          UserProfile userProfile =
+              await DatabaseServices.emailExists(userCredential.user!.email!);
+          userProfile.userId = userCredential.user!.uid;
+          DatabaseServices.updateUserData(userProfile);
+
+          if (userProfile.userId != userCredential.user!.uid) {
+            var userProfile1 = await AuthServices.createUserProfile(
+                name: usernameController.text.trim());
+            DatabaseServices.upsertUserWallet(userProfile1, 0);
+          }
         }).onError((error, stackTrace) {
           Toast.show("An Error occurred",
               duration: Toast.lengthLong, gravity: Toast.bottom);
@@ -122,28 +139,31 @@ class _SignupState extends State<Signup> {
                                             MainAxisAlignment.start,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
-                                        children: [RichText(
-                                          text: TextSpan(
-                                            text: '',
-                                            children: <TextSpan>[
-                                              const TextSpan(
-                                                text:
-                                                "Looks like you don't have an account. Let's create a one for ",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14),
-                                              ),
-                                              TextSpan(
-                                                text: widget.email!,
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    decoration: TextDecoration.underline),
-                                              ),
-                                            ],
+                                        children: [
+                                          RichText(
+                                            text: TextSpan(
+                                              text: '',
+                                              children: <TextSpan>[
+                                                const TextSpan(
+                                                  text:
+                                                      "Looks like you don't have an account. Let's create a one for ",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14),
+                                                ),
+                                                TextSpan(
+                                                  text: widget.email!,
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      decoration: TextDecoration
+                                                          .underline),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
                                           const SizedBox(height: 20),
                                         ],
                                       )

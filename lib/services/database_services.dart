@@ -6,21 +6,73 @@ import '../models/activity.dart';
 import '../models/property.dart';
 
 class DatabaseServices {
+  static void upsertUserWallet(UserProfile user, int amount) {
+    walletsRef.upsert({
+      'user_id': user.id,
+      'balance': amount.toDouble(),
+    }).execute();
+  }
+
+  static void createAccountTransaction(
+      int walletId, int amount, String type, String reason, String method) {
+    transactionsRef.insert({
+      'wallet_id': walletId,
+      'amount': amount.toDouble(),
+      'type': type,
+      'reason': reason,
+      'method': method,
+    }).execute();
+  }
+
+  static getAccountTransaction(
+      int userId, int amount, String type, String reason, String method) async {
+    var walletSnap = await walletsRef.select().eq('user_id', userId).execute();
+
+    var wallets = walletSnap.data.map((doc) => Wallet.fromDoc(doc)).toList();
+
+    return wallets;
+  }
+
   static void updateUserData(UserProfile user) {
     userProfilesRef.update({
+      'user_id': user.userId,
       'name': user.name,
       'phone_number': user.phoneNumber,
       'email': user.email,
       'bio': user.bio,
       'profile_picture': user.profilePicture,
-    }).match({'user_id': user.id}).execute();
+    }).match({'id': user.id}).execute();
   }
 
   static getUserProfile(String userId) async {
     var userProfileDocument =
         await userProfilesRef.select().eq('user_id', userId).limit(1).execute();
+    List userProfile = userProfileDocument.data
+        .map((doc) => UserProfile.fromDoc(doc))
+        .toList();
+
+    if (userProfile.isNotEmpty) {
+      return userProfile[0];
+    } else {
+      return null;
+    }
+  }
+
+  static getUserProfileById(int userId) async {
+    var userProfileDocument =
+        await userProfilesRef.select().eq('id', userId).limit(1).execute();
     var userProfile = userProfileDocument.data
-        .map((value) => UserProfile.fromDoc(value))
+        .map((doc) => UserProfile.fromDoc(doc))
+        .toList();
+
+    return userProfile[0];
+  }
+
+  static emailExists(String email) async {
+    var userProfileDocument =
+        await userProfilesRef.select().eq('email', email).limit(1).execute();
+    var userProfile = userProfileDocument.data
+        .map((doc) => UserProfile.fromDoc(doc))
         .toList();
 
     return userProfile[0];
@@ -28,13 +80,9 @@ class DatabaseServices {
 
   static Future<List> getListingsBySearch(String search) async {
     List listings = [];
-
-    // var listingsTypeSnap = await listingsRef
-    //     .select()
-    //     .textSearch('search_listings', search)
-    //     .execute();
-    var listingsTypeSnap = await supabase
-        .rpc('search_listings', params: {'keyword': ['&@~ $search']}).execute();
+    var listingsTypeSnap = await supabase.rpc('search_listings', params: {
+      'keyword': ['&@~ $search']
+    }).execute();
 
     listings.addAll(
         listingsTypeSnap.data.map((doc) => Listing.fromDoc(doc)).toList());
