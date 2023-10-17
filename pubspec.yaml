@@ -88,6 +88,7 @@ dependencies:
   internet_connection_checker: ^1.0.0+1
   double_back_to_close: ^2.0.0
   flutter_credit_card: ^4.0.0+1
+  observe_internet_connectivity: ^1.0.2
 
 #  awesome_notifications: ^0.7.0-beta.7
 #  awesome_notifications_fcm: ^0.7.4+1
@@ -149,4 +150,5 @@ flutter:
   assets:
     - lib/widgets/
     - assets/images/
+    - .env
 

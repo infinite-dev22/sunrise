@@ -171,7 +171,7 @@ class DatabaseServices {
     return favorites;
   }
 
-  static void createListing(Listing listing) {
+  static void createListing(Listing listing, var onSuccess, var onError) {
     listingsRef.insert({
       "user_id": listing.userId,
       'name': listing.name,
@@ -197,7 +197,7 @@ class DatabaseServices {
       'features': listing.features,
       'features_two': listing.features2,
       'images': listing.images
-    }).execute();
+    }).execute().onError((error, stackTrace) => onError).then((value) => onSuccess);
   }
 
   static updateListing(Listing listing) async {

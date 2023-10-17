@@ -19,8 +19,7 @@ class CustomPhotoGallery extends StatefulWidget {
   State<CustomPhotoGallery> createState() => _CustomPhotoGalleryState();
 }
 
-class _CustomPhotoGalleryState extends State<CustomPhotoGallery>
-    with ChangeNotifier {
+class _CustomPhotoGalleryState extends State<CustomPhotoGallery> {
   late bool isNetwork = false;
   int _activeImage = 0;
 

@@ -24,14 +24,9 @@ class CardPayPage extends StatefulWidget {
 }
 
 class _CardPayPageState extends State<CardPayPage> {
-  void _loadDotEnv() async {
-    await dotenv.load(fileName: ".env");
-  }
-
   @override
   void initState() {
     super.initState();
-    _loadDotEnv();
   }
 
   final String txRef = "TXN-${Random().nextInt(1000000)}";
@@ -207,7 +202,7 @@ class _CardPayPageState extends State<CardPayPage> {
 
     final Flutterwave flutterwave = Flutterwave(
         context: context,
-        publicKey: dotenv.env['PUBLIC_KEY']!,
+        publicKey: "FLWPUBK_TEST-bba650c9c1177a792dcc2795f0592e5d-X",
         currency: "UGX",
         txRef: txRef,
         amount: amount,

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutterwave_standard/core/flutterwave.dart';
 import 'package:flutterwave_standard/models/requests/customer.dart';
 import 'package:flutterwave_standard/models/requests/customizations.dart';
@@ -71,7 +72,7 @@ class _MomoPayPageState extends State<MomoPayPage> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       labelText: 'Enter amount (UGX)',
-                      hintText: 'eg. 5,000'),
+                      hintText: 'eg. 5,000'),keyboardType: TextInputType.number,
                   inputFormatters: [
                     ThousandsFormatter(),
                   ],
@@ -106,7 +107,7 @@ class _MomoPayPageState extends State<MomoPayPage> {
 
     final Flutterwave flutterwave = Flutterwave(
         context: context,
-        publicKey: "FLWPUBK_TEST-7fbdeeb6b7282940521aa93a36c85431-X",
+        publicKey: "FLWPUBK_TEST-bba650c9c1177a792dcc2795f0592e5d-X",
         currency: "UGX",
         txRef: txRef,
         amount: amount,
@@ -130,5 +131,10 @@ class _MomoPayPageState extends State<MomoPayPage> {
     } else {
       return FlutterwaveViewUtils.showToast(context, "Payment unsuccessful");
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 }

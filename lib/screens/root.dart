@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
 import 'package:sunrise/models/account.dart';
 import 'package:sunrise/screens/rooms.dart';
 import 'package:sunrise/screens/settings.dart';
@@ -69,19 +70,29 @@ class _RootAppState extends State<RootApp> {
     toast.init(context);
     _checkNetwork();
 
-    return Scaffold(
-      backgroundColor: AppColor.appBgColor,
-      body: RefreshIndicator(
-        onRefresh: () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) => super.widget)),
-        child: DoubleBack(
-          message: 'Tap back again to exit',
-          child: _buildPage(),
+    return RefreshIndicator(
+      onRefresh: () => Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) => super.widget)),
+      child: InternetConnectivityListener(
+        connectivityListener: (BuildContext context, bool hasInternetAccess) {
+          if (isDeviceConnected && !hasInternetAccess) {
+            Toast.show("Your internet connection is unstable",
+                duration: 10,
+                gravity: Toast.top,
+                backgroundColor: Colors.black.withOpacity(.8));
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColor.appBgColor,
+          body: DoubleBack(
+            message: 'Tap back again to exit',
+            child: _buildPage(),
+          ),
+          floatingActionButton: _buildBottomBar(),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniCenterDocked,
         ),
       ),
-      floatingActionButton: _buildBottomBar(),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterDocked,
     );
   }
 
@@ -91,10 +102,10 @@ class _RootAppState extends State<RootApp> {
       Toast.show("You are back Online",
           duration: Toast.lengthLong,
           gravity: Toast.top,
-          backgroundColor: AppColor.green_700);
+          backgroundColor: Colors.green.withOpacity(.8));
     } else {
       Toast.show("No internet connection",
-          duration: 10, gravity: Toast.top, backgroundColor: AppColor.red_700);
+          duration: 10, gravity: Toast.top, backgroundColor: Colors.red.shade900.withOpacity(.8));
     }
   }
 
@@ -224,9 +235,9 @@ class _RootAppState extends State<RootApp> {
     });
   }
 
-  showDialogBox() => showCupertinoDialog<String>(
+  showDialogBox() => showAdaptiveDialog<String>(
         context: context,
-        builder: (BuildContext context) => CupertinoAlertDialog(
+        builder: (BuildContext context) => AlertDialog(
           title: const Text('No Connection'),
           content: const Text('Please check your internet connectivity'),
           actions: <Widget>[

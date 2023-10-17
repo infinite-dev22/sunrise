@@ -5,11 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:sunrise/services/database_services.dart';
 import 'package:toast/toast.dart';
 
 import '../models/account.dart';
 import '../services/auth_services.dart';
+import '../services/database_services.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_textfield.dart';
 import 'detail.dart';
@@ -37,6 +37,8 @@ class _SignupState extends State<Signup> {
   final double _opacity = 0.2;
   final _formKey = GlobalKey<FormState>();
 
+  bool _isLoading = false;
+
   // sign user in method
   void signUserIn() {
     if (_formKey.currentState!.validate()) {
@@ -59,6 +61,10 @@ class _SignupState extends State<Signup> {
                 email: emailController.text.trim(),
                 password: passwordController.text.trim())
             .then((userCredential) async {
+          setState(() {
+            _isLoading = true;
+          });
+
           UserProfile userProfile =
               await DatabaseServices.emailExists(userCredential.user!.email!);
           userProfile.userId = userCredential.user!.uid;
@@ -69,6 +75,10 @@ class _SignupState extends State<Signup> {
                 name: usernameController.text.trim());
             DatabaseServices.upsertUserWallet(userProfile1, 0);
           }
+
+          setState(() {
+            _isLoading = true;
+          });
         }).onError((error, stackTrace) {
           Toast.show("An Error occurred",
               duration: Toast.lengthLong, gravity: Toast.bottom);
@@ -115,8 +125,7 @@ class _SignupState extends State<Signup> {
                       filter:
                           ImageFilter.blur(sigmaX: _sigmaX, sigmaY: _sigmaY),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 20),
+                        padding: const EdgeInsets.fromLTRB(10, 10, 20, 20),
                         decoration: BoxDecoration(
                             color: const Color.fromRGBO(0, 0, 0, 1)
                                 .withOpacity(_opacity),
@@ -132,8 +141,109 @@ class _SignupState extends State<Signup> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                (widget.email != null)
-                                    ? Column(
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (_isLoading)
+                                          const Row(
+                                            children: [
+                                              SizedBox(
+                                                height: 15,
+                                                width: 15,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Color.fromARGB(
+                                                      255, 71, 233, 133),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                            ],
+                                          ),
+                                        (widget.email != null)
+                                            ? Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 10, top: 10),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    children: <TextSpan>[
+                                                      const TextSpan(
+                                                        text:
+                                                            "Looks like you don't have an account.\nLet's create a one for\n",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 14),
+                                                      ),
+                                                      TextSpan(
+                                                        text: widget.email!,
+                                                        style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            decoration:
+                                                                TextDecoration
+                                                                    .underline),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            : const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 15),
+                                                child: Text(
+                                                    "Create a new account",
+                                                    // ignore: prefer_const_constructors
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16),
+                                                    textAlign: TextAlign.start),
+                                              )
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 10,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      AuthTextField(
+                                        controller: usernameController,
+                                        hintText: 'Username',
+                                        obscureText: false,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      AuthTextField(
+                                        controller: emailController,
+                                        hintText: 'Email',
+                                        obscureText: false,
+                                        isEmail: true,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      AuthPasswordTextField(
+                                        controller: passwordController,
+                                        hintText: 'Password',
+                                      ),
+                                      const SizedBox(height: 10),
+                                      AuthPasswordTextField(
+                                        controller: confirmPasswordController,
+                                        hintText: 'Confirm password',
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Column(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
@@ -146,113 +256,48 @@ class _SignupState extends State<Signup> {
                                               children: <TextSpan>[
                                                 const TextSpan(
                                                   text:
-                                                      "Looks like you don't have an account. Let's create a one for ",
+                                                      'By selecting Agree & Continue below, I agree to our ',
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 14),
                                                 ),
                                                 TextSpan(
-                                                  text: widget.email!,
+                                                  text:
+                                                      'Terms of Service and Privacy Policy',
+                                                  recognizer:
+                                                      TapGestureRecognizer()
+                                                        ..onTap = () =>
+                                                            Navigator.push(
+                                                                context,
+                                                                CupertinoPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          const DetailPage(
+                                                                    showingContent:
+                                                                        'Privacy Policy',
+                                                                  ),
+                                                                )),
                                                   style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
+                                                      color: Color.fromARGB(
+                                                          255, 71, 233, 133),
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      decoration: TextDecoration
-                                                          .underline),
+                                                      fontSize: 14),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                          const SizedBox(height: 20),
-                                        ],
-                                      )
-                                    : const Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Text("Create a new account",
-                                              // ignore: prefer_const_constructors
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16),
-                                              textAlign: TextAlign.start),
-                                          SizedBox(height: 30),
-                                        ],
-                                      ),
-                                AuthTextField(
-                                  controller: usernameController,
-                                  hintText: 'Username',
-                                  obscureText: false,
-                                ),
-                                const SizedBox(height: 10),
-                                AuthTextField(
-                                  controller: emailController,
-                                  hintText: 'Email',
-                                  obscureText: false,
-                                  isEmail: true,
-                                ),
-                                const SizedBox(height: 10),
-                                AuthPasswordTextField(
-                                  controller: passwordController,
-                                  hintText: 'Password',
-                                ),
-                                const SizedBox(height: 10),
-                                AuthPasswordTextField(
-                                  controller: confirmPasswordController,
-                                  hintText: 'Confirm password',
-                                ),
-                                const SizedBox(height: 20),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        text: '',
-                                        children: <TextSpan>[
-                                          const TextSpan(
-                                            text:
-                                                'By selecting Agree & Continue below, I agree to our ',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14),
-                                          ),
-                                          TextSpan(
-                                            text:
-                                                'Terms of Service and Privacy Policy',
-                                            recognizer: TapGestureRecognizer()
-                                              ..onTap = () => Navigator.push(
-                                                  context,
-                                                  CupertinoPageRoute(
-                                                    builder: (context) =>
-                                                        const DetailPage(
-                                                      showingContent:
-                                                          'Privacy Policy',
-                                                    ),
-                                                  )),
-                                            style: const TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 71, 233, 133),
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14),
+                                          const SizedBox(height: 10),
+                                          AuthButtonAgree(
+                                            text: "Agree and Continue",
+                                            onTap: () {
+                                              signUserIn();
+                                            },
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    AuthButtonAgree(
-                                      text: "Agree and Continue",
-                                      onTap: () {
-                                        signUserIn();
-                                      },
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

@@ -49,7 +49,6 @@ class AppColor {
 
   static const translucent = Color(0xff80ececec);
 
-
   static const Color menuBackground = Color(0xFF090912);
   static const Color itemsBackground = Color(0xFF1B2339);
   static const Color pageBackground = Color(0xFF282E45);

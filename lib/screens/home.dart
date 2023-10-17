@@ -536,12 +536,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const Text('Something went wrong'),
                 IconButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => super.widget));
-                    },
+                    onPressed: _retryStreamOnError,
                     icon: const Icon(Icons.refresh_rounded))
               ],
             ),
@@ -605,6 +600,12 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  _retryStreamOnError() {
+    setState(() {
+      _initStreams();
+    });
   }
 
   _showFilteredListings(String filter) {
@@ -734,7 +735,7 @@ class _HomePageState extends State<HomePage> {
   _listingTypeFilteredStream(String filter) {
     return listingsRef
         .stream(primaryKey: ['id'])
-        .eq("propertyType", filter)
+        .eq("property_type", filter)
         .order('created_at', ascending: false);
   }
 

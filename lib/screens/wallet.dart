@@ -30,6 +30,7 @@ class _WalletPageState extends State<WalletPage> {
   late Wallet _wallet;
 
   bool isFavorite = false;
+  bool showError = true;
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +57,11 @@ class _WalletPageState extends State<WalletPage> {
                     stream: _walletStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        Toast.show("An Error occurred",
+                        if (showError) {
+                          Toast.show("An Error occurred",
                             duration: Toast.lengthLong, gravity: Toast.bottom);
+                          showError = false;
+                        }
                       }
 
                       try {

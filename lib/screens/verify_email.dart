@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrise/screens/root.dart';
-import 'package:sunrise/screens/welcome.dart';
 import 'package:toast/toast.dart';
 
 import '../models/account.dart';
@@ -68,7 +67,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.02),
-                          ClipRect(
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
                             child: BackdropFilter(
                               filter: ImageFilter.blur(
                                   sigmaX: sigmaX, sigmaY: sigmaY),
@@ -82,7 +82,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                         Radius.circular(30))),
                                 width: MediaQuery.of(context).size.width * 0.9,
                                 height:
-                                    MediaQuery.of(context).size.height * 0.5,
+                                    MediaQuery.of(context).size.height * 0.55,
                                 child: Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -116,25 +116,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                           },
                                           child: const Text(
                                               'Resend Verification Email',
-                                              style: TextStyle(
-                                                  color: Color.fromARGB(
-                                                      255, 71, 233, 133),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18),
-                                              textAlign: TextAlign.start)),
-                                      const SizedBox(height: 10),
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pushAndRemoveUntil(
-                                                    MaterialPageRoute(
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            WelcomePage()),
-                                                    (Route<dynamic> route) =>
-                                                        false);
-                                          },
-                                          child: const Text('Go back',
                                               style: TextStyle(
                                                   color: Color.fromARGB(
                                                       255, 71, 233, 133),

@@ -9,6 +9,7 @@ import 'package:sunrise/screens/login.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/sign_up.dart';
 import 'package:sunrise/screens/verify_email.dart';
+import 'package:sunrise/theme/color.dart';
 import 'package:toast/toast.dart';
 
 import '../models/account.dart';
@@ -18,18 +19,30 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_square_tile.dart';
 import '../widgets/auth_textfield.dart';
 
-class WelcomePage extends StatelessWidget {
-  WelcomePage({super.key});
+class WelcomePage extends StatefulWidget {
+  const WelcomePage({super.key});
 
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
   final ToastContext toast = ToastContext();
 
   // text editing controllers
   final emailController = TextEditingController();
+
   final passwordController = TextEditingController();
 
-  final double _sigmaX = 5; // from 0-10
-  final double _sigmaY = 5; // from 0-10
+  final double _sigmaX = 5;
+
+  // from 0-10
+  final double _sigmaY = 5;
+
+  // from 0-10
   final double _opacity = 0.2;
+  bool _isLoading = false;
+
   final _formKey = GlobalKey<FormState>();
 
   // sign user in method
@@ -58,13 +71,13 @@ class WelcomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipRect(
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
                     child: BackdropFilter(
                       filter:
                           ImageFilter.blur(sigmaX: _sigmaX, sigmaY: _sigmaY),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 20),
+                        padding: const EdgeInsets.fromLTRB(10, 10, 20, 20),
                         decoration: BoxDecoration(
                             color: const Color.fromRGBO(0, 0, 0, 1)
                                 .withOpacity(_opacity),
@@ -77,151 +90,228 @@ class WelcomePage extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  "Sign in",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                                const SizedBox(height: 10),
-                                AuthTextField(
-                                  controller: emailController,
-                                  hintText: 'Email',
-                                  obscureText: false,
-                                  isEmail: true,
-                                ),
-                                const SizedBox(height: 10),
-                                AuthButton(
-                                  onTap: (() async {
-                                    var nav = Navigator.of(context);
-                                    if (_formKey.currentState!.validate()) {
-                                      if (EmailValidator.validate(
-                                          emailController.text)) {
-                                        List<String> userList =
-                                            await FirebaseAuth.instance
-                                                .fetchSignInMethodsForEmail(
-                                                    emailController.text);
-
-                                        if (userList.isEmpty) {
-                                          nav.push(
-                                            MaterialPageRoute(
-                                                builder: (context) => Signup(
-                                                      email:
-                                                          emailController.text,
-                                                    )),
-                                          );
-                                        } else {
-                                          nav.push(
-                                            MaterialPageRoute(
-                                                builder: (context) => LoginPage(
-                                                      email: emailController
-                                                          .text
-                                                          .trim(),
-                                                    )),
-                                          );
-                                        }
-                                      } else {
-                                        Toast.show("Email not valid",
-                                            duration: Toast.lengthLong,
-                                            gravity: Toast.bottom);
-                                      }
-                                    }
-                                  }),
-                                ),
-
-                                const SizedBox(height: 5),
-
-                                // or continue with
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Expanded(
-                                      child: Divider(
-                                        thickness: 0.5,
-                                        color: Colors.grey[400],
+                                    if (_isLoading)
+                                      const SizedBox(
+                                        height: 15,
+                                        width: 15,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color:
+                                              Color.fromARGB(255, 71, 233, 133),
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox(
+                                        width: 25,
                                       ),
-                                    ),
                                     const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10.0),
+                                      padding:
+                                          EdgeInsets.only(left: 15, top: 15),
                                       child: Text(
-                                        'Or',
+                                        "Sign in",
                                         style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
+                                          color: Colors.white,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.start,
                                       ),
                                     ),
-                                    Expanded(
-                                      child: Divider(
-                                        thickness: 0.5,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
+                                    Container(),
                                   ],
                                 ),
-
-                                const SizedBox(height: 5),
-
-                                // google + apple sign in buttons
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // google button
-                                      AuthSquareTile(
-                                        imagePath: 'assets/images/google.png',
-                                        title: "Continue with Google",
-                                        onTap: () {
-                                          signInWithGoogle();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
                                 const SizedBox(height: 10),
-
-                                // not a member? register now
                                 Padding(
-                                  padding: const EdgeInsets.all(1),
+                                  padding: const EdgeInsets.only(left: 10),
                                   child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
                                     children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        // ignore: prefer_const_literals_to_create_immutables
-                                        children: [
-                                          const Text(
-                                            'Don\'t have an account?',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18),
-                                            textAlign: TextAlign.start,
-                                          ),
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
+                                      AuthTextField(
+                                        controller: emailController,
+                                        hintText: 'Email',
+                                        obscureText: false,
+                                        isEmail: true,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      AuthButton(
+                                        onTap: (() {
+                                          var nav = Navigator.of(context);
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            if (EmailValidator.validate(
+                                                emailController.text)) {
+                                              setState(() {
+                                                _isLoading = true;
+                                              });
+
+                                              FirebaseAuth.instance
+                                                  .fetchSignInMethodsForEmail(
+                                                      emailController.text)
+                                                  .then((userList) {
+                                                setState(() {
+                                                  _isLoading = false;
+                                                });
+                                                if (userList.isEmpty) {
+                                                  nav.push(
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            const Signup()));
-                                              },
-                                              child: const Text('Sign Up',
-                                                  style: TextStyle(
-                                                      color: Color.fromARGB(
-                                                          255, 71, 233, 133),
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18),
-                                                  textAlign: TextAlign.start)),
+                                                            Signup(
+                                                              email:
+                                                                  emailController
+                                                                      .text,
+                                                            )),
+                                                  );
+                                                }
+                                                if (userList.first !=
+                                                    'password') {
+                                                  Toast.show(
+                                                      "Can't use this sign in option.",
+                                                      duration:
+                                                          Toast.lengthLong,
+                                                      gravity: Toast.bottom);
+                                                } else {
+                                                  nav.push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            LoginPage(
+                                                              email:
+                                                                  emailController
+                                                                      .text
+                                                                      .trim(),
+                                                            )),
+                                                  );
+                                                }
+                                              }).onError((error, stackTrace) {
+                                                if (!error
+                                                    .toString()
+                                                    .contains("No element")) {
+                                                  Toast.show(
+                                                      "An error occurred",
+                                                      duration:
+                                                          Toast.lengthLong,
+                                                      backgroundColor: AppColor
+                                                          .red_700
+                                                          .withAlpha(200),
+                                                      gravity: Toast.bottom);
+                                                }
+                                                setState(() {
+                                                  _isLoading = false;
+                                                });
+                                                return null;
+                                              });
+                                            } else {
+                                              Toast.show("Email not valid",
+                                                  duration: Toast.lengthLong,
+                                                  gravity: Toast.bottom);
+                                            }
+                                          }
+                                        }),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      // or continue with
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              color: Colors.grey[400],
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10.0),
+                                            child: Text(
+                                              'Or',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              color: Colors.grey[400],
+                                            ),
+                                          ),
                                         ],
+                                      ),
+
+                                      const SizedBox(height: 5),
+
+                                      // google + apple sign in buttons
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            // google button
+                                            AuthSquareTile(
+                                              imagePath:
+                                                  'assets/images/google.png',
+                                              title: "Continue with Google",
+                                              onTap: () {
+                                                signInWithGoogle();
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 10),
+
+                                      // not a member? register now
+                                      Padding(
+                                        padding: const EdgeInsets.all(1),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              // ignore: prefer_const_literals_to_create_immutables
+                                              children: [
+                                                const Text(
+                                                  'Don\'t have an account?',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 18),
+                                                  textAlign: TextAlign.start,
+                                                ),
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  const Signup()));
+                                                    },
+                                                    child: const Text('Sign Up',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    71,
+                                                                    233,
+                                                                    133),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 18),
+                                                        textAlign:
+                                                            TextAlign.start)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -297,7 +387,8 @@ class WelcomePage extends StatelessWidget {
 
   _navigateToVerifyEmail(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (BuildContext context) => const VerifyEmailPage()),
+        MaterialPageRoute(
+            builder: (BuildContext context) => const VerifyEmailPage()),
         (Route<dynamic> route) => false);
   }
 }

@@ -2,6 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:sunrise/screens/verify_email.dart';
 import 'package:sunrise/services/database_services.dart';
@@ -34,6 +35,8 @@ Future<void> main() async {
 
   // Always initialize Awesome Notifications
   await NotificationController.initializeLocalNotifications();
+
+  // await dotenv.load(fileName: ".env");
 
   if (FirebaseAuth.instance.currentUser != null) {
     // Get user profile.
@@ -214,6 +217,25 @@ class NotificationController {
           notificationLayout: NotificationLayout.Default,
           payload: {
             'notificationId': 'HbkhGYUhIy87y7888UHOIUyn89y87YHon87y87'
+          }),
+    );
+  }
+
+  static Future<void> createNewFailedNotification() async {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) isAllowed = await displayNotificationRationale();
+    if (!isAllowed) return;
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+          id: -1,
+          // -1 is replaced by a random number
+          channelKey: 'alerts',
+          title: 'Upload Failed.',
+          //'asset://assets/images/balloons-in-sky.jpg',
+          notificationLayout: NotificationLayout.Default,
+          payload: {
+            'notificationId': 'HbkhGYUhIy87y7326hfRIUyn89y87YHon87y87'
           }),
     );
   }

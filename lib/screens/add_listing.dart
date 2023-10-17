@@ -264,7 +264,8 @@ class _AddListingPageState extends State<AddListingPage> {
   }
 
   _buildBody() {
-    return Material(color: AppColor.appBgColor,
+    return Material(
+      color: AppColor.appBgColor,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +278,7 @@ class _AddListingPageState extends State<AddListingPage> {
               height: 20,
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Form(
                 key: _formKey,
                 child: _buildForm(),
@@ -295,7 +296,7 @@ class _AddListingPageState extends State<AddListingPage> {
   _buildForm() {
     return Column(
       children: [
-        _buildTextField("Name", 30, _nameController),
+        _buildTextField("Name", 25, _nameController),
         _textFieldWithUnit(
             "Price", "Currency", currencies, 15, _currency, _priceController,
             (dropDownValue) {
@@ -358,8 +359,9 @@ class _AddListingPageState extends State<AddListingPage> {
           },
           title: const Text("Property Owner"),
         ),
+        const SizedBox(height: 20),
         _formButtons(),
-        const SizedBox(height: 100),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -884,7 +886,8 @@ class _AddListingPageState extends State<AddListingPage> {
       listing!.id = widget.listing!.id;
       DatabaseServices.updateListing(listing!);
     } else {
-      DatabaseServices.createListing(listing!);
+      DatabaseServices.createListing(listing!,
+          _showCompleteUploadNotification(), _showFailedUploadNotification);
     }
   }
 
@@ -958,15 +961,19 @@ class _AddListingPageState extends State<AddListingPage> {
     await NotificationController.createNewDoneNotification();
   }
 
+  _showFailedUploadNotification(error, stacktrace) async {
+    await NotificationController.dismissNotifications();
+    await NotificationController.createNewFailedNotification();
+    print(error);
+    return error;
+  }
+
   _buildAddFeaturedDialog() {
     return showModalBottomSheet(
       context: context,
       showDragHandle: true,
       builder: (context) => Column(
         children: [
-          const SizedBox(
-            height: 50,
-          ),
           WideButton(
             "Promote Ad \$30/month",
             color: Colors.white,
@@ -975,7 +982,7 @@ class _AddListingPageState extends State<AddListingPage> {
               _promoteAdConfirmDialog(30, 30);
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           WideButton(
             "Promote Ad \$10/week",
             color: Colors.white,
@@ -985,7 +992,7 @@ class _AddListingPageState extends State<AddListingPage> {
             },
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           WideButton(
             "Post Ad",
@@ -995,7 +1002,7 @@ class _AddListingPageState extends State<AddListingPage> {
               _uploadListingAd(false, 0, 0);
             },
           ),
-          const SizedBox(height: 50),
+          const Spacer(),
         ],
       ),
     );
@@ -1023,7 +1030,7 @@ class _AddListingPageState extends State<AddListingPage> {
         await StorageServices.uploadListingImages(CustomPhotoGallery.images);
     _uploadListing(feature, time);
 
-    if (amount < 1) {
+    if (amount > 0) {
       DatabaseServices.createAccountTransaction(
           widget.userProfile!.id, amount, "withdraw", "promote listing ad", "");
     }
@@ -1038,7 +1045,7 @@ class _AddListingPageState extends State<AddListingPage> {
     setState(() {
       _loading = false;
     });
-    _showCompleteUploadNotification();
+    // _showCompleteUploadNotification();
   }
 
   _buildProgress() {
@@ -1143,6 +1150,7 @@ class _AddListingPageState extends State<AddListingPage> {
 
     await showModalBottomSheet(
       isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (ctx) {
         return MultiSelectBottomSheet(
