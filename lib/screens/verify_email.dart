@@ -20,7 +20,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   late Timer _timer;
   User? user = FirebaseAuth.instance.currentUser;
   var duration = const Duration(seconds: 30);
-  var sentEmail = false;
+  var sentEmail = true;
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +154,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           _navigateToRootApp(nav, userProfile);
         } else {
           if (sentEmail) {
-            if (duration.inSeconds == 0) {
-              await user.sendEmailVerification();
-            }
-          } else {
-            sentEmail = true;
+            // if (duration.inSeconds == 0) {
+            //   await user.sendEmailVerification();
+            // }
+          // } else {
+            sentEmail = false;
             await user.sendEmailVerification();
           }
         }

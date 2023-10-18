@@ -75,7 +75,9 @@ class DatabaseServices {
         .map((doc) => UserProfile.fromDoc(doc))
         .toList();
 
-    return userProfile[0];
+    print(userProfile);
+
+    return userProfile;
   }
 
   static Future<List> getListingsBySearch(String search) async {

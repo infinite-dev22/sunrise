@@ -65,15 +65,17 @@ class _SignupState extends State<Signup> {
             _isLoading = true;
           });
 
-          UserProfile userProfile =
+          List<UserProfile> userProfiles =
               await DatabaseServices.emailExists(userCredential.user!.email!);
-          userProfile.userId = userCredential.user!.uid;
-          DatabaseServices.updateUserData(userProfile);
 
-          if (userProfile.userId != userCredential.user!.uid) {
-            var userProfile1 = await AuthServices.createUserProfile(
-                name: usernameController.text.trim());
-            DatabaseServices.upsertUserWallet(userProfile1, 0);
+          if (userProfiles.isNotEmpty) {
+            UserProfile userProfile = userProfiles[0];
+            userProfile.userId = userCredential.user!.uid;
+            DatabaseServices.updateUserData(userProfile);
+          } else {
+              var userProfile1 = await AuthServices.createUserProfile(
+                  name: usernameController.text.trim());
+              DatabaseServices.upsertUserWallet(userProfile1, 0);
           }
 
           setState(() {
@@ -82,6 +84,7 @@ class _SignupState extends State<Signup> {
         }).onError((error, stackTrace) {
           Toast.show("An Error occurred",
               duration: Toast.lengthLong, gravity: Toast.bottom);
+          print('$error\n$stackTrace');
         });
       } else {
         Toast.show("Email not valid",
