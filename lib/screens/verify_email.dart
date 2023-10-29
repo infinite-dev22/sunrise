@@ -7,6 +7,7 @@ import 'package:sunrise/screens/root.dart';
 import 'package:toast/toast.dart';
 
 import '../models/account.dart';
+import '../services/auth_services.dart';
 import '../services/database_services.dart';
 
 class VerifyEmailPage extends StatefulWidget {
@@ -20,7 +21,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   late Timer _timer;
   User? user = FirebaseAuth.instance.currentUser;
   var duration = const Duration(seconds: 30);
-  var sentEmail = true;
+  late bool sentEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +150,20 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         if (user.emailVerified) {
           Toast.show("Email verified successfully",
               duration: Toast.lengthLong, gravity: Toast.bottom);
+
+          List<UserProfile> userProfiles =
+              await DatabaseServices.emailExists(user.email!);
+
+          if (userProfiles.isNotEmpty) {
+            UserProfile userProfile = userProfiles[0];
+            userProfile.userId = user.uid;
+            DatabaseServices.updateUserData(userProfile);
+          } else {
+            var userProfile1 =
+                await AuthServices.createUserProfile(name: user.email);
+            DatabaseServices.upsertUserWallet(userProfile1, 0);
+          }
+
           UserProfile userProfile = await DatabaseServices.getUserProfile(
               FirebaseAuth.instance.currentUser!.uid);
           _navigateToRootApp(nav, userProfile);
@@ -157,7 +172,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             // if (duration.inSeconds == 0) {
             //   await user.sendEmailVerification();
             // }
-          // } else {
+            // } else {
             sentEmail = false;
             await user.sendEmailVerification();
           }
@@ -177,6 +192,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   void initState() {
+    sentEmail = true;
+
     super.initState();
 
     var nav = Navigator.of(context);

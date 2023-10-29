@@ -7,9 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 
-import '../models/account.dart';
-import '../services/auth_services.dart';
-import '../services/database_services.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_textfield.dart';
 import 'detail.dart';
@@ -56,32 +53,22 @@ class _SignupState extends State<Signup> {
       }
 
       if (EmailValidator.validate(emailController.text.trim())) {
+        setState(() {
+          _isLoading = true;
+        });
         FirebaseAuth.instance
             .createUserWithEmailAndPassword(
                 email: emailController.text.trim(),
                 password: passwordController.text.trim())
             .then((userCredential) async {
           setState(() {
-            _isLoading = true;
-          });
-
-          List<UserProfile> userProfiles =
-              await DatabaseServices.emailExists(userCredential.user!.email!);
-
-          if (userProfiles.isNotEmpty) {
-            UserProfile userProfile = userProfiles[0];
-            userProfile.userId = userCredential.user!.uid;
-            DatabaseServices.updateUserData(userProfile);
-          } else {
-              var userProfile1 = await AuthServices.createUserProfile(
-                  name: usernameController.text.trim());
-              DatabaseServices.upsertUserWallet(userProfile1, 0);
-          }
-
-          setState(() {
-            _isLoading = true;
+            _isLoading = false;
           });
         }).onError((error, stackTrace) {
+          setState(() {
+            _isLoading = false;
+          });
+
           Toast.show("An Error occurred",
               duration: Toast.lengthLong, gravity: Toast.bottom);
           print('$error\n$stackTrace');
