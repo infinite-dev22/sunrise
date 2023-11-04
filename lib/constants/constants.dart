@@ -15,3 +15,5 @@ final chatRoomsRef = supabase.from('chat_rooms');
 final messagesRef = supabase.from('messages');
 final transactionsRef = supabase.from('transactions');
 final walletsRef = supabase.from('wallets');
+
+String? userName;

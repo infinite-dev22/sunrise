@@ -18,7 +18,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="Home Pal EAP snapshot">
+        android:label="Zuula Homes EAP snapshot">
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"

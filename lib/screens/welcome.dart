@@ -169,7 +169,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                                 if (userList.first !=
                                                     'password') {
                                                   Toast.show(
-                                                      "Can't use this sign in option.",
+                                                      "Can't sign in with this option.",
                                                       duration:
                                                           Toast.lengthLong,
                                                       gravity: Toast.bottom);

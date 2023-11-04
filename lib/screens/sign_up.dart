@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 
+import '../constants/constants.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_textfield.dart';
 import 'detail.dart';
@@ -56,6 +57,7 @@ class _SignupState extends State<Signup> {
         setState(() {
           _isLoading = true;
         });
+        userName = usernameController.text;
         FirebaseAuth.instance
             .createUserWithEmailAndPassword(
                 email: emailController.text.trim(),

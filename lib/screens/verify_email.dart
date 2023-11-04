@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:sunrise/screens/root.dart';
 import 'package:toast/toast.dart';
 
+import '../constants/constants.dart';
 import '../models/account.dart';
 import '../services/auth_services.dart';
 import '../services/database_services.dart';
@@ -18,6 +19,7 @@ class VerifyEmailPage extends StatefulWidget {
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
+  final ToastContext toast = ToastContext();
   late Timer _timer;
   User? user = FirebaseAuth.instance.currentUser;
   var duration = const Duration(seconds: 30);
@@ -25,8 +27,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ToastContext toast = ToastContext();
-
     const double sigmaX = 5; // from 0-10
     const double sigmaY = 5; // from 0-10
     const double opacity = 0.2;
@@ -204,6 +204,24 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
       if (user?.emailVerified ?? false) {
         timer.cancel();
+
+        Toast.show("Email verified successfully",
+            duration: Toast.lengthLong, gravity: Toast.bottom);
+
+        List userProfiles = await DatabaseServices.emailExists(user!.email!);
+
+        if (userProfiles.isNotEmpty) {
+          UserProfile userProfile = userProfiles[0];
+          userProfile.userId = user.uid;
+          DatabaseServices.updateUserData(userProfile);
+        } else {
+          await AuthServices.createUserProfile(name: userName);
+
+          UserProfile userProfile = await DatabaseServices.getUserProfile(
+              FirebaseAuth.instance.currentUser!.uid);
+
+          DatabaseServices.upsertUserWallet(userProfile, 0);
+        }
 
         UserProfile userProfile = await DatabaseServices.getUserProfile(
             FirebaseAuth.instance.currentUser!.uid);
