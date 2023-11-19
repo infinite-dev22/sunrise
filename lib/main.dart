@@ -146,7 +146,7 @@ class NotificationController {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text('Allow HomePal to send you notifications!'),
+                const Text('Allow Zuula Homes to send you notifications!'),
               ],
             ),
             actions: [

@@ -65,12 +65,12 @@ class _DetailPageState extends State<DetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildContentHeading("Home Pal Privacy Policy"),
+          _buildContentHeading("Zuula Home Privacy Policy"),
           _buildContentBody(
-              "This privacy policy applies to the Home Pal mobile app, which is owned and operated by WaGroLabs."),
+              "This privacy policy applies to the Zuula Home mobile app, which is owned and operated by WaGroLabs."),
           _buildContentSubHeading("What information do we collect?"),
           _buildContentBody(
-              "We collect the following information from you when you use the Home Pal app:"),
+              "We collect the following information from you when you use the Zuula Home app:"),
           _buildContentBodyList([
             "Your name, email address, and phone number",
             "Your device information, such as your device ID and operating system",
@@ -79,8 +79,8 @@ class _DetailPageState extends State<DetailPage> {
           ]),
           _buildContentSubHeading("We use your information to:"),
           _buildContentBodyList([
-            "Provide you with the Home Pal app and its features",
-            "Improve the Home Pal app and its features",
+            "Provide you with the Zuula Home app and its features",
+            "Improve the Zuula Home app and its features",
             "Send you marketing and promotional materials",
             "Contact you about your account or to resolve any issues",
             "Comply with our legal obligations"
@@ -89,7 +89,7 @@ class _DetailPageState extends State<DetailPage> {
           _buildContentBody(
               "We may share your information with the following third parties:"),
           _buildContentBodyList([
-            "Our service providers, who help us operate the Home Pal app, such as our hosting provider and our analytics provider",
+            "Our service providers, who help us operate the Zuula Home app, such as our hosting provider and our analytics provider",
             "Other companies that we partner with to offer you certain features, such as our payment processor",
             "Law enforcement or other government agencies, if required by law"
           ]),
@@ -103,7 +103,7 @@ class _DetailPageState extends State<DetailPage> {
           ]),
           _buildContentSubHeading("How long do we keep your information?"),
           _buildContentBody(
-              "We keep your information for as long as you use the Home Pal app or as needed to provide you with the services you have requested. We may also keep your information for a longer period of time to comply with our legal obligations or to resolve any disputes."),
+              "We keep your information for as long as you use the Zuula Home app or as needed to provide you with the services you have requested. We may also keep your information for a longer period of time to comply with our legal obligations or to resolve any disputes."),
           _buildContentSubHeading("Your rights"),
           _buildContentBody(
               "You have the following rights regarding your information:"),
@@ -116,16 +116,16 @@ class _DetailPageState extends State<DetailPage> {
             "To port your information to another service",
             [
               "You can exercise these rights by contacting us at ",
-              "Home Pal Support"
+              "Zuula Home Support"
             ]
           ]),
           _buildContentSubHeading("Changes to this privacy policy"),
           _buildContentBody(
-              "We may update this privacy policy from time to time. The updated version will be posted on the Home Pal app and will be effective as soon as it is posted."),
+              "We may update this privacy policy from time to time. The updated version will be posted on the Zuula Home app and will be effective as soon as it is posted."),
           _buildContentSubHeading("Contact us"),
           _buildContentBodyWithLink(
               "If you have any questions about this privacy policy, please contact us at ",
-              "Home Pal Support"),
+              "Zuula Home Support"),
         ],
       ),
     );
@@ -137,9 +137,9 @@ class _DetailPageState extends State<DetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildContentHeading("Home Pal: Your Real Estate Companion"),
+          _buildContentHeading("Zuula Home: Your Real Estate Companion"),
           _buildContentBody(
-              "Home Pal is the mobile app that makes buying, selling, or renting a home easier than ever. With Home Pal, you can:"),
+              "Zuula Home is the mobile app that makes buying, selling, or renting a home easier than ever. With Zuula Home, you can:"),
           _buildContentBodyList([
             "Browse millions of listings from trusted real estate agents",
             "Get personalized recommendations based on your needs and preferences",
@@ -147,27 +147,27 @@ class _DetailPageState extends State<DetailPage> {
             "Track your progress and stay organized throughout the home buying or selling process",
           ]),
           _buildContentBody(
-              "Home Pal is the perfect tool for anyone who is looking to buy, sell, or rent a home. With its intuitive interface and powerful features, Home Pal makes the home buying or selling process simple and stress-free."),
+              "Zuula Home is the perfect tool for anyone who is looking to buy, sell, or rent a home. With its intuitive interface and powerful features, Zuula Home makes the home buying or selling process simple and stress-free."),
           _buildContentSubHeading(
-              "Here are some of the features that make Home Pal the best real estate app on the market:"),
+              "Here are some of the features that make Zuula Home the best real estate app on the market:"),
           _buildContentBodyList([
-            "Millions of listings: Home Pal has access to millions of listings from trusted real estate agents. This means you're sure to find the perfect home for your needs.",
-            "Personalized recommendations: Home Pal uses your search history and preferences to provide you with personalized recommendations. This means you're only seeing homes that are relevant to you.",
-            "Direct communication with agents: Home Pal makes it easy to communicate with real estate agents directly. This means you can get the answers you need quickly and easily.",
-            "Track your progress: Home Pal keeps track of your progress throughout the home buying or selling process. This means you can always stay organized and on top of things."
+            "Millions of listings: Zuula Home has access to millions of listings from trusted real estate agents. This means you're sure to find the perfect home for your needs.",
+            "Personalized recommendations: Zuula Home uses your search history and preferences to provide you with personalized recommendations. This means you're only seeing homes that are relevant to you.",
+            "Direct communication with agents: Zuula Home makes it easy to communicate with real estate agents directly. This means you can get the answers you need quickly and easily.",
+            "Track your progress: Zuula Home keeps track of your progress throughout the home buying or selling process. This means you can always stay organized and on top of things."
           ]),
           _buildContentBody(
-              "Home Pal is the perfect way to buy, sell, or rent a home. Download the app today and start your home search!"),
+              "Zuula Home is the perfect way to buy, sell, or rent a home. Download the app today and start your home search!"),
           _buildContentSubHeading(
-              "Here are some of the benefits of using Home Pal:"),
+              "Here are some of the benefits of using Zuula Home:"),
           _buildContentBodyList([
-            "Save time and money: Home Pal can help you save time and money by streamlining the home buying or selling process.",
-            "Get the best deal: Home Pal can help you find the best deal on your home by comparing listings from multiple agents.",
-            "Make informed decisions: Home Pal provides you with the information you need to make informed decisions about your home purchase or sale.",
-            "Get peace of mind: Home Pal is backed by a team of experts who are there to help you every step of the way.",
+            "Save time and money: Zuula Home can help you save time and money by streamlining the home buying or selling process.",
+            "Get the best deal: Zuula Home can help you find the best deal on your home by comparing listings from multiple agents.",
+            "Make informed decisions: Zuula Home provides you with the information you need to make informed decisions about your home purchase or sale.",
+            "Get peace of mind: Zuula Home is backed by a team of experts who are there to help you every step of the way.",
           ]),
           _buildContentBody(
-              "If you're looking for a trusted real estate partner, Home Pal is the app for you. Download the app today and start your home search!"),
+              "If you're looking for a trusted real estate partner, Zuula Home is the app for you. Download the app today and start your home search!"),
         ],
       ),
     );
